@@ -23,7 +23,7 @@ picardJar = "/usr/local/picard/2.9.2/bin/picard.jar"
 
 // Inputs
 inputDirectory = file('/scratch/vh83/sandbox/jared/full_cwl_pipeline_testing/input_files/')
-inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz").take(1)
+inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz").take(2)
 
 // Outputs
 outputDir = "/scratch/vh83/sandbox/jared/full_cwl_pipeline_testing/nextflow/outputs"
@@ -133,22 +133,28 @@ process groupContigs {
     tsv_string = sequence_tuple_list[0][0] + hg38_protection_tag
     temp_size = sequence_tuple_list[0][1]
     group_count = 0
+
+    def write_group(tsv_string, group_count):
+        group_count_str = str(group_count)
+        n_zeros = 3 - len(group_count_str)
+        group_count_str = (n_zeros * "0") + group_count_str
+        with open("{}.contig_group".format(group_count_str), 'w') as out_fh:
+            out_fh.write(tsv_string)
+
+
     for t in sequence_tuple_list[1:]:
         if temp_size + t[1] <= longest_sequence:
             temp_size += t[1]
             tsv_string += '\t' + t[0] + hg38_protection_tag
         else:
-            with open("{}.contig_group".format(group_count), 'w') as out_fh:
-                out_fh.write(tsv_string)
+            write_group(tsv_string, group_count)
             group_count += 1
             tsv_string = t[0] + hg38_protection_tag
             temp_size = t[1]
     if tsv_string:
-        with open("{}.contig_group".format(group_count), 'w') as out_fh:
-            out_fh.write(tsv_string)
+        write_group(tsv_string, group_count)
         group_count += 1
-    with open("{}.contig_group".format(group_count), 'w') as out_fh:
-        out_fh.write("unmapped")
+    write_group("unmapped", group_count)
     """
 }
 
@@ -212,22 +218,28 @@ process applyBqsrModel {
 groupedRecalibratedBams_ch = recalibratedBams.groupTuple()
 
 
-/* process gatherBqsrReports { */
-/* } */
-
 
 process gatherBams {
     input:
         set baseName, contigGroupings, recalBams from groupedRecalibratedBams_ch
     output:
-        stdout result
+        set baseName, file("${baseName}.recal.merge.bam") into recalMergedBams
 
+    module  'picard/2.9.2'
+    // Note: Due to the use of temp folders the recalibrated fragments do not
+    //       naturally sort correctly. As order is important to retain sorting
+    //       they are sorted by their basename prior to being added as inputs.
+    // TODO: Do something with metrics file. Or update picard. Seems newer
+    //       versions don't require it as an input.
     """
-    echo ${"--input " + recalBams.join(" --input ")}
+    java -Xms4000m -jar $picardJar MarkDuplicates \
+        OUTPUT=${baseName}.recal.merge.bam \
+        CREATE_INDEX=true \
+        METRICS_FILE=metrics.txt \
+        ${" INPUT=" + recalBams.sort { it.baseName }.join(" INPUT=")}
     """
 }
 
-result.subscribe { println it }
 
 
 /* process calculateScatterIntervals { */
