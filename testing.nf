@@ -7,10 +7,19 @@ ref       = file("${refBase}.fasta")
 refDict   = file("${refBase}.dict")
 refFai    = file("${refBase}.fasta.fai")
 
+// Known Sites
+millsIndels = file("${refFolder}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz")
+knownIndels = file("${refFolder}/Homo_sapiens_assembly38.known_indels.vcf.gz")
+dbSNP       = file("${refFolder}/Homo_sapiens_assembly38.dbsnp138.vcf")
+
+
 // Tools
-// Note: Necessary to provide absolute path to jar files to set memory limits
+// Note: It is necessary to provide absolute path to jar files to set memory limits
 //       in some cases.
+// TODO: Set file versions here to be used by processes (allows us to update 
+//       versions easily).
 picardJar = "/usr/local/picard/2.9.2/bin/picard.jar"
+
 
 // Inputs
 inputDirectory = file('/scratch/vh83/sandbox/jared/full_cwl_pipeline_testing/input_files/')
@@ -144,42 +153,81 @@ process groupContigs {
 }
 
 
-// See https://github.com/nextflow-io/nextflow/issues/298 for combine 
-// operator to get cartesian product of two channels
+// Using combine operator to get cartesian product of two channels
 contigBamScatter_ch = sortedBamFiles.combine(contigGroupings.flatten())
 
 
-/* process printInputs { */
-/*     stageInMode 'symlink' */
-
-/*     input: */
-/*         set baseName, sortedBam, bamIndex, contigGrouping  from contigBamScatter_ch */
-/*     output: */
-/*         stdout result */
-
-/*     """ */
-/*     # Dirty way of reading and formatting the contig list */
-/*     CONTIG_LIST=\$(cat $contigGrouping | sed -E 's/\t|^/ INPUT=/g') */
-/*     echo \$CONTIG_LIST */
-/*     """ */
-/* } */
-
-
 process generateBqsrModel {
+    input:
+        set baseName, sortedBam, bamIndex, contigGrouping  from contigBamScatter_ch
+    output:
+        set baseName, sortedBam, bamIndex, contigGrouping, 
+            file("${baseName}.${contigGrouping.baseName}.recalreport") into recalReportsBams
+
+    module 'gatk/4.0.11.0'
+    """
+    # Somewhat dirty way of formatting the sequence groupings
+    SEQUENCE_GROUPING=\$(cat $contigGrouping | sed -E 's/\t|^/ -L /g')
+    gatk --java-options '-Xms4000m' BaseRecalibrator \
+        --use-original-qualities \
+        -R $ref \
+        -I $sortedBam \
+        -O ${baseName}.${contigGrouping.baseName}.recalreport \
+        --known-sites $millsIndels \
+        --known-sites $knownIndels \
+        --known-sites $dbSNP \
+        \$SEQUENCE_GROUPING
+    """
 }
 
-// These could possibly be merged? Would mean for a longer job though
 
 process applyBqsrModel {
+    input:
+        set baseName, sortedBam, bamIndex, contigGrouping, recalReport from recalReportsBams
+    output:
+        set baseName, contigGrouping,
+            file("${baseName}.${contigGrouping.baseName}.recal.bam") into recalibratedBams
+
+    module 'gatk/4.0.11.0'
+    """
+    # Somewhat dirty way of formatting the sequence groupings
+    SEQUENCE_GROUPING=\$(cat $contigGrouping | sed -E 's/\t|^/ -L /g')
+    gatk --java-options '-Xms3000m' ApplyBQSR \
+    --add-output-sam-program-record \
+    --use-original-qualities \
+    --static-quantized-quals 10 \
+    --static-quantized-quals 20 \
+    --static-quantized-quals 30 \
+    -R $ref \
+    -I $sortedBam \
+    -O ${baseName}.${contigGrouping.baseName}.recal.bam \
+    -bqsr $recalReport \
+    \$SEQUENCE_GROUPING
+    """
 }
+
+
+// Create a new channel grouping the recalibrated fragments by baseName (first
+// part of tuple)
+groupedRecalibratedBams_ch = recalibratedBams.groupTuple()
 
 
 /* process gatherBqsrReports { */
 /* } */
 
 
-/* process gatherBams { */
-/* } */
+process gatherBams {
+    input:
+        set baseName, contigGroupings, recalBams from groupedRecalibratedBams_ch
+    output:
+        stdout result
+
+    """
+    echo ${"--input " + recalBams.join(" --input ")}
+    """
+}
+
+result.subscribe { println it }
 
 
 /* process calculateScatterIntervals { */
@@ -211,8 +259,6 @@ process applyBqsrModel {
 // "${refFolder}/Homo_sapiens_assembly38.fasta.fai"
 // "${refFolder}/Homo_sapiens_assembly38.fasta.ann"
 
-// "${refFolder}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz"
-// "${refFolder}/Homo_sapiens_assembly38.known_indels.vcf.gz.tbi"
 // "${refFolder}/1000G_phase1.snps.high_confidence.hg38.vcf.gz"
 // "${refFolder}/1000G.phase3.integrated.sites_only.no_MATCHED_REV.hg38.vcf.idx"
 // "${refFolder}/Homo_sapiens_assembly38.dbsnp138.vcf"
