@@ -211,8 +211,6 @@ process generateBqsrModel {
     queue       globalQueueS
 
     """
-    # Somewhat dirty way of formatting the sequence groupings
-    SEQUENCE_GROUPING=\$(cat $contigGrouping | sed -E 's/\t|^/ -L /g')
     gatk --java-options '-Xmx4000m' BaseRecalibrator \
         --use-original-qualities \
         -R $ref \
@@ -221,7 +219,7 @@ process generateBqsrModel {
         --known-sites $millsIndels \
         --known-sites $knownIndels \
         --known-sites $dbSNP \
-        \$SEQUENCE_GROUPING
+        -L ${contigGrouping.join(" -L")}
     """
 }
 
@@ -242,18 +240,17 @@ process applyBqsrModel {
     queue       globalQueueS
 
     """
-    SEQUENCE_GROUPING=\$(cat $contigGrouping | sed -E 's/\t|^/ -L /g')
     gatk --java-options '-Xmx3000m' ApplyBQSR \
-    --add-output-sam-program-record \
-    --use-original-qualities \
-    --static-quantized-quals 10 \
-    --static-quantized-quals 20 \
-    --static-quantized-quals 30 \
-    -R $ref \
-    -I $sortedBam \
-    -O ${baseName}.${contigGrouping.baseName}.recal.bam \
-    -bqsr $recalReport \
-    \$SEQUENCE_GROUPING
+        --add-output-sam-program-record \
+        --use-original-qualities \
+        --static-quantized-quals 10 \
+        --static-quantized-quals 20 \
+        --static-quantized-quals 30 \
+        -R $ref \
+        -I $sortedBam \
+        -O ${baseName}.${contigGrouping.baseName}.recal.bam \
+        -bqsr $recalReport \
+        -L ${contigGrouping.join(" -L")}
     """
 }
 
@@ -284,7 +281,6 @@ process gatherBams {
     // TODO: Do something with metrics file. Or update picard. Seems newer
     //       versions don't require it as an input.
     """
-
     java -Xmx4000m -jar $picardJar MarkDuplicates \
         OUTPUT=${baseName}.recal.merge.bam \
         CREATE_INDEX=true \
@@ -292,7 +288,6 @@ process gatherBams {
         ${" INPUT=" + recalBams.sort { it.baseName }.join(" INPUT=")}
     """
 }
-
 
 
 process calculateScatterIntervals {
