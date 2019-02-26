@@ -219,7 +219,7 @@ process generateBqsrModel {
         --known-sites $millsIndels \
         --known-sites $knownIndels \
         --known-sites $dbSNP \
-        -L ${contigGrouping.join(" -L ")}
+        -L ${contigGrouping.text.split("\t").join(" -L ")}
     """
 }
 
@@ -250,7 +250,7 @@ process applyBqsrModel {
         -I $sortedBam \
         -O ${baseName}.${contigGrouping.baseName}.recal.bam \
         -bqsr $recalReport \
-        -L ${contigGrouping.join(" -L ")}
+        -L ${contigGrouping.text.split("\t").join(" -L ")}
     """
 }
 
