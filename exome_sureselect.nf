@@ -5,6 +5,7 @@ refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('/scratch/vh83/sandbox/jason/fastqs/')
 outputDir      = "/scratch/vh83/sandbox/jason/out"
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
+padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -100,39 +101,117 @@ process runLocatit {
     queue       globalQueueS
 
     """
-    java -Xmx4g -jar $locatitJar \
-       -U -q 25 -m 1 -d 0 -IB -OB -b ${panel_bed} \
-       -o "${baseName.locatit.bam}" ${bam} ${index}   
+    java -Xmx4g -jar '/projects/vh83/local_software/agent/LocatIt_v4.0.1.jar' \
+         -i -C -U -q 25 -m 3 -c 2500 -d 0 -IB -OB -b ${panel_bed}  \
+         -o "${baseName}.locatit.bam" ${bam} ${index}
     """
 
 }
 
-locatitBams.println()
 
-//process sortBam {
-//    input:
-//        set baseName, markedBam from markedBamFiles
-//    output:
-//        set baseName,
-//            file("${baseName}.marked.sorted.bam"), 
-//            file("${baseName}.marked.sorted.bai") into sortedBamFiles
-//
-//    executor    globalExecutor
-//    stageInMode globalStageInMode
-//    cpus        1
-//    memory      globalMemoryS
-//    time        globalTimeS
-//    queue       globalQueueS
-//
+process sortBam {
+    input:
+        set baseName, file(bam) from locatitBams
+    output:
+        set baseName, 
+            file("${baseName}.locatit.sorted.bam"), 
+            file("${baseName}.locatit.sorted.bai") into sortedBamFiles
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    """
+    java -Xmx4000m -jar $picardJar SortSam \
+        INPUT=$bam \
+        OUTPUT=${baseName}.locatit.sorted.bam \
+        SORT_ORDER=coordinate \
+        CREATE_INDEX=true \
+        CREATE_MD5_FILE=true \
+        MAX_RECORDS_IN_RAM=300000
+    """
+}
+
+tumor  = Channel.create()
+normal = Channel.create()
+sortedBamFiles.choice(tumor, normal){ a -> a[0] =~ /_T$/ ? 0 : 1 }
+
+
+
+
+//create bedfile segments
+bedSegments = Channel.fromPath("$padded_bed").splitText( by: 10000, file: "paddedBed.bed")
+
+
+process runVardict {
+    input:
+        set tbaseName, file(tbam), file(tbai) from tumor
+        set nbaseName, file(nbam), file(nbai) from normal
+        each file(segment) from bedSegments
+    output:
+        set tbaseName, nbaseName, segment, file("${tbaseName}.${nbaseName}.${segment}.somatic.vardict.raw.tsv") into rawVardictSegments
+    
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    """
+    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
+        -G $ref -f 0.005 -N $tbaseName -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $segment > "${tbaseName}.${nbaseName}.${segment}.somatic.vardict.raw.tsv"
+    """
+}
+
+
+
+rawVardictSegments
+    .flatMap { key, key2, whatever, files -> files }
+    .collect()
+    .set{temp}
+
+//temp.println()
+
+
+process mergeVardicts {
+    input:
+        file(segment) from temp
+    output:
+        file("somatic.vardict.raw.merged.tsv") into mergedRawVardict
+    
+
+    """
+    for every file in $segment
+    do
+        cat \$i >> somatic.vardict.raw.merged.tsv
+    done
+
+  """
+}
+
+mergedRawVardict.println()
+
+
+
+
 //    """
-//    java -Xmx4000m -jar $picardJar SortSam \
-//        INPUT=$markedBam \
-//        OUTPUT=${baseName}.marked.sorted.bam \
-//        SORT_ORDER=coordinate \
-//        CREATE_INDEX=true \
-//        CREATE_MD5_FILE=true \
-//        MAX_RECORDS_IN_RAM=300000
+//    cat ${beds} > $tbasebame
+//                  '~/scripts/git_controlled/VarDict/teststrandbias.R | ' \
+//                  '~/scripts/git_controlled/VarDict/var2vcf_valid_b37_chrnames.pl -N {sample_name} -E -f {AF_THR} > {vcf_out}'.
 //    """
 //}
-//
-//
+
+
+
+
+
+
+
+
+
+
