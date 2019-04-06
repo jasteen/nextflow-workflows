@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/fastqs/')
+inputDirectory = file('/scratch/vh83/projects/medha_exomes/testing_fgbio/fastqs/')
 outputDir      = "/scratch/vh83/projects/medha_exomes/out"
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
@@ -31,7 +31,7 @@ globalCores       = 1
 bwaCores	  = 12
 globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
-globalMemoryL     = '16 GB'
+globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
 globalTimeM       = '1h'
 globalTimeL       = '24h'
@@ -89,6 +89,8 @@ process alignBwa {
     output:
         set baseName, file("${baseName}.bam") into bamFiles
 
+    publishDir path: './bam_out', mode: 'copy'
+
     executor    globalExecutor
     stageInMode globalStageInMode
     module      bwaModule
@@ -113,6 +115,8 @@ process sortBWA {
         set baseName, file(bam) from bamFiles
     output:
         set baseName, file("${baseName}.sorted.bam") into sortedBams
+    
+    publishDir path: './bam_out', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -128,90 +132,135 @@ process sortBWA {
     """
 }
 
-locatitInput = sortedBams.join(inputIndexes)
+umiMap = sortedBams.join(inputIndexes)
 
 //locatitInput.println()
 
-process runLocatit {
+process AnnotateBamWithUmis {
     input:
-        set baseName, file(bam), file(index) from locatitInput
+        set baseName, file(bam), file(index) from umiMap
     output:
-        set baseName, file("${baseName}.locatit.bam") into locatitBams
+        set baseName, file("${baseName}.umi.bam") into umiMarkedBams
+
+    publishDir path: './bam_out', mode: 'copy'    
 
     executor    globalExecutor
     stageInMode globalStageInMode
     module	'java'
+    module      'fgbio'
     cpus        globalCores
     memory      globalMemoryL
     time        globalTimeL
     queue       globalQueueL
 
     """
-    java -Xmx14g -jar '/projects/vh83/local_software/agent/LocatIt_v4.0.1.jar' \
-         -i -C -U -q 25 -m 3 -c 2500 -d 0 -IB -OB -b ${panel_bed}  \
-         -o ${baseName}.locatit.bam ${bam} ${index}
+    java -Xmx62g -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' AnnotateBamWithUmis \
+         -i ${bam} -f ${index} -o "${baseName}.umi.bam" 
+    """
+
+}
+
+process markDuplicates {
+    input:
+        set baseName, file(bam) from umiMarkedBams 
+    output:
+        set baseName, file("${baseName}.umi.dedup.bam"), file("${baseName}.dedup.metrics.txt") into dedupBams 
+    
+    publishDir path: './bam_out', mode: 'copy'
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module 	'picard'
+    cpus        globalCores
+    memory      globalMemoryL
+    time        globalTimeL
+    queue       globalQueueL
+
+    """
+    java -Xmx62g -jar /usr/local/picard/2.9.2/bin/picard.jar MarkDuplicates I=$bam O=${baseName}.umi.dedup.bam M="${baseName}.dedup.metrics.txt" BARCODE_TAG=RX
+    """
+
+}
+
+process groupreadsByUmi {
+    input:
+        set baseName, file(bam) from dedupBams
+    output:
+        set baseName, file("${baseName}.umi.histogram.tsv"), file("${baseName}.umi.grouped.bam") into umiGroupedBams
+    
+    publishDir path: './bam_out', mode: 'copy'
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      'java'
+    module      'fgbio'
+    cpus        globalCores
+    memory      globalMemoryL
+    time        globalTimeL
+    queue       globalQueueL
+
+    """
+    java -Xmx62g -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' GroupReadsByUmi \
+         -i ${bam} -f "${baseName}.umi.histogram.tsv" -o "${baseName}.umi.grouped.bam" -s Adjacency -e 1 
     """
 
 }
 
 
-//process sortBam {
-//    input:
-//        set baseName, file(bam) from locatitBams
-//    output:
-//        set baseName, 
-//            file("${baseName}.locatit.sorted.bam"), 
-//            file("${baseName}.locatit.sorted.bai") into sortedBamFiles
-//
-//    executor    globalExecutor
-//    stageInMode globalStageInMode
-//    cpus        1
-//    memory      globalMemoryS
-//    time        globalTimeS
-//    queue       globalQueueS
-//
-//    """
-//    java -Xmx4000m -jar $picardJar SortSam \
-//        INPUT=$bam \
-//        OUTPUT=${baseName}.locatit.sorted.bam \
-//        SORT_ORDER=coordinate \
-//        CREATE_INDEX=true \
-//        CREATE_MD5_FILE=true \
-//        MAX_RECORDS_IN_RAM=300000
-//    """
-//}
-//
-//tumor  = Channel.create()
-//normal = Channel.create()
-//sortedBamFiles.choice(tumor, normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
-//
-//
-////create bedfile segments
+process indexUmiBam {
+    input:
+        set baseName, file(hist), file(bam) from umiGroupedBams
+    output:
+        set baseName, file(hist), file(bam), file("${baseName}.umi.grouped.bam.bai") into indexedBams
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      'samtools'
+    cpus        globalCores
+    memory      globalMemoryL
+    time        globalTimeL
+    queue       globalQueueL
+
+    """
+    samtools index $bam ${baseName}.umi.grouped.bam.bai
+    """
+
+}
+
+
+tumor  = Channel.create()
+normal = Channel.create()
+
+indexedBams.choice(tumor, normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
+
+
+//create bedfile segments
 //bedSegments = Channel.fromPath("$padded_bed").splitText( by: 10000, file: "paddedBed.bed")
 //
 //
-////process runVardict {
-////    input:
-////        set tbaseName, file(tbam), file(tbai) from tumor
-////        set nbaseName, file(nbam), file(nbai) from normal
-////        each file(segment) from bedSegments
-////    output:
-////        set tbaseName, nbaseName, segment, file("${tbaseName}.${nbaseName}.${segment}.somatic.vardict.raw.tsv") into rawVardictSegments
-////    
-////
-////    executor    globalExecutor
-////    stageInMode globalStageInMode
-////    cpus        1
-////    memory      globalMemoryS
-////    time        globalTimeS
-////    queue       globalQueueS
-////
-////    """
-////    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
-////        -G $ref -f 0.005 -N $tbaseName -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $segment > "${tbaseName}.${nbaseName}.${segment}.somatic.vardict.raw.tsv"
-////    """
-////}
-////
+
+process runVardict {
+    input:
+        set tbaseName, file(thist), file(tbam), file(tbai) from tumor
+        set nbaseName, file(nhist), file(nbam), file(nbai) from normal
+    output:
+        set tbaseName, nbaseName, file("${tbaseName}.${nbaseName}.somatic.vardict.raw.tsv") into rawVardictSegments
+    
+    publishDir path: './vardict_out', mode: 'copy'    
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryL
+    time        globalTimeL
+    queue       globalQueueL
+
+    """
+    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
+        -G $ref -f 0.005 -N $tbaseName -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $padded_bed > "${tbaseName}.${nbaseName}.somatic.vardict.raw.tsv"
+    """
+}
+
 //
 //process runVardict {
 //    input:
