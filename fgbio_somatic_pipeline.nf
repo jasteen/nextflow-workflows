@@ -39,19 +39,19 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
-inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
+ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
-umiMap = inputFiles.join(inputIndexes)
+ch_umiMap = inputFiles.join(inputIndexes)
 
 
 process createUnmappedUMIBam {
     publishDir path: './bam_out', mode: 'copy'
     
     input:
-        set baseName, file(R1), file(R2), file(I2) from umiMap
+        set baseName, file(R1), file(R2), file(I2) from ch_umiMap
     output:
-        set baseName, file("${baseName}.unmapped.umi.bam") into unmappedUMIbams
+        set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
 
     publishDir path: './bam_out', mode: 'copy'
 
@@ -65,7 +65,8 @@ process createUnmappedUMIBam {
     queue       globalQueueL
 
     """
-    java -Xmx30g -Djava.io.tmpdir=/scratch/vh83/tmp -XX:+AggressiveOpts -XX:+AggressiveHeap -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
+    java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
+        -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
@@ -76,9 +77,10 @@ process markAdaptors {
     publishDir path: './bam_out', mode: 'copy'
 
     input:
-        set baseName, file(bam) from unmappedUMIbams
+        set baseName, file(bam) from ch_unmappedUMIbams
     output:
-        set baseName, file("${baseName}.unmapped.umi.marked.bam"), file("${baseName}.unmapped.umi.marked_metrics.tsv") into markedUMIbams
+        set baseName, file("${baseName}.unmapped.umi.marked.bam"),
+                      file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams
 
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -99,9 +101,9 @@ process markAdaptors {
 
 process alignBwa {
     input:
-        set baseName, file(bam), file(metrics) from markedUMIbams
+        set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.piped.bam") into pipedBams
+        set baseName, file("${baseName}.piped.bam") into ch_pipedBams
 
     publishDir path: './bam_out', mode: 'copy'
 
@@ -134,9 +136,9 @@ process alignBwa {
 
 process groupreadsByUmi {
     input:
-        set baseName, file(bam) from pipedBams
+        set baseName, file(bam) from ch_pipedBams
     output:
-        set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into umiGroupedBams
+        set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
     publishDir path: './bam_out', mode: 'copy'
 
@@ -149,7 +151,7 @@ process groupreadsByUmi {
     queue       globalQueueL
     
     """
-    java -Xmx6g -Djava.io.tmpdir=/scratch/vh83/tmp -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' GroupReadsByUmi \
+    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar fgbioJar GroupReadsByUmi \
          -i ${bam} -f "${baseName}.piped.grouped.histogram.tsv" -o "${baseName}.piped.grouped.bam" -s Adjacency -e 1 
     """
 
@@ -158,9 +160,9 @@ process groupreadsByUmi {
 
 process generateConsensusReads {
     input:
-        set baseName, file(hist), file(bam) from umiGroupedBams
+        set baseName, file(hist), file(bam) from ch_umiGroupedBams
     output:
-        set baseName, file("${baseName}.consensus.unmapped.bam") into unmappedConsensusBams
+        set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
     executor    globalExecutor
@@ -173,7 +175,7 @@ process generateConsensusReads {
 
 
     """
-    java -Xmx6g -Djava.io.tmpdir=/scratch/vh83/tmp -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' CallMolecularConsensusReads \
+    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar fgbioJar CallMolecularConsensusReads \
         --input $bam --output ${baseName}.consensus.unmapped.bam \
         --error-rate-post-umi 30 --min-reads 1
     """
@@ -208,15 +210,15 @@ process generateConsensusReads {
 
 process mapConsensusReads {
      input:
-        set baseName, file(bam) from unmappedConsensusBams
+        set baseName, file(bam) from ch_unmappedConsensusBams
     output:
-        set baseName, file("${baseName}.consensus.aligned.bam") into mappedConsensusBams
+        set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'java'
-    module 	bwaModule
+    module 	    bwaModule
     cpus        bwaCores
     memory      globalMemoryM
     time        globalTimeL
@@ -228,7 +230,7 @@ process mapConsensusReads {
         -I "$bam" \
         -FASTQ /dev/stdout \
         -INTERLEAVE true -TMP_DIR $tmp_dir | \
-    bwa mem -M -t $bwaCores -p $ref /dev/stdin | \
+    bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM /dev/stdin -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.consensus.aligned.bam" -R $ref -ADD_MATE_CIGAR true \
@@ -241,9 +243,9 @@ process mapConsensusReads {
 
 process indexBam {
     input:
-        set baseName, file(bam) from mappedConsensusBams
+        set baseName, file(bam) from ch_mappedConsensusBams
     output:
-        set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into indexedConsensusBams
+        set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
     executor    globalExecutor
@@ -261,27 +263,30 @@ process indexBam {
 
 }
 
-//I cant think of a better workflow to make sure Tumor and normal are processed in order
+//I cant think of a better workflow to make sure Tumor and Normal are processed in order
 //create channel for normal and tumor
-tumor  = Channel.create()
-normal = Channel.create()
+ch_tumor  = Channel.create()
+ch_normal = Channel.create()
 
-//split single bam channel into tumor and normal
-indexedConsensusBams.choice(tumor, normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
+//split single bam channel into tumor and normal **CURRENTLY RELIES ON SAMPLE_[FFPE|NORMAL] naming scheme
+ch_indexedConsensusBams.choice(ch_tumor, ch_normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
 
-//fix the names to allow remerging by sample number
-normalSplit = normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
-tumorSplit = tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+//split SAMPLE from FFPE|NORMAL so channels can be joined by sample
+ch_normalSplit = ch_normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+ch_tumorSplit = ch_tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
 
 //merge tumor and normal back together by sample number. 
-vardictInput = tumorSplit.join(normalSplit)
+ch_vardictInput = ch_tumorSplit.join(ch_normalSplit)
+
+//TODO:  write split up vardict process by bed region to make it quicker.  will require writing tsv files 
+//       and then merging before making VCF file.
 
 
 process runVardict {
     input:
-        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from vardictInput
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
     output:
-        set sample, file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into rawVardict
+        set sample, file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into ch_rawVardict
     
     publishDir path: './bam_out', mode: 'copy'
     
