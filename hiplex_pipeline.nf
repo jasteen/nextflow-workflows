@@ -54,22 +54,22 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-inputFiles = Channel.fromFilePairs("$inputDirectory/*.R{1,2}.fastq.gz")
+ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*.R{1,2}.fastq.gz")
 
 
 process align_bwa {
 
     input:
-        set baseName, file(fastqs) from inputFiles
+        set baseName, file(fastqs) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into mappedBams
+        set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into ch_mappedBams
 
     publishDir path: './bam_out', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode
     module      bwaModule
-    module      'samtools'
+    module      samtoolsModule
     cpus        bwaCores
     memory      globalMemoryM
     time        globalTimeM
@@ -77,8 +77,8 @@ process align_bwa {
 
     """
     bwa mem -M -t $bwaCores -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
-                  | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
-                  | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
+        | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
+        | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
     samtools index "${baseName}.hq.sorted.bam" "${baseName}.hq.sorted.bam.bai"
     """
 }
@@ -86,9 +86,9 @@ process align_bwa {
 process run_vardict {
 
     input:
-        set baseName, file(bam), file(bai) from mappedBams                
+        set baseName, file(bam), file(bai) from ch_mappedBams                
     output: 
-        set baseName, file("${baseName}.vcf") into vardictVCFs           
+        set baseName, file("${baseName}.vcf") into ch_vardictVCFs           
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -116,11 +116,11 @@ process collect_vcf_result {
       publishDir './variants_merged_out/', mode: 'copy'
 
       input:
-      file all_vcf from vardictVCFs.toList()
+      file all_vcf from ch_vardictVCFs.collect()
       file refFai
 
       output:
-      file "merged.vcf" into mergedVCF
+      file "merged.vcf" into ch_mergedVCF
 
       when:
       !all_vcf.empty
@@ -198,9 +198,9 @@ process collect_vcf_result {
 process vt_decompose_normalise {
         
     input:
-        set baseName, file(vcf) from mergedVCF
+        set baseName, file(vcf) from ch_mergedVCF
     output:
-        set baseName, file("merged.vt.vcf.gz") into vtDecomposeVCF
+        set baseName, file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './variants_merged_out', mode: 'copy'
 
@@ -221,9 +221,9 @@ process vt_decompose_normalise {
 process apply_vep {
 
     input:
-        set baseName, file(vcf) from vtDecomposeVCF
+        set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
-        set baseName, file("merged.vt.vep.vcf.gz") into vepVCF
+        set baseName, file("merged.vt.vep.vcf.gz") into ch_vepVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
