@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/full_fg_workflow/fastqs/')
+inputDirectory = file('/scratch/vh83/projects/medha_exomes/testing_fgbio/fastqs/')
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
@@ -42,7 +42,7 @@ globalQueueL      = 'comp'
 ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
 ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
-ch_umiMap = inputFiles.join(inputIndexes)
+ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
 
 
 process createUnmappedUMIBam {
