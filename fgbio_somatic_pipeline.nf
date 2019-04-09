@@ -30,7 +30,7 @@ globalStageInMode = 'symlink'
 globalCores       = 1
 bwaCores	  = 12
 globalMemoryS     = '6 GB'
-globalMemoryM     = '8 GB'
+globalMemoryM     = '32 GB'
 globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
 globalTimeM       = '1h'
@@ -61,11 +61,11 @@ process createUnmappedUMIBam {
     module      'fgbio'
     module      'java'
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
     """
-    java -Xmx6g -XX:+AggressiveOpts -XX:+AggressiveHeap -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
+    java -Xmx30g -Djava.io.tmpdir=/scratch/vh83/tmp -XX:+AggressiveOpts -XX:+AggressiveHeap -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
@@ -85,11 +85,11 @@ process markAdaptors {
     cpus        1
     module      'java'
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
     """
-    java -Dpicard.useLegacyParser=false -Xmx6g -jar $picardJar MarkIlluminaAdapters \
+    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
         -INPUT $bam \
         -OUTPUT "${baseName}.unmapped.umi.marked.bam" \
         -METRICS "${baseName}.unmapped.umi.marked_metrics.tsv"
@@ -113,7 +113,7 @@ process alignBwa {
     module      'picard'
     cpus        bwaCores
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
     """
@@ -145,11 +145,11 @@ process groupreadsByUmi {
     module      'java'
     cpus        globalCores
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
     
     """
-    java -Xmx6g -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' GroupReadsByUmi \
+    java -Xmx6g -Djava.io.tmpdir=/scratch/vh83/tmp -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' GroupReadsByUmi \
          -i ${bam} -f "${baseName}.piped.grouped.histogram.tsv" -o "${baseName}.piped.grouped.bam" -s Adjacency -e 1 
     """
 
@@ -168,12 +168,12 @@ process generateConsensusReads {
     module      'java'
     cpus        globalCores
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
 
     """
-    java -Xmx6g -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' CallMolecularConsensusReads \
+    java -Xmx6g -Djava.io.tmpdir=/scratch/vh83/tmp -jar '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar' CallMolecularConsensusReads \
         --input $bam --output ${baseName}.consensus.unmapped.bam \
         --error-rate-post-umi 30 --min-reads 1
     """
@@ -219,7 +219,7 @@ process mapConsensusReads {
     module 	bwaModule
     cpus        bwaCores
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
 
@@ -251,7 +251,7 @@ process indexBam {
     module      'samtools'
     cpus        globalCores
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeL
     queue       globalQueueL
 
 
@@ -261,43 +261,44 @@ process indexBam {
 
 }
 
-
+//I cant think of a better workflow to make sure Tumor and normal are processed in order
+//create channel for normal and tumor
 tumor  = Channel.create()
 normal = Channel.create()
-temp = indexedConsensusBams.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}.toList()
 
-temp.choice(tumor, normal){ a -> a =~ /FFPE/ ? 0 : 1 }
-//tumor.println()
-normal.println()
+//split single bam channel into tumor and normal
+indexedConsensusBams.choice(tumor, normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
+
+//fix the names to allow remerging by sample number
+normalSplit = normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+tumorSplit = tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+
+//merge tumor and normal back together by sample number. 
+vardictInput = tumorSplit.join(normalSplit)
 
 
-
-//vardictInput = tumor.join(normal)
-
-//vardictInput.println()
-
-//process runVardict {
-//    input:
-//        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from vardictInput
-//    output:
-//        set file("${tbaseName}.${nbaseName}.somatic.vardict.vcf") into rawVardict
-//    
-//    publishDir path: './bam_out', mode: 'copy'
-//    
-//    executor    globalExecutor
-//    stageInMode globalStageInMode
-//    cpus        1
-//    module      "R"
-//    memory      globalMemoryM
-//    time        globalTimeM
-//    queue       globalQueueL
-//    
-//    """
-//    export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
-//    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
-//        -G $ref -f 0.005 -N "${tbam}|${nbam}" -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $padded_bed | \
-//    teststrandbias.R | \
-//    var2vcf_paired.pl -N "${tbam}|${nbam}" -E -f 0.1 > "${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf"
-//    """
-//}
+process runVardict {
+    input:
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from vardictInput
+    output:
+        set sample, file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into rawVardict
+    
+    publishDir path: './bam_out', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    module      'R/3.5.1'
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    
+    """
+    export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
+    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
+        -G $ref -f 0.01 -N "${tbam}|${nbam}" -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $padded_bed | \
+    /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
+    var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf"
+    """
+}
 
