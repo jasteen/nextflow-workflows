@@ -39,13 +39,17 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
+//create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
 ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
+//i'm sure there is a better way to map the basename, but this works for the moment.
 ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
+//join input files and index on the baseName
 ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
 
 
 process createUnmappedUMIBam {
+    
     publishDir path: './bam_out', mode: 'copy'
     
     input:
@@ -151,7 +155,7 @@ process groupreadsByUmi {
     queue       globalQueueL
     
     """
-    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar fgbioJar GroupReadsByUmi \
+    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar GroupReadsByUmi \
          -i ${bam} -f "${baseName}.piped.grouped.histogram.tsv" -o "${baseName}.piped.grouped.bam" -s Adjacency -e 1 
     """
 
@@ -175,7 +179,7 @@ process generateConsensusReads {
 
 
     """
-    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar fgbioJar CallMolecularConsensusReads \
+    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CallMolecularConsensusReads \
         --input $bam --output ${baseName}.consensus.unmapped.bam \
         --error-rate-post-umi 30 --min-reads 1
     """
