@@ -337,7 +337,7 @@ process catSegments {
     
     script:
     """
-    for every segment from tsv
+    for every segment in tsv
     do
       cat \$segment >> ${sample}.collated.vardict.tsv
     done
