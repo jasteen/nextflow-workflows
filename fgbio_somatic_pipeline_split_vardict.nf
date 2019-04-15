@@ -324,6 +324,9 @@ process runVardict {
 
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
+
+ch_rawVardict = ch_collatedSegments.collectFile {sampple, tbam, nbam, tsvs -> ${sample}.collated.vardict.tsv, tsvs}
+/*
 process catSegments {
     echo true
     input: 
@@ -349,7 +352,7 @@ process catSegments {
     """
 
 }
-
+*/
 
 process makeVCF {
     input:
