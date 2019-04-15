@@ -319,7 +319,7 @@ process runVardict {
 
 ch_collatedSegments = ch_rawVardictSegments.collectFile()
 
-ch_rawVardictSegments.println()
+ch_collatedSegments.println()
 
 /*
 process catSegments {
