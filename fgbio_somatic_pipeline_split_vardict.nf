@@ -317,12 +317,12 @@ process runVardict {
 //ch_rawVardictSegments.println()
 
 
-ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2]).flatten()
+ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file("*.tsv") from ch_collatedSegments.collect()
+        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -337,7 +337,10 @@ process catSegments {
     
     script:
     """
-    cat *.tsv > ${sample}.collated.vardict.tsv
+    for every segment from tsv
+    do
+      cat \$segment >> ${sample}.collated.vardict.tsv
+    done
     """
 
 }
