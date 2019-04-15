@@ -285,7 +285,8 @@ ch_vardictInput = ch_tumorSplit.join(ch_normalSplit)
 //       and then merging before making VCF file.
 
 //create bedfile segments
-bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "paddedBed.bed")
+//bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "paddedBed.bed")
+bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000)
 
 
 process runVardict {
@@ -293,7 +294,7 @@ process runVardict {
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
         each file(segment) from bedSegments   
     output:
-        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.{$segment}.somatic.vardict.tsv") into ch_rawVardictSegments
+        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
     
     publishDir path: './bam_out', mode: 'copy'
     
