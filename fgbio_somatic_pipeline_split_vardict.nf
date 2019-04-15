@@ -336,8 +336,8 @@ process catSegments {
     queue       globalQueueL
     
     script:
-    """
     myfiles = tsv.collect{ it.toString() }.join(' ')
+    """
     cat ${myfiles} > ${sample}.collated.vardict.tsv
     """
 
