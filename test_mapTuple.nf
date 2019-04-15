@@ -19,7 +19,7 @@ process catfiles {
 
   script:
 
-  myfiles = tsv.collect{ it.toString() }.join(' ')
+  myfiles = tsv.collec().join(' ')
   """
   cat ${myfiles} > ${sample}.collated.vardict.tsv
   """
