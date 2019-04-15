@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/testing_fgbio/fastqs/')
+inputDirectory = file('/scratch/vh83/projects/medha_exomes/really_testing/fastqs')
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
@@ -290,7 +290,7 @@ process runVardict {
     input:
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
     output:
-        set sample, file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into ch_rawVardict
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into ch_rawVardict
     
     publishDir path: './bam_out', mode: 'copy'
     
@@ -303,11 +303,33 @@ process runVardict {
     queue       globalQueueL
     
     """
-    export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
-    /home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin/VarDict \
-        -G $ref -f 0.01 -N "${tbam}|${nbam}" -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 $padded_bed | \
-    /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
-    var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf"
+    export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
+    VarDict -G ${ref} -f 0.01 -N "${tbam}|${nbam}" \
+        -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 ${segment} \
+        > "${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv"
     """
 }
+
+process makeVCF {
+    input:
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(tsv) from ch_rawVardict
+    output:
+        set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
+    
+    publishDir path: './bam_out', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    module      'R/3.5.1'
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
+    """  
+    cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
+    var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
+    """
+}
+
 
