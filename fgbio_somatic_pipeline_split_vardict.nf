@@ -336,7 +336,7 @@ process catSegments {
     queue       globalQueueL
     
     
-    myfiles = tsv.collect{ it.toString() }.join(' ')
+    myfiles = $tsv.collect{ it.toString() }.join(' ')
     myfiles.println()
 
     """
