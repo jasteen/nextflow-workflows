@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/really_testing/fastqs')
+inputDirectory = file('/scratch/vh83/projects/medha_exomes/full_fg_workflow/fastqs')
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
