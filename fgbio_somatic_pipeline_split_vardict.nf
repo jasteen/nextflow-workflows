@@ -322,7 +322,7 @@ ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> 
 
 process catSegments {
     input: 
-        set sample, tbam, nbam, file("*.tsv") from ch_collatedSegments
+        set sample, tbam, nbam, file("*.tsv") from ch_collatedSegments.collect()
     output: 
         set sample, tbam, nbam, file("${sample}.collated.tsv") into ch_rawVardict
 
