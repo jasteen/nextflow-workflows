@@ -313,7 +313,7 @@ process runVardict {
 
 }
 
-ch_collatedSegments = ch_rawVardictSegments.groupBy([sample, tbam, nbam])
+ch_collatedSegments = ch_rawVardictSegments.groupTuple([0,1,2])
 
 process catSegments {
     input: set sample, files("*.tsv") from ch_collatedSegments.collect()
