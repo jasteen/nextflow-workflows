@@ -68,6 +68,9 @@ process createUnmappedUMIBam {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
+    errorStrategy 'retry'
+    maxRetries 3
+
 
     """
     java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
