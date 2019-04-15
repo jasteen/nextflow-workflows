@@ -298,7 +298,7 @@ process runVardict {
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
-    time        globalTimeL
+    time        globalTimeXL
     queue       globalQueueL
     
     """
