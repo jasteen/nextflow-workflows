@@ -58,6 +58,7 @@ process createUnmappedUMIBam {
 
     publishDir path: './bam_out', mode: 'copy'
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -86,6 +87,7 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -148,6 +150,7 @@ process groupreadsByUmi {
     
     publishDir path: './bam_out', mode: 'copy'
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'java'
@@ -172,6 +175,7 @@ process generateConsensusReads {
         set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'java'
@@ -222,6 +226,7 @@ process mapConsensusReads {
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'java'
@@ -255,6 +260,7 @@ process indexBam {
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
     publishDir path: './bam_out', mode: 'copy'
 
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'samtools'
@@ -302,6 +308,7 @@ process runVardict {
     
     publishDir path: './bam_out', mode: 'copy'
     
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -322,7 +329,7 @@ process runVardict {
 //ch_rawVardictSegments.println()
 
 
-ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2]).flatten()
+ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
 
 //ch_rawVardict = ch_collatedSegments.collectFile {sample, tbam, nbam, tsvs -> [${sample}.collated.vardict.tsv, tsvs] }
@@ -336,6 +343,7 @@ process catSegments {
 
     publishDir path: './bam_out', mode: 'copy'
     
+    cache 'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -362,6 +370,7 @@ process makeVCF {
     
     publishDir path: './bam_out', mode: 'copy'
     
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
