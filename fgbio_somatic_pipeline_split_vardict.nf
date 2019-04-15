@@ -67,6 +67,7 @@ process createUnmappedUMIBam {
     time        globalTimeL
     queue       globalQueueL
 
+    script:
     """
     java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
@@ -93,6 +94,7 @@ process markAdaptors {
     time        globalTimeL
     queue       globalQueueL
 
+    script:
     """
     java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
         -INPUT $bam \
@@ -121,6 +123,7 @@ process alignBwa {
     time        globalTimeL
     queue       globalQueueL
 
+    script:
     """
     set -o pipefail
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
@@ -153,6 +156,7 @@ process groupreadsByUmi {
     time        globalTimeL
     queue       globalQueueL
     
+    script:
     """
     java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar GroupReadsByUmi \
          -i ${bam} -f "${baseName}.piped.grouped.histogram.tsv" -o "${baseName}.piped.grouped.bam" -s Adjacency -e 1 
@@ -176,7 +180,7 @@ process generateConsensusReads {
     time        globalTimeL
     queue       globalQueueL
 
-
+    script:
     """
     java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CallMolecularConsensusReads \
         --input $bam --output ${baseName}.consensus.unmapped.bam \
@@ -227,7 +231,7 @@ process mapConsensusReads {
     time        globalTimeL
     queue       globalQueueL
 
-
+    script:
     """
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
         -I "$bam" \
@@ -259,7 +263,7 @@ process indexBam {
     time        globalTimeL
     queue       globalQueueL
 
-
+    script:
     """
     samtools index $bam ${baseName}.consensus.aligned.bam.bai
     """
@@ -305,6 +309,7 @@ process runVardict {
     time        globalTimeL
     queue       globalQueueL
     
+    script:
     """
     export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
     VarDict -G ${ref} -f 0.01 -N "${tbam}|${nbam}" \
@@ -335,7 +340,7 @@ process catSegments {
     time        globalTimeL
     queue       globalQueueL
     
-    
+    script:
     myfiles = $tsv.collect{ it.toString() }.join(' ')
     myfiles.println()
 
@@ -361,6 +366,7 @@ process makeVCF {
     time        globalTimeL
     queue       globalQueueL
 
+    script:
     """  
     module purge
     module load R/3.5.1
