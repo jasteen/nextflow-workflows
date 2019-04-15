@@ -319,11 +319,10 @@ process runVardict {
 
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
-
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
+        set sample, tbam, nbam, file("*.tsv") from ch_collatedSegments.collect
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -337,10 +336,11 @@ process catSegments {
     queue       globalQueueL
 
     """
-    cat ${tsv} > ${sample}.collated.vardict.tsv
+    cat *.tsv > ${sample}.collated.vardict.tsv
     """
 
 }
+
 
 process makeVCF {
     input:
@@ -364,4 +364,3 @@ process makeVCF {
     /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
-
