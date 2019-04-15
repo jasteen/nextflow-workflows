@@ -344,7 +344,7 @@ process catSegments {
     publishDir path: './bam_out', mode: 'copy'
     
     cache 'deep'
-    executor    globalExecutor
+    executor    'local'
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
@@ -353,7 +353,6 @@ process catSegments {
     
     script:
     myfiles = tsv.collect{ it.toString() }.join(' ')
-
 
     """
     cat ${myfiles} > ${sample}.collated.vardict.tsv
