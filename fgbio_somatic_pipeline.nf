@@ -297,7 +297,6 @@ process runVardict {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
-    module      'R/3.5.1'
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
@@ -321,12 +320,13 @@ process makeVCF {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
-    module      'R/3.5.1'
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
 
     """  
+    module purge
+    module load R/3.5.1
     cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
     /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
