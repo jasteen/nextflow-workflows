@@ -301,9 +301,9 @@ process runVardict {
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
         each file(segment) from bedSegments   
     output:
-        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
+        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments.view()
     
-    publishDir path: './bam_out', mode: 'copy'
+    publishDir path: './bam_out/raw_segs', mode: 'copy'
     
     cache       'deep'
     executor    globalExecutor
@@ -323,18 +323,14 @@ process runVardict {
 
 }
 
-//ch_rawVardictSegments.println()
-
-
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
 
-//ch_rawVardict = ch_collatedSegments.collectFile {sample, tbam, nbam, tsvs -> [${sample}.collated.vardict.tsv, tsvs] }
 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
+        set sample, tbam, nbam, file('*.tsv') from ch_collatedSegments.toList()
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -349,10 +345,10 @@ process catSegments {
     
     script:
     
-    myfiles = tsv.join(' ')
+//    myfiles = tsv.join(' ')
 
     """
-    cat ${myfiles} > ${sample}.collated.vardict.tsv
+    cat *.tsv > ${sample}.collated.vardict.tsv
     """
 
 }
