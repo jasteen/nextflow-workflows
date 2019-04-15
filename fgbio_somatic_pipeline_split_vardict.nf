@@ -314,14 +314,17 @@ process runVardict {
 
 }
 
+//ch_rawVardictSegments.println()
+
+
+ch_collatedSegments = ch_rawVardictSegments.groupTuple([0,1,2])
+
 ch_rawVardictSegments.println()
 
 /*
-ch_collatedSegments = ch_rawVardictSegments.groupTuple([0,1,2])
-
 process catSegments {
     input: set sample, files("*.tsv") from ch_collatedSegments.collect()
-    output: set "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(2)", file("${sample}.collated.tsv") into ch_rawVardict
+    output: set "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(1)", "$sample.name.toString().tokenize('_').get(2)", file("${sample}.collated.tsv") into ch_rawVardict
 
     publishDir path: './bam_out', mode: 'copy'
     
