@@ -322,7 +322,7 @@ ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
+        set sample, tbam, nbam, file(tsv) from ch_collatedSegments
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -337,10 +337,8 @@ process catSegments {
     
     script:
     """
-    for every segment in tsv
-    do
-      cat \$segment >> ${sample}.collated.vardict.tsv
-    done
+    myfiles = tsv.collect{ it.toString() }.join(' ')
+    cat ${myfiles} > ${sample}.collated.vardict.tsv
     """
 
 }
