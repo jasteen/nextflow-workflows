@@ -313,6 +313,9 @@ process runVardict {
 
 }
 
+ch_rawVardictSegments.println()
+
+/*
 ch_collatedSegments = ch_rawVardictSegments.groupTuple([0,1,2])
 
 process catSegments {
@@ -355,4 +358,4 @@ process makeVCF {
     var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.:wqsomatic.vardict.vcf"
     """
 }
-
+*/
