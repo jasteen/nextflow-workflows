@@ -323,9 +323,9 @@ ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file("*.tsv") from ch_collatedSegments.collect()
+        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
     output: 
-        set sample, tbam, nbam, file("${sample}.collated.tsv") into ch_rawVardict
+        set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
     publishDir path: './bam_out', mode: 'copy'
     
@@ -337,14 +337,14 @@ process catSegments {
     queue       globalQueueL
 
     """
-    cat $file > ${sample}.collated.vardict.tsv
+    cat ${tsv} > ${sample}.collated.vardict.tsv
     """
 
 }
 
 process makeVCF {
     input:
-        set sample, file(tsv) from ch_rawVardict
+        set sample, tbam, nbam, file(tsv) from ch_rawVardict
     output:
         set sample, tbam, nbam, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
     
