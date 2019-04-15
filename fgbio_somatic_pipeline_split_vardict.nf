@@ -327,8 +327,7 @@ ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file(tsv) from ch_collatedSegments
-        
+        set sample, tbam, nbam, file(tsv) from ch_collatedSegments.collect()
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -342,7 +341,7 @@ process catSegments {
     queue       globalQueueL
     
     script:
-    
+    myfiles = tsv.collect{ it.toString() }.join(' ')
     myfiles.println()
 
     """
