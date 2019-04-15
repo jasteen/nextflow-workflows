@@ -319,12 +319,10 @@ process runVardict {
 
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
-ch_collatedSegments.println()
 
-/*
 process catSegments {
-    input: set sample, files("*.tsv") from ch_collatedSegments.collect()
-    output: set "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(1)", "$sample.name.toString().tokenize('_').get(2)", file("${sample}.collated.tsv") into ch_rawVardict
+    input: set sample, tbam, nbam, files("*.tsv") from ch_collatedSegments
+    output: set sample, tbam, nbam, file("${sample}.collated.tsv") into ch_rawVardict
 
     publishDir path: './bam_out', mode: 'copy'
     
@@ -352,14 +350,15 @@ process makeVCF {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
-    module      'R/3.5.1'
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
 
     """  
+    module purge
+    module load R/3.5.1
     cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
-    var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.:wqsomatic.vardict.vcf"
+    /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
-*/
+
