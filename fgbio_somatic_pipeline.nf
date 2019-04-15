@@ -35,6 +35,7 @@ globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
 globalTimeM       = '1h'
 globalTimeL       = '24h'
+globalTimeL       = '72h'
 globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
