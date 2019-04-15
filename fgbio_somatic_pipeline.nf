@@ -305,7 +305,7 @@ process runVardict {
     """
     export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
     VarDict -G ${ref} -f 0.01 -N "${tbam}|${nbam}" \
-        -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 ${segment} \
+        -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 ${padded_bed} \
         > "${sample}.${ttype}_v_${ntype}.somatic.vardict.tsv"
     """
 }
