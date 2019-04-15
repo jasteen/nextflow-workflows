@@ -351,11 +351,12 @@ process catSegments {
     myfiles = tsv.collect{ it.toString() }.join(' ')
 
     """
-    cat ${myfiles} > ${sample}.collated.vardict.tsv
+    echo cat ${myfiles} 
     """
 
 }
 
+//    cat ${myfiles} > ${sample}.collated.vardict.tsv
 
 process makeVCF {
     input:
