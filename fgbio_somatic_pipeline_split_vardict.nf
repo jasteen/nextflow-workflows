@@ -336,7 +336,7 @@ process catSegments {
     queue       globalQueueL
 
     """
-    cat $files > ${sample}.collated.vardict.tsv
+    cat $file > ${sample}.collated.vardict.tsv
     """
 
 }
