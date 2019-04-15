@@ -153,7 +153,6 @@ process groupreadsByUmi {
     cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
-    module      'java'
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
@@ -178,7 +177,6 @@ process generateConsensusReads {
     cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
-    module      'java'
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
@@ -229,7 +227,6 @@ process mapConsensusReads {
     cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
-    module      'java'
     module 	    bwaModule
     cpus        bwaCores
     memory      globalMemoryM
@@ -343,7 +340,7 @@ process catSegments {
 
     publishDir path: './bam_out', mode: 'copy'
     
-    cache 'deep'
+    cache       'deep'
     executor    'local'
     stageInMode globalStageInMode
     cpus        1
