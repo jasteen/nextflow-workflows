@@ -293,7 +293,7 @@ process runVardict {
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
         each file(segment) from bedSegments   
     output:
-        set "${sample}_${file(tbam)}_${file(nbam)}", file("${sample}.${ttype}_v_${ntype}.{$segment}.somatic.vardict.tsv") into ch_rawVardictSegments
+        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.{$segment}.somatic.vardict.tsv") into ch_rawVardictSegments
     
     publishDir path: './bam_out', mode: 'copy'
     
@@ -313,10 +313,10 @@ process runVardict {
 
 }
 
-ch_collated_segments = ch_rawVardictSegments.groupTuple()
+ch_collatedSegments = ch_rawVardictSegments.groupTuple(by: [0,1,2])
 
 process catSegments {
-    input: set sample, files("*.tsv") from ch_collated_segments.collect()
+    input: set sample, files("*.tsv") from ch_collatedSegments.collect()
     output: set "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(0)", "$sample.name.toString().tokenize('_').get(2)", file("${sample}.collated.tsv") into ch_rawVardict
 
     publishDir path: './bam_out', mode: 'copy'
