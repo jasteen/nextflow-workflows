@@ -317,7 +317,7 @@ process runVardict {
 //ch_rawVardictSegments.println()
 
 
-ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(0,1,2)
+ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple([0,1,2])
 
 ch_collatedSegments.println()
 
