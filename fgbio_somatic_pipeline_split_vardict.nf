@@ -335,7 +335,7 @@ process catSegments {
     time        globalTimeL
     queue       globalQueueL
     
-    script:
+    
     myfiles = tsv.collect{ it.toString() }.join(' ')
     myfiles.println()
 
