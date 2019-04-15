@@ -317,7 +317,7 @@ process runVardict {
 //ch_rawVardictSegments.println()
 
 
-ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
+ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2]).flatten()
 
 process catSegments {
     echo true
@@ -334,7 +334,8 @@ process catSegments {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-
+    
+    script:
     """
     cat *.tsv > ${sample}.collated.vardict.tsv
     """
