@@ -342,7 +342,6 @@ process catSegments {
     
     cache       'deep'
     executor    'local'
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
