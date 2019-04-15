@@ -290,7 +290,7 @@ process runVardict {
     input:
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
     output:
-        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file("${sample}.${ttype}_v_${ntype}.somatic.vardict.vcf") into ch_rawVardict
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file("${sample}.${ttype}_v_${ntype}.somatic.vardict.tsv") into ch_rawVardict
     
     publishDir path: './bam_out', mode: 'copy'
     

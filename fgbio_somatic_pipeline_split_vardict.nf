@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/really_testing/')
+inputDirectory = file('/scratch/vh83/projects/medha_exomes/test_split/fastqs')
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
@@ -313,7 +313,7 @@ process runVardict {
 
 }
 
-ch_collated_segments = groupTuple(ch_rawVardictSegments)
+ch_collated_segments = ch_rawVardictSegments.groupTuple()
 
 process catSegments {
     input: set sample, files("*.tsv") from ch_collated_segments.collect()
