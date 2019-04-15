@@ -328,7 +328,7 @@ process makeVCF {
 
     """  
     cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
-    var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
+    /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
 
