@@ -331,7 +331,7 @@ ch_collatedSegments = ch_rawVardictSegments.collect().map{ sample, tbam, nbam, s
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file('*.tsv') from ch_collatedSegments.toList()
+        set sample, tbam, nbam, file('*.tsv') from ch_collatedSegments
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
