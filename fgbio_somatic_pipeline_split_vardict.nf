@@ -348,7 +348,7 @@ process catSegments {
     
     script:
     
-    myfiles = tsv.collect.join(' ')
+    myfiles = tsv.collect().join(' ')
 
     """
     cat ${myfiles} > ${sample}.collated.vardict.tsv
