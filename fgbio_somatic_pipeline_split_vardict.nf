@@ -301,8 +301,9 @@ process runVardict {
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
         each file(segment) from bedSegments   
     output:
-        set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
-    
+  //      set sample, tbam, nbam, file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
+         file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
+
     publishDir path: './bam_out/raw_segs', mode: 'copy'
     
     cache       'deep'
@@ -323,16 +324,44 @@ process runVardict {
 
 }
 
-
+Channel.from(ch_rawVardictSegments)
+   .collectFile()
+   .println()
 //ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
 
 //ch_collatedSegments = ch_rawVardictSegments.groupTuple(by: [0,1,2])
 
+/*
+process catSegments {
+    echo true
+    input: 
+        file '*.tsv' from ch_rawVardictSegments.collect
+    output: 
+        file("${sample}.collated.vardict.tsv") into ch_rawVardict
+
+    publishDir path: './bam_out', mode: 'copy'
+    
+    cache       'deep'
+    executor    'local'
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    
+    script:
+    
+    //myfiles = tsv.join(' ')
+
+    """
+    cat *.tsv > collated.vardict.tsv
+    """
+
+}
 
 process catSegments {
     echo true
     input: 
-        set sample, tbam, nbam, file('*.tsv') from ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
+        set sample, tbam, nbam, file(tsv) from ch_rawVardictSegments
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
@@ -347,10 +376,10 @@ process catSegments {
     
     script:
     
-//    myfiles = tsv.join(' ')
+    myfiles = tsv.join(' ')
 
     """
-    cat *.tsv > ${sample}.collated.vardict.tsv
+    cat ${myfiles} > ${sample}.collated.vardict.tsv
     """
 
 }
@@ -381,3 +410,4 @@ process makeVCF {
     /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
+*/
