@@ -1,8 +1,22 @@
 
 
 ch_files = Channel.fromPath('./*.tsv')
+ch_files2 = ch_files.map { tsv -> [baseName(), tsv]}
+process touchFiles {
 
-ch_temp = ch_files.map { file -> ['S1', 'S1_FFPE.consensus.aligned.bam', 'S1_WB.consensus.aligned.bam', file] }
+  input:
+    set sample, file(tsv) from ch_files
+  output:
+    set sample, file('*.touched.tsv') into ch_touched
+
+    script:
+
+    """
+    mv $tsv ${sample}.touched.tsv
+    """
+}
+
+ch_temp = ch_touched.map { sample, file -> [sample, 'A', 'B', file] }
 
 
 ch_temp2 = ch_temp.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment] }.groupTuple(by: [0,1,2])
@@ -19,7 +33,7 @@ process catfiles {
 
   script:
 
-  myfiles = tsv.collec().join(' ')
+  myfiles = tsv.collect().join(' ')
   """
   cat ${myfiles} > ${sample}.collated.vardict.tsv
   """
