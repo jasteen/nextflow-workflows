@@ -324,8 +324,11 @@ process runVardict {
 }
 
 
-ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment]}.collect().groupTuple(by: [0,1,2])
+//ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam, nbam, segment]}.groupTuple(by: [0,1,2])
+ch_rawVardictSegments.flatten().collect().println()
 
+
+/*
 process catSegments {
     echo true
     input: 
@@ -377,4 +380,4 @@ process makeVCF {
     /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
-
+*/
