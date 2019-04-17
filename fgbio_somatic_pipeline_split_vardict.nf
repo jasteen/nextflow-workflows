@@ -292,7 +292,7 @@ ch_vardictInput = ch_tumorSplit.join(ch_normalSplit)
 //       and then merging before making VCF file.
 
 //create bedfile segments
-bedSegments = Channel.fromPath("$padded_bed").splitText( by: 25000, file: "seg")
+bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 //bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000)
 
 
