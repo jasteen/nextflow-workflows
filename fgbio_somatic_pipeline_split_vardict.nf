@@ -340,7 +340,8 @@ process catSegments {
     publishDir path: './bam_out', mode: 'copy'
     
     cache       'deep'
-    executor    'local'
+    executor    globalExecutor
+    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
