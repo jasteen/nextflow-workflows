@@ -278,7 +278,7 @@ process indexBam {
 ch_tumor  = Channel.create()
 ch_normal = Channel.create()
 
-//split single bam channel into tumor and normal **CURRENTLY RELIES ON SAMPLE_[FFPE|NORMAL] naming scheme
+//split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
 ch_indexedConsensusBams.choice(ch_tumor, ch_normal){ a -> a[0] =~ /_FFPE$/ ? 0 : 1 }
 
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
@@ -286,20 +286,16 @@ ch_normalSplit = ch_normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], 
 ch_tumorSplit = ch_tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
 
 //merge tumor and normal back together by sample number. 
-ch_vardictInput = ch_tumorSplit.join(ch_normalSplit)
-
-//TODO:  write split up vardict process by bed region to make it quicker.  will require writing tsv files 
-//       and then merging before making VCF file.
+ch_tumorNormalPairs = ch_tumorSplit.join(ch_normalSplit)
 
 //create bedfile segments
-bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
-//bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000)
-
+ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
+//create cartesian product of the input channel and the segments files
+ch_vardictInput = ch_tumorNormalPairs.combine(ch_bedSegments)
 
 process runVardict {
     input:
-        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai) from ch_vardictInput
-        each file(segment) from bedSegments   
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictInput
     output:
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
 
@@ -325,9 +321,6 @@ process runVardict {
 
 
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
-//ch_rawVardictSegments.flatten().collect().println()
-
-//ch_collatedSegments.println()
 
 
 process catSegments {
