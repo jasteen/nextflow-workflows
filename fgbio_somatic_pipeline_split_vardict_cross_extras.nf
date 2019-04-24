@@ -141,7 +141,8 @@ process alignBwa {
 }
 
 
-Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg").into(ch_bedSegments, ch_bedSegments2)
+ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
+ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
 ch_vardictPreUMI= ch_mappedNoUMI.combine(ch_bedSegments2)
 
