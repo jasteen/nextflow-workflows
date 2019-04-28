@@ -109,7 +109,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.piped.bam"), file("${baseName}.piped.bam.bai") into ch_pipedBams, ch_mappedNoUMI
+        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI
 
     publishDir path: './output/intermediate', mode: 'copy'
 
