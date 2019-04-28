@@ -167,7 +167,7 @@ process indexPreUmiBam {
 ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardictPreUMI= ch_indexedmappedNoUMI.combine(ch_bedSegments2)
+ch_vardictPreUMI= ch_indexedMappedNoUMI.combine(ch_bedSegments2)
 
 process vardictPreUMI {
     
