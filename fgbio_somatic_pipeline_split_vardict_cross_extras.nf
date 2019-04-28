@@ -140,15 +140,37 @@ process alignBwa {
     """
 }
 
+process indexBam {
+    input:
+        set baseName, file(bam) from ch_mappedNoUMI
+    output:
+        set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedMappedNoUMI
+    publishDir path: './output/intermediate', mode: 'copy'
+
+    cache       'deep'
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      'samtools'
+    cpus        globalCores
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
+    script:
+    """
+    samtools index $bam ${baseName}.consensus.aligned.bam.bai
+    """
+
+}
+
 
 ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardictPreUMI= ch_mappedNoUMI.combine(ch_bedSegments2)
+ch_vardictPreUMI= ch_indexedmappedNoUMI.combine(ch_bedSegments2)
 
 process vardictPreUMI {
     
-
     input:
         set baseName, file(bam), file(bai), file(segment) from ch_vardictPreUMI
     output:
@@ -159,7 +181,7 @@ process vardictPreUMI {
     export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
     VarDict -G ${ref} -f 0.01 -N "$baseName" \
         -b "$bam" -c 1 -S 2 -E 3 -g 4 ${segment} \
-        > "${sample}.${segment}.somatic.vardict.tsv"
+        > "${baseName}.${segment}.vardict.tsv"
     """
 
 }
@@ -172,7 +194,7 @@ process catSegmentspreUMI {
     input: 
         set baseName, file(tsv) from ch_collatedSegmentspreUMI
     output: 
-        set baseName, file("${sample}.collated.vardict.tsv") into ch_vardictPreUMICollated
+        set baseName, file("${baseName}.collated.vardict.tsv") into ch_vardictPreUMICollated
     
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -186,7 +208,7 @@ process catSegmentspreUMI {
     myfiles = tsv.collect().join(' ')
 
     """
-    cat ${myfiles} > ${sample}.collated.vardict.tsv
+    cat ${myfiles} > ${baseName}.collated.vardict.tsv
     """
 
 }
