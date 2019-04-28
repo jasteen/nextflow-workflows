@@ -134,13 +134,13 @@ process alignBwa {
     bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
-        -OUTPUT "${baseName}.piped.bam" -R "$ref" -CREATE_INDEX true -ADD_MATE_CIGAR true \
+        -OUTPUT "${baseName}.piped.bam" -R "$ref" -ADD_MATE_CIGAR true \
         -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
         -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
     """
 }
 
-process indexBam {
+process indexPreUmiBam {
     input:
         set baseName, file(bam) from ch_mappedNoUMI
     output:
