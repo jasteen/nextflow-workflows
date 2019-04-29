@@ -234,7 +234,7 @@ process makeVCFpreUMI {
     module purge
     module load R/3.5.1
     cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/teststrandbias.R | \
-    /home/jste0021/scripts/git_controlled/VarDict/var2vcf.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
+    /home/jste0021/scripts/git_controlled/VarDict/var2vcf_vaild.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
     """
 }
 
