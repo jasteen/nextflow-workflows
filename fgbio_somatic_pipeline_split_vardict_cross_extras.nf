@@ -144,7 +144,7 @@ process indexPreUmiBam {
     input:
         set baseName, file(bam) from ch_mappedNoUMI
     output:
-        set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedMappedNoUMI
+        set baseName, file(bam), file("${baseName}.piped.bam.bai") into ch_indexedMappedNoUMI
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
@@ -158,7 +158,7 @@ process indexPreUmiBam {
 
     script:
     """
-    samtools index $bam ${baseName}.consensus.aligned.bam.bai
+    samtools index $bam ${baseName}.piped.bam.bai
     """
 
 }
