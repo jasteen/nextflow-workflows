@@ -174,7 +174,7 @@ process vardictPreUMI {
     input:
         set baseName, file(bam), file(bai), file(segment) from ch_vardictPreUMI
     output:
-        set baseName, file("${baseName}.${segment}.tsv") into ch_vardictPreUMISegments
+        set baseName, file("${baseName}.${segment}.vardict.tsv") into ch_vardictPreUMISegments
 
     script:
     """
