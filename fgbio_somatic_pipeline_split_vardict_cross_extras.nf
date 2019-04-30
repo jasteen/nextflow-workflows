@@ -376,7 +376,7 @@ ch_tumor  = Channel.create()
 ch_normal = Channel.create()
 
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
-ch_indexedConsensusBams.choice(ch_tumor, ch_normal){ baseName -> baseName =~ /_FFPE$/ ? 0 : 1 }
+ch_indexedConsensusBams.choice(ch_tumor, ch_normal){ baseName -> baseName[0] =~ /_FFPE$/ ? 0 : 1 }
 
 ch_tumor.println()
 
