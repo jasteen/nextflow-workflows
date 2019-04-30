@@ -378,6 +378,10 @@ ch_normal = Channel.create()
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
 ch_indexedConsensusBams.choice(ch_tumor, ch_normal){ baseName -> baseName =~ /_FFPE$/ ? 0 : 1 }
 
+println(ch_tumor)
+println(ch_normal)
+
+/*
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
 ch_normalSplit = ch_normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
 ch_tumorSplit = ch_tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
@@ -470,4 +474,4 @@ process makeVCF {
     /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
-
+*/
