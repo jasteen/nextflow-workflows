@@ -175,11 +175,18 @@ process vardictPreUMI {
     output:
         set baseName, file("${baseName}.${segment}.vardict.tsv") into ch_vardictPreUMISegments
 
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        6
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
     script:
     """
-    export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
+    export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
     VarDict -G ${ref} -f 0.01 -N "$baseName" \
-        -b "$bam" -c 1 -S 2 -E 3 -g 4 ${segment} \
+        -b "$bam" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
         > "${baseName}.${segment}.vardict.tsv"
     """
 
@@ -232,8 +239,8 @@ process makeVCFpreUMI {
     """  
     module purge
     module load R/3.5.1
-    cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/teststrandbias.R | \
-    /home/jste0021/scripts/git_controlled/VarDict/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
+    cat $tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
+    /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
     """
 }
 
@@ -400,16 +407,16 @@ process runVardict {
     cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        1
+    cpus        6
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
     
     script:
     """
-    export PATH=/home/jste0021/scripts/git_controlled/VarDict:/home/jste0021/scripts/git_controlled/VarDictJava/build/install/VarDict/bin:$PATH
+    export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
     VarDict -G ${ref} -f 0.01 -N "${tbam}|${nbam}" \
-        -b "${tbam}|${nbam}" -c 1 -S 2 -E 3 -g 4 ${segment} \
+        -b "${tbam}|${nbam}" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
         > "${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv"
     """ 
 
@@ -466,8 +473,8 @@ process makeVCF {
     """  
     module purge
     module load R/3.5.1
-    cat $tsv | /home/jste0021/scripts/git_controlled/VarDict/testsomatic.R | \
-    /home/jste0021/scripts/git_controlled/VarDict/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
+    cat $tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
+    /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
 
