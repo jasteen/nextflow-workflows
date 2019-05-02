@@ -109,7 +109,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics
+        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
 
     publishDir path: './output/intermediate', mode: 'copy'
 
@@ -327,7 +327,7 @@ process mapConsensusReads {
     input:
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
-        set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics
+        set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
@@ -480,6 +480,7 @@ process makeVCF {
     """
 }
 
+ch_forMetrics = ch_forMetrics1.concat(ch_forMetrics2)
 
 process collectMetrics {
 
