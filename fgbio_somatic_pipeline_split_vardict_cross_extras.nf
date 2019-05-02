@@ -501,6 +501,8 @@ process collectMetrics {
     script:
 
     """
+    module purge
+    module load R/3.5.1
     java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
         -I $bam \
         -O ${sample}.multiple_metrics \
