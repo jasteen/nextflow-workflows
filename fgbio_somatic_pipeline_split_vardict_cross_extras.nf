@@ -64,7 +64,7 @@ process createUnmappedUMIBam {
     module      'fgbio'
     module      'java'
     memory      globalMemoryM
-    time        globalTimeL
+    time        '6h'
     queue       globalQueueL
 
     script:
@@ -92,7 +92,7 @@ process markAdaptors {
     cpus        1
     module      'java'
     memory      globalMemoryM
-    time        globalTimeL
+    time        '3h'
     queue       globalQueueL
 
     script:
@@ -109,7 +109,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI
+        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics
 
     publishDir path: './output/intermediate', mode: 'copy'
 
@@ -181,7 +181,9 @@ process vardictPreUMI {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-
+    errorStrategy 'retry'
+    maxRetries 3
+    
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -325,7 +327,7 @@ process mapConsensusReads {
     input:
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
-        set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams
+        set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
@@ -478,3 +480,31 @@ process makeVCF {
     """
 }
 
+
+process collectMetrics {
+
+    input:
+        set sample, file(bam) from ch_forMetrics
+    output:
+        set sample, file(*multiple_metrics*) into ch_metrics
+    
+    publishDir path: './output/metrics', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
+    script:
+
+    """
+    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
+        -I $bam \
+        -O ${sample}.multiple_metrics \
+        -R $ref 
+    """
+
+
+}
