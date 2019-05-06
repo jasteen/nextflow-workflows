@@ -161,7 +161,7 @@ process mergeVCFS {
     set baseName, file(vcf), file(tbi) from ch_indexedVCF
     
     output:
-    file "merged.vcf.gz" into ch_mergedVCF
+    file "merged.vardict.vcf.gz" into ch_mergedVCF
 
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
