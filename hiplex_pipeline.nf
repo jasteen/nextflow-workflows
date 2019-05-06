@@ -158,7 +158,7 @@ process mergeVCFS {
 
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    set baseName, file(vcf), file(tbi) from ch_vardictVCFs
+    set baseName, file(vcf), file(tbi) from ch_indexedVCF
     
     output:
     file "merged.vcf.gz" into ch_mergedVCF
