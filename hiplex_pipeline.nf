@@ -155,7 +155,7 @@ process indexVCFS {
 
 
 process mergeVCFS {
-
+    echo true
     publishDir './variants_merged_out/', mode: 'copy'
     input:
     file("*.vcf*") from ch_indexedVCF.collect()
