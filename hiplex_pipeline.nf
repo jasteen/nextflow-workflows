@@ -158,7 +158,7 @@ process mergeVCFS {
 
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    set baseName, file(vcf), file(tbi) from ch_indexedVCF
+    set baseName, file(vcf), file(tbi) from ch_indexedVCF.collect()
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -173,6 +173,7 @@ process mergeVCFS {
 
 
     script:
+
     myfiles = vcf.collect().join(' ')
 
     """
