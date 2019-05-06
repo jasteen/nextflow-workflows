@@ -171,7 +171,7 @@ process mergeVCFS {
     time        globalTimeM
     queue       globalQueueL
 
-    myFiles = 
+    
     script: 
 
     """
