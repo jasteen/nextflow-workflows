@@ -228,7 +228,7 @@ process makeVCFpreUMI {
     output:
         set sample, file("${sample}.vardict.vcf") into ch_outputVCFpreUMI
     
-    publishDir path: './output/preUMIvcf', mode: 'copy'
+    publishDir path: './output/intermediate', mode: 'copy'
     
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -246,7 +246,72 @@ process makeVCFpreUMI {
     """
 }
 
+process reheaderPreUMIVCF {
+    input:
+        set sample, file(vcf) from ch_outputVCFpreUMI
+    output:
+        set sample, file("*.vcf.gz") into ch_finalpreUMIVCF
 
+    publishDir path: './output/intermediate', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    module      'bcftools/1.8'
+
+    script:
+    """
+    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
+        bcftools sort -o ${sample}.varditc.sorted.vcf.gz -O z -
+    """
+
+}
+/*
+process preUMIVCFVEP {
+
+    input:
+        set sample, file(vcf) from ch_finalpreUMIVCF
+    output:
+        set sample, file("*.vcf.gz") into ch_annotatedFinalpreUMIVCF
+
+    publishDir path: './output/intermediate', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    module      'vep/90'
+    script:
+    """
+    vep --cache --dir_cache {other_vep}  \
+        --assembly GRCh37 --refseq --offline \
+        --fasta ${ref} \
+        --sift b --polyphen b --symbol --numbers --biotype \
+        --total_length --hgvs --format vcf \
+        --vcf --force_overwrite --flag_pick --no_stats \
+        --custom {brcaexpath},brcaex,vcf,exact,0,Clinical_significance_ENIGMA, \
+        Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA, \
+        Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
+        --custom {gnomadpath},gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
+        --custom {revelpath},RVL,vcf,exact,0,REVEL_SCORE \
+        --plugin MaxEntScan,{maxentscanpath} \
+        --plugin ExAC,{exacpath},AC,AN \
+        --plugin dbNSFP,{dbnsfppath},REVEL_score,REVEL_rankscore \
+        --plugin dbscSNV,{dbscsnvpath} \
+        --plugin CADD,{caddpath} \
+        --fork {cores} \
+        -i {vcf_in} \
+        -o {vcf_out}
+
+    """
+
+}
+*/
 
 process groupreadsByUmi {
     input:
@@ -479,6 +544,32 @@ process makeVCF {
     /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
+
+
+process reheaderUMIVCF {
+    input:
+        set sample, file(vcf) from ch_outputVCF
+    output:
+        set sample, file("*.vcf.gz") into ch_finalVCF
+
+    publishDir path: './output/intermediate', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    module      'bcftools/1.8'
+
+    script:
+    """
+    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
+        bcftools sort -o ${sample}.varditc.sorted.vcf.gz -O z -
+    """
+
+}
+
 
 ch_forMetrics = ch_forMetrics1.concat(ch_forMetrics2)
 

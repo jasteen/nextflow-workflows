@@ -42,8 +42,8 @@ samtoolsModule = 'samtools/1.9'
 globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
-bwaCores	  = 12
-vepCores          = 12
+bwaCores	        = 4
+vepCores          = 4
 globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
 globalMemoryL     = '64 GB'
@@ -76,7 +76,7 @@ process align_bwa {
     queue       globalQueueL
 
     """
-    bwa mem -M -t $bwaCores -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
+    bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
         | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
     samtools index "${baseName}.hq.sorted.bam" "${baseName}.hq.sorted.bam.bai"
@@ -107,93 +107,78 @@ process run_vardict {
     """
 }
 
+process sortVCFS {
 
-//collectedVCF = Channel.from(vardictVCFS).collect().println{ "./bam_out/file.list"}
+    input:
+        set baseName, file(vcf) from ch_vardictVCFs
+    output:
+        set baseName, file("${baseName}.sorted.vcf") into ch_sortedVCF
 
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
 
-process collect_vcf_result {
+    script:
+    """
+    bcftools sort -o "${baseName}.sorted.vcf.gz" -O z ${vcf}
+    """
+}
 
-      publishDir './variants_merged_out/', mode: 'copy'
+process indexVCFS {
+    input:
+        set baseName, file(vcf) from ch_sortedVCF
+    output:
+        set baseName, file("${baseName}.sorted.vcf"), file("${baseName}.sorted.vcf.tbi") into ch_indexedVCF
 
-      input:
-      file all_vcf from ch_vardictVCFs.collect()
-      file refFai
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
 
-      output:
-      file "merged.vcf" into ch_mergedVCF
-
-      when:
-      !all_vcf.empty
-
-      shell:
-      '''
-      mkdir VCF
-      mv *.vcf VCF
-      # Extract the header from the first VCF
-      sed '/^#CHROM/q' VCF/!{all_vcf[0]} > header.txt
-      # Add contigs in the VCF header
-      cat !{refFai} | cut -f1,2 | sed -e 's/^/##contig=<ID=/' -e 's/[	 ][	 ]*/,length=/' -e 's/$/>/' > contigs.txt
-      sed -i '/##reference=.*/ r contigs.txt' header.txt
-      # Add version numbers in the VCF header
-      sed -i '/##source=.*/ r versions.txt' header.txt
-      # Check if sort command allows sorting in natural order (chr1 chr2 chr10 instead of chr1 chr10 chr2)
-      if [ `sort --help | grep -c 'version-sort' ` == 0 ]
-      then
-          sort_ops="-k1,1d"
-      else
-          sort_ops="-k1,1V"
-      fi
-      # Add all VCF contents and sort
-      grep --no-filename -v '^#' VCF/*.vcf | LC_ALL=C sort -t '	' $sort_ops -k2,2n >> header.txt
-      mv header.txt merged.vcf
-      '''
+    script:
+    """
+    bcftools index -f --tbi ${vcf} -o ${baseName}.sorted.vcf.gz.tbi
+    """
 }
 
 
 
+process mergeVCFS {
+
+    publishDir './variants_merged_out/', mode: 'copy'
+    input:
+    set baseName, file(vcf), file(tbi) from ch_vardictVCFs
+    
+    output:
+    file "merged.vcf.gz" into ch_mergedVCF
+
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
 
 
+    script:
+    myfiles = a_vcf.collect().join(' ')
 
-
-
-
-
-//process mergeVCFS {
-//    input:
-//        file(vcfs) from vardictVCFs.collect().toList()
-//    output:
-//        file("merged.vcf.gz") into mergedVCF
-//
-//    publishDir path: './variants_merged_out', mode: 'copy'
-//
-//    executor    globalExecutor
-//    stageInMode globalStageInMode
-//    module      bwaModule
-//    memory      globalMemoryM
-//    time        globalTimeM
-//    queue       globalQueueL
-//
-//    shell:
-//    '''
-//    # Extract the header from the first VCF
-//    grep '^#' !{all_vcf[0]} > !{out_annotated_vcf}
-//    # Add version numbers in the VCF header just after fileformat line
-//    grep -h -v '^#' *.vcf >> !{out_annotated_vcf}
-//
-//
-//}
-//
-
-
-//cript:
-//    """
-//    echo $vardictVCFs.join("\n") >> subvcf.list
-//    java -Xmx16g -jar ~/picard.jar mergeVcfs \
-//          -I subvcf.list \
-//          -O merged.vcf.gz
-//    """
-//}
-
+    """
+    bcftools merge -O z -o merged.vardict.vcf.gz ${myfiles} 
+    """
+}
 
 process vt_decompose_normalise {
         
@@ -233,6 +218,7 @@ process apply_vep {
     memory      globalMemoryM
     time        globalTimeM
     queue       globalQueueL
+    module      'vep/90'
 
     """
     vep --cache --dir_cache $other_vep \
@@ -251,8 +237,10 @@ process apply_vep {
                       --plugin dbNSFP,$vep_dbnsfp,REVEL_score,REVEL_rankscore \
                       --plugin dbscSNV,$vep_dbscsnv \
                       --plugin CADD,$vep_cadd \
-                      --fork $vepCores \
-                      -i $vcf \
-                      -o merged.vt.vep.vcf.gz}
+                      --fork ${task.cpus} \
+                      -i ${vcf} \
+                      -o merged.vt.vep.vcf.gz
     """
 }
+
+
