@@ -175,7 +175,7 @@ process mergeVCFS {
     script: 
 
     """
-    bcftools merge -O z -o merged.vardict.vcf.gz "*.vcf.gz"" 
+    bcftools merge -O z -o merged.vardict.vcf.gz "*.vcf.gz" 
     """
 }
 
