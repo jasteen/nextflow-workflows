@@ -173,7 +173,7 @@ process mergeVCFS {
 
 
     script:
-    myfiles = a_vcf.collect().join(' ')
+    myfiles = vcf.collect().join(' ')
 
     """
     bcftools merge -O z -o merged.vardict.vcf.gz ${myfiles} 
