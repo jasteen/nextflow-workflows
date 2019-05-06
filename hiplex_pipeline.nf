@@ -112,7 +112,7 @@ process sortVCFS {
     input:
         set baseName, file(vcf) from ch_vardictVCFs
     output:
-        set baseName, file("${baseName}.sorted.vcf") into ch_sortedVCF
+        set baseName, file("${baseName}.sorted.vcf.gz") into ch_sortedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
