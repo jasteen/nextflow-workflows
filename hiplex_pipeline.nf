@@ -158,7 +158,7 @@ process mergeVCFS {
 
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    set baseName, file(vcf), file(tbi) from ch_indexedVCF.collect()
+    set baseName, file("*.vcf.gz"), file("*.tbi") from ch_indexedVCF.collect()
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -172,12 +172,10 @@ process mergeVCFS {
     queue       globalQueueL
 
 
-    script:
-
-    myfiles = vcf.collect().join(' ')
+    script: 
 
     """
-    bcftools merge -O z -o merged.vardict.vcf.gz ${myfiles} 
+    bcftools merge -O z -o merged.vardict.vcf.gz "*.vcf.gz"" 
     """
 }
 
