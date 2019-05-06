@@ -171,11 +171,11 @@ process mergeVCFS {
     time        globalTimeM
     queue       globalQueueL
 
-
+    myFiles = 
     script: 
 
     """
-    bcftools merge -O z -o merged.vardict.vcf.gz "*.vcf.gz" 
+    bcftools merge -O z -o merged.vardict.vcf.gz *.vcf.gz 
     """
 }
 
