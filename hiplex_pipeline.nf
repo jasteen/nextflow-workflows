@@ -134,7 +134,7 @@ process indexVCFS {
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
-        set baseName, file("${baseName}.sorted.vcf"), file("${baseName}.sorted.vcf.tbi") into ch_indexedVCF
+        set baseName, file(vcf), file("${baseName}.sorted.vcf.tbi") into ch_indexedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
