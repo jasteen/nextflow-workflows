@@ -158,7 +158,7 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    file(vcf) from ch_sortedVCF2.collect()   
+    set temp, file(vcf) from ch_sortedVCF2.collect()   
     set baseName, file(tbi) from ch_indexedVCF
 
     output:
