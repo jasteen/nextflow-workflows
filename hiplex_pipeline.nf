@@ -175,7 +175,7 @@ process mergeVCFS {
     script: 
 
     """
-    echo "${bam.join('\n')}" > temp.txt
+    echo "${vcf.join('\n')}" > temp.txt
     bcftools merge -f -O z -o merged.vardict.vcf.gz temp.txt 
     """
 }
