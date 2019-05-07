@@ -20,7 +20,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 Channel
-    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam")
+    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam").take(2)
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_1; ch_2; ch_3 }
 
@@ -59,7 +59,7 @@ process CoverageBed {
 
     script:
     """
-    coverageBed -b $i -a ${bed_target} \
+    coverageBed -b ${bam} -a ${bed_target} \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
