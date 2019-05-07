@@ -114,7 +114,7 @@ process run_vardict {
 process reheaderVCF {
     input:
         set baseName, file(vcf) from ch_vardictVCFs
-        file ("~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt") 
+        file("/projects/vh83/reference/genomes/b37/vcf_contig_header_lines.txt") 
     
     output:
         set baseName, file("${baseName}reheader.vcf.gz") into ch_reheaderVCF
