@@ -175,7 +175,8 @@ process mergeVCFS {
     script: 
 
     """
-    ls *.vcf.gz | xargs bcftools merge -O z -o merged.vardict.vcf.gz  
+    echo '*.vcf' > temp.txt
+    bcftools merge -f -O z -o merged.vardict.vcf.gz temp.txt 
     """
 }
 
