@@ -206,9 +206,10 @@ process mergeVCFS {
     script: 
 
     """
-    foreach $vcf{
-        if(${vcf} =~ /.vcf\$/){
-        echo "${vcf}\n" >> temp.list
+    for(thing in $vcf){
+        if(thing =~ /.vcf\$/){
+        echo "thing\n" >> temp.list
+        }
     }
     bcftools merge -O z -o "merged.vardict.vcf.gz" -l temp.list
     """
