@@ -190,7 +190,7 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file(vcf) from ch_indexedVCF.collect()   
+    file(vcf) from ch_indexedVCF.collect().toList() 
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
