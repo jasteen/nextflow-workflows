@@ -204,10 +204,10 @@ process mergeVCFS {
 
     
     script: 
+    myFiles = ${vcf}.split(" ")
 
     """
-    myFiles = ${vcf}.split(" ")
-    for(thing in myFiles){
+    for(thing in ${myFiles}){
         if(thing =~ /.vcf\$/){
         echo "thing\n" >> temp.list
         }
