@@ -188,9 +188,9 @@ process indexVCFS {
 
 process mergeVCFS {
     echo true
-    publishDir './variants_merged_out/', mode: 'copy'
+    publishDir './variants_merged/', mode: 'copy'
     input:
-    set baseName, file(vcf), file(bai) from ch_indexedVCF  
+    file(vcf) from ch_indexedVCF.collect()   
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -206,7 +206,9 @@ process mergeVCFS {
     script: 
 
     """
-    echo "${vcf.collect().join('\n')}" > temp.list
+    if(${vcf} =~ /.vcf\$/){
+        echo "${vcf.join('\n')}" > temp.list
+    }
     bcftools merge -O z -o "merged.vardict.vcf.gz" -l temp.list
     """
 }
@@ -220,7 +222,7 @@ process vt_decompose_normalise {
     output:
         file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
 
-    publishDir path: './variants_merged_out', mode: 'copy'
+    publishDir path: './variants_merged', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode
