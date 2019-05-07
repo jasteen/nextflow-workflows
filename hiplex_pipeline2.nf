@@ -190,7 +190,7 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file(vcf) from ch_indexedVCF.collect().toList() 
+    file(vcf) from ch_indexedVCF.collect() 
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -206,7 +206,8 @@ process mergeVCFS {
     script: 
 
     """
-    for(thing in $vcf){
+    myFiles = ${vcf}.split(" ")
+    for(thing in myFiles){
         if(thing =~ /.vcf\$/){
         echo "thing\n" >> temp.list
         }
