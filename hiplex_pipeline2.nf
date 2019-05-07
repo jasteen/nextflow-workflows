@@ -154,11 +154,14 @@ process indexVCFS {
 }
 
 
+
+ch_temp = ch_sortedVCF2.map{a,file(b) > file(b)}
+
 process mergeVCFS {
     echo true
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    set temp, file(vcf) from ch_sortedVCF2.collect()   
+    file(vcf) from ch_temp.collect()   
     set baseName, file(tbi) from ch_indexedVCF
 
     output:
