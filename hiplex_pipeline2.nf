@@ -167,7 +167,6 @@ process mergeVCFS {
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    module      bwaModule
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -177,9 +176,7 @@ process mergeVCFS {
 
     """
     echo "${vcf.join('\n')}" > temp.list
-    java -Xmx6g -Dpicard.useLegacyParser=false -jar ${picardJar} MergeVcfs \
-          -INPUT temp.list \
-          -OUTPUT "merged.vardict.vcf.gz" 
+    bcftools merge -O z -o "merged.vardict.vcf.gz" -f temp.list
     """
 }
 
