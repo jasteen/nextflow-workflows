@@ -18,6 +18,7 @@ refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 
+header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
 AF_THR           = 0.1
 
 //Annotation resources
@@ -114,7 +115,6 @@ process run_vardict {
 process reheaderVCF {
     input:
         set baseName, file(vcf) from ch_vardictVCFs
-        file("/projects/vh83/reference/genomes/b37/vcf_contig_header_lines.txt") 
     
     output:
         set baseName, file("${baseName}.reheader.vcf.gz") into ch_reheaderVCF
@@ -131,7 +131,7 @@ process reheaderVCF {
 
     script:
     """
-    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O z -o "${baseName}.reheader.vcf.gz" ${vcf}
+    bcftools annotate -h ${header} -O z -o "${baseName}.reheader.vcf.gz" ${vcf}
     """
 
 }
