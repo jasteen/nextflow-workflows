@@ -39,7 +39,7 @@ process InstersectBed {
 
     script:
     """
-    module load bedtools
+    module load bedtools/2.2
     intersectBed -abam ${bam} -b ${bed_target} > ${sample}.intersectbed.bam
     """
 }
@@ -59,6 +59,7 @@ process CoverageBed {
 
     script:
     """
+    module load bedtools/2.2
     coverageBed -b ${bam} -a ${bed_target} \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
@@ -73,6 +74,7 @@ process ReadsMapped {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
+    module      'samtools/1.9'
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
@@ -93,6 +95,7 @@ process TargetMapped {
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
+    module      'samtools/1.9'
     time        globalTimeL
     queue       globalQueueL
 
