@@ -155,7 +155,7 @@ process indexVCFS {
 
 
 
-ch_temp = ch_sortedVCF2.map{ a, file(b) > file(b) }
+ch_temp = ch_sortedVCF2.map{ a, file(b) -> file(b) }
 
 process mergeVCFS {
     echo true
