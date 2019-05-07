@@ -135,7 +135,7 @@ process indexVCFS {
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
-        set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
+        set baseName, file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -159,7 +159,7 @@ process mergeVCFS {
     publishDir './variants_merged_out/', mode: 'copy'
     input:
     file(vcf) from ch_sortedVCF2.collect()   
-    set baseName, file(vcf), file(tbi) from ch_indexedVCF
+    set baseName, file(tbi) from ch_indexedVCF
 
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
