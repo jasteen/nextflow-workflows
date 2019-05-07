@@ -42,7 +42,7 @@ samtoolsModule = 'samtools/1.9'
 globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
-bwaCores	        = 4
+bwaCores	      = 4
 vepCores          = 4
 globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
@@ -260,7 +260,7 @@ process apply_vep {
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
                       --vcf --force_overwrite --flag_pick --no_stats \
-                      --custom $vep_brca,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,\
+                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,\
                       Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,\
                       Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
                       --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
