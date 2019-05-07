@@ -117,7 +117,7 @@ process reheaderVCF {
         file("/projects/vh83/reference/genomes/b37/vcf_contig_header_lines.txt") 
     
     output:
-        set baseName, file("${baseName}reheader.vcf.gz") into ch_reheaderVCF
+        set baseName, file("${baseName}.reheader.vcf.gz") into ch_reheaderVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
