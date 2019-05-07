@@ -20,7 +20,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 Channel
-    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam")
+    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam").take(2)
     .map{ file -> file.baseName, file }
     .into { ch_1; ch_2; ch_3 }
 
@@ -109,7 +109,7 @@ process collateData {
     output:
         set sample, file("batch1_summary_coverage.txt") into ch_out
     
-    publishDir path: './output/intermediate', mode: 'copy'
+    publishDir path: './output/', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode

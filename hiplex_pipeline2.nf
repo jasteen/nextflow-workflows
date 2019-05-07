@@ -204,7 +204,7 @@ process mergeVCFS {
 
     
     script: 
-    myFiles = ${vcf}.split(" ")
+    myFiles = vcf.split(" ")
 
     """
     for(thing in ${myFiles}){
