@@ -88,7 +88,7 @@ process run_vardict {
     input:
         set baseName, file(bam), file(bai) from ch_mappedBams                
     output: 
-        set baseName, file("${baseName}.vcf") into ch_vardictVCFs           
+        file("${baseName}.vcf") into ch_vardictVCFs           
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -176,10 +176,10 @@ process mergeVCFS {
     script: 
 
     """
-    echo "${vcf.join('\n')}" > temp.txt
-    java -jar ${picardJar} MergeVcfs \
-          I=input_variant_files.list \
-          O=output_variants.vcf.gz 
+    echo "${vcf.join('\n')}" > temp.list
+    java -Xmx6g -Dpicard.useLegacyParser=false -jar ${picardJar} MergeVcfs \
+          -INPUT temp.list \
+          -OUTPUT "merged.vardict.vcf.gz" 
     """
 }
 
