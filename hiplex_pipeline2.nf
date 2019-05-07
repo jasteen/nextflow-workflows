@@ -131,7 +131,7 @@ process reheaderVCF {
 
     script:
     """
-    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O z -o "${baseName}.reheader.vcf.gz" vcf
+    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O z -o "${baseName}.reheader.vcf.gz" ${vcf}
     """
 
 }
