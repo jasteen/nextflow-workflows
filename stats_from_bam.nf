@@ -21,7 +21,7 @@ globalQueueL      = 'comp'
 
 Channel
     .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam").take(2)
-    .map{ file -> ${file.baseName}, file }
+    .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_1; ch_2; ch_3 }
 
 process InstersectBed {
