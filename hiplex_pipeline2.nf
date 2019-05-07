@@ -135,7 +135,7 @@ process indexVCFS {
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
-        set baseName, file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
+        set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -155,15 +155,14 @@ process indexVCFS {
 
 
 
-ch_temp = ch_sortedVCF2.map{ a, b -> b }
+//ch_temp = ch_sortedVCF2.map{ a, b -> b }
 
 process mergeVCFS {
     echo true
     publishDir './variants_merged_out/', mode: 'copy'
     input:
-    file(vcf) from ch_temp.collect()   
-    set baseName, file(tbi) from ch_indexedVCF
-
+    set baseName, file(vcf), file(bai) from ch_indexedVCF.collect()   
+    
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
 
