@@ -107,7 +107,7 @@ ch_final2 = ch_final.join(ch_onTarget)
 
 process collateData {
     input:
-        set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final
+        set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final2
     output:
         set sample, file("batch1_summary_coverage.txt") into ch_out
     
