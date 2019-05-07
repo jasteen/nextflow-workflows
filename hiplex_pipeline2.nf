@@ -88,7 +88,7 @@ process run_vardict {
     input:
         set baseName, file(bam), file(bai) from ch_mappedBams                
     output: 
-        file("${baseName}.vcf") into ch_vardictVCFs           
+        set baseName, file("${baseName}.vcf") into ch_vardictVCFs           
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
