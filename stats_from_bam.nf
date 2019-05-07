@@ -5,7 +5,7 @@ genome_file=file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k
 bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
 out_dir=file("/scratch/uc23/jste0021/heidi_stats_output")
 
-/ Global Resource Configuration Options
+// Global Resource Configuration Options
 globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
