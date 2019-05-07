@@ -100,20 +100,49 @@ process run_vardict {
     queue       globalQueueL 
 
     """
-    export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
-    vardict -G $ref -f $AF_THR -N $baseName -b $bam -c 1 -S 2 -E 3 -g 4 $vardictBed | \
-        teststrandbias.R | \
-        var2vcf_valid_b37_chrnames.pl -N $baseName -E -f $AF_THR > "${baseName}.vcf"
+    module purge
+    module load R/3.5.1
+    export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
+    VarDict -G $ref -f $AF_THR -N $baseName -b $bam -c 1 -S 2 -E 3 -g 4 $vardictBed | \
+        /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N $baseName -E -f $AF_THR > "${baseName}.vcf"
     """
+}
+
+
+
+process reheaderVCF {
+    input:
+        set baseName, file(vcf) from ch_vardictVCFs
+        file ("~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt") 
+    
+    output:
+        set baseName, file("${baseName}reheader.vcf.gz") into ch_reheaderVCF
+
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    script:
+    """
+    bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O z -o "${baseName}.reheader.vcf.gz" vcf
+    """
+
 }
 
 
 process sortVCFS {
 
     input:
-        set baseName, file(vcf) from ch_vardictVCFs
+        set baseName, file(vcf) from ch_reheaderVCF
     output:
-        set baseName, file("${baseName}.sorted.vcf.gz") into ch_sortedVCF, ch_sortedVCF2
+        set baseName, file("${baseName}.sorted.vcf.gz") into ch_sortedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -187,9 +216,9 @@ process mergeVCFS {
 process vt_decompose_normalise {
         
     input:
-        set baseName, file(vcf) from ch_mergedVCF
+        file(vcf) from ch_mergedVCF
     output:
-        set baseName, file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
+        file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './variants_merged_out', mode: 'copy'
 
@@ -210,9 +239,9 @@ process vt_decompose_normalise {
 process apply_vep {
 
     input:
-        set baseName, file(vcf) from ch_vtDecomposeVCF
+        file(vcf) from ch_vtDecomposeVCF
     output:
-        set baseName, file("merged.vt.vep.vcf.gz") into ch_vepVCF
+        file("merged.vt.vep.vcf.gz") into ch_vepVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
