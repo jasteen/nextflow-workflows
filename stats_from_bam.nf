@@ -39,6 +39,7 @@ process InstersectBed {
 
     script:
     """
+    module load bedtools
     intersectBed -abam ${bam} -b ${bed_target} > ${sample}.intersectbed.bam
     """
 }
@@ -130,4 +131,4 @@ process collateData {
             ${sample} \
             "batch1_summary_coverage.txt"
     """
-}    
+}
