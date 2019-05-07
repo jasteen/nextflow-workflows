@@ -63,7 +63,7 @@ process CoverageBed {
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
-
+}
 process ReadsMapped {
     input:
         set sample, file(bam) from ch_3
@@ -126,8 +126,8 @@ process collateData {
     module load R/3.5.1
     Rscript --vanilla /scratch/uc23/jste0021/stats.R \
             ${bedtools} \
-            $onGenome \
-            $onTarget \
+            ${onGenome} \
+            ${onTarget} \
             ${sample} \
             "batch1_summary_coverage.txt"
     """
