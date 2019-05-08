@@ -164,7 +164,7 @@ process indexVCFS {
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
-        set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into {ch_files; ch_list}
+        set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -185,6 +185,8 @@ process indexVCFS {
 //ch_indexedVCF = Channel.from ( ['basenameA', file('A.vcf'), file('A.tbi')],
 //                              ['basenameB', file('B.vcf'), file('B.tbi')] )
 //                       .into { files_ch; list_ch }
+
+ch_indexedVCF.into{ch_list;ch_files}
 
 ch_list.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
