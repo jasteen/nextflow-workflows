@@ -347,7 +347,7 @@ process CoverageBed {
     """
     module load bedtools/2.27.1-gcc5
     coverageBed -b ${bam} -a ${intervalFile} \
-        -sorted -hist -g ${genome_file} | \
+        -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
 }
