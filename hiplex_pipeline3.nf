@@ -100,8 +100,6 @@ process run_vardict {
     queue       globalQueueL 
 
     """
-    module purge
-    module load R/3.5.1
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
     VarDict -G ${ref} -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} > "${baseName}.tsv"
     """
@@ -113,7 +111,7 @@ process makeVCF {
     output:
         set baseName, file("${baseName}.vardict.vcf") into ch_vardictVCFs
     
-    publishDir path: './output/intermediate', mode: 'copy'
+    publishDir path: './variants_raw_out', mode: 'copy'
     
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -125,8 +123,10 @@ process makeVCF {
     script:
 
     """
+    module purge
+    module load R/3.5.1
     cat ${tsv} | /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} \
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "${baseName}" \
         -f 0.1 -E > "${baseName}.vardict.vcf"
     """
 }
