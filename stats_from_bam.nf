@@ -1,9 +1,10 @@
+input_path = "/scratch/uc23/hfettke/cfDNA_BAMs/batch2"
+bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
+
 
 //Variables
 reference=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
 genome_file=file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
-bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
-out_dir=file("/scratch/uc23/jste0021/heidi_stats_output")
 
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
@@ -20,7 +21,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 Channel
-    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam")
+    .fromPath("${input_path}/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_1; ch_2; ch_3 }
 
