@@ -56,6 +56,8 @@ process CoverageBed {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
+    errorStrategy 'retry'
+    maxRetries 3
 
     script:
     """
@@ -78,7 +80,8 @@ process ReadsMapped {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-
+    errorStrategy 'retry'
+    maxRetries 3
     script:
     """
     samtools view -c -F4 ${bam} > "${sample}.mapped_to_genome.txt"
@@ -98,6 +101,8 @@ process TargetMapped {
     module      'samtools/1.9'
     time        globalTimeL
     queue       globalQueueL
+    errorStrategy 'retry'
+    maxRetries 3
 
     script:
     """
@@ -122,6 +127,8 @@ process collateData {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
+    errorStrategy 'retry'
+    maxRetries 3
     
     script:
     """
