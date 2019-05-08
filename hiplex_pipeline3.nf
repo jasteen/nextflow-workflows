@@ -454,9 +454,9 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 process catStats {
 
     input:
-        set file(stats) from ch_out2
+        file(stats) from ch_out2
     output:
-        set sample, file("project_summary.txt") into ch_out
+        file("project_summary.txt") into ch_out
     
     publishDir path: './metrics/', mode: 'copy'
 
