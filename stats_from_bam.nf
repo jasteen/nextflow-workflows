@@ -20,7 +20,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 Channel
-    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam").take(2)
+    .fromPath("/scratch/uc23/hfettke/cfDNA_BAMs/batch1/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_1; ch_2; ch_3 }
 
@@ -132,6 +132,6 @@ process collateData {
             ${onGenome} \
             ${onTarget} \
             ${sample} \
-            "batch1_summary_coverage.txt"
+            "${sample}_summary_coverage.txt"
     """
 }
