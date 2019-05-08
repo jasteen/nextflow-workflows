@@ -115,7 +115,7 @@ process collateData {
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final2
     output:
-        set sample, file("batch1_summary_coverage.txt") into ch_out
+        set sample, file("${sample}_summary_coverage.txt") into ch_out
     
     publishDir path: './output/', mode: 'copy'
 
@@ -139,3 +139,4 @@ process collateData {
             "${sample}_summary_coverage.txt"
     """
 }
+
