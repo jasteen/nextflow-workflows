@@ -456,7 +456,7 @@ process catStats {
     input:
         file(stats) from ch_out2
     output:
-        file("project_summary.txt") into ch_out
+        file("project_summary.txt") into ch_out3
     
     publishDir path: './metrics/', mode: 'copy'
 
