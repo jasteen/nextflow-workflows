@@ -415,8 +415,6 @@ process TargetMapped {
     """
 }
 
-
-
 ch_final = ch_bedtools.join(ch_onGenome)
 ch_final2 = ch_final.join(ch_onTarget)
 ch_final3 = ch_final2.join(ch_onTotal)
@@ -470,7 +468,7 @@ process catStats {
 
     script:
     """
-    cat ${stats} > project_summary.txt
+    cat ${stats} > "project_summary.txt"
     """
 
 }
