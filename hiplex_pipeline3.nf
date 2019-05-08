@@ -95,7 +95,6 @@ process run_vardict {
     
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    module      bwaModule
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL 
@@ -104,9 +103,9 @@ process run_vardict {
     module purge
     module load R/3.5.1
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
-    VarDict -G $ref -f $AF_THR -N $baseName -b $bam -c 1 -S 2 -E 3 -g 4 $vardictBed | \
+    VarDict -G ${ref} -f ${AF_THR} -N "$baseName" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N $baseName -E -f $AF_THR > "${baseName}.vcf"
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -E -f ${AF_THR} > "${baseName}.vcf"
     """
 }
 
@@ -190,11 +189,11 @@ ch_indexedVCF.into{ch_list;ch_files}
 
 ch_list.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
-       .set {list_f}
+       .set {ch_list_f}
 
 ch_files
     .collect()
-    .set {all_files}
+    .set {ch_all_files}
 
 /*
 process foo {
@@ -216,8 +215,8 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file list from list_f
-    file '*' from all_files
+    file list from ch_list_f
+    file '*' from ch_all_files
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
