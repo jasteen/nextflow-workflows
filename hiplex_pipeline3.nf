@@ -109,9 +109,9 @@ process run_vardict {
 
 process makeVCF {
     input:
-        set sample, file(tsv) from ch_vardictTSV
+        set baseName, file(tsv) from ch_vardictTSV
     output:
-        set sample, file("${sample}.vardict.vcf") into ch_vardictVCFs
+        set baseName, file("${sample}.vardict.vcf") into ch_vardictVCFs
     
     publishDir path: './output/intermediate', mode: 'copy'
     
@@ -127,7 +127,7 @@ process makeVCF {
     """
     cat ${tsv} | /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} \
-        -f 0.1 -E > "${sample}.vardict.vcf"
+        -f 0.1 -E > "${baseName}.vardict.vcf"
     """
 }
 
