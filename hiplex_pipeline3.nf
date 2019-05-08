@@ -105,7 +105,7 @@ process run_vardict {
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
     VarDict -G ${ref} -f ${af_thr} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -E -f ${af_thr} > "${baseName}.vcf"
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -f ${af_thr} > "${baseName}.vcf"
     """
 }
 
