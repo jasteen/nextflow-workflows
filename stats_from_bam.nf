@@ -15,7 +15,7 @@ globalMemoryM     = '32 GB'
 globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
 globalTimeM       = '1h'
-globalTimeL       = '24h'
+globalTimeL       = '6h'
 globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
@@ -56,8 +56,7 @@ process CoverageBed {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-    errorStrategy 'retry'
-    maxRetries 3
+    errorStrategy 'ignore'
 
     script:
     """
@@ -80,8 +79,8 @@ process ReadsMapped {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-    errorStrategy 'retry'
-    maxRetries 3
+    errorStrategy 'ignore'
+    
     script:
     """
     samtools view -c -F4 ${bam} > "${sample}.mapped_to_genome.txt"
@@ -101,8 +100,7 @@ process TargetMapped {
     module      'samtools/1.9'
     time        globalTimeL
     queue       globalQueueL
-    errorStrategy 'retry'
-    maxRetries 3
+    errorStrategy 'ignore'
 
     script:
     """
@@ -127,9 +125,8 @@ process collateData {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-    errorStrategy 'retry'
-    maxRetries 3
-    
+    errorStrategy 'ignore'
+
     script:
     """
     module purge
