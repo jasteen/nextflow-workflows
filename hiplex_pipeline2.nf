@@ -184,13 +184,11 @@ process indexVCFS {
 
 
 
-//ch_temp = ch_sortedVCF2.map{ a, b -> b }
-
 process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file(vcf) from ch_indexedVCF.collect() 
+    set baseName, file(vcf), file(tbi) from ch_indexedVCF.collect{"$it[1]"}.join("\n").view()
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -204,18 +202,14 @@ process mergeVCFS {
 
     
     script: 
-    myFiles = vcf.split(" ")
+    
+    
 
     """
-    for(thing in ${myFiles}){
-        if(thing =~ /.vcf\$/){
-        echo "thing\n" >> temp.list
-        }
-    }
+    echo $vcf > temp.list
     bcftools merge -O z -o "merged.vardict.vcf.gz" -l temp.list
     """
 }
-
 
 
 process vt_decompose_normalise {
