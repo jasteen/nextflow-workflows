@@ -39,7 +39,7 @@ process InstersectBed {
 
     script:
     """
-    module load bedtools/2.2
+    module load bedtools/2.27.1-gcc5
     intersectBed -abam ${bam} -b ${bed_target} > ${sample}.intersectbed.bam
     """
 }
@@ -59,7 +59,7 @@ process CoverageBed {
 
     script:
     """
-    module load bedtools/2.2
+    module load bedtools/2.27.1-gcc5
     coverageBed -b ${bam} -a ${bed_target} \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
