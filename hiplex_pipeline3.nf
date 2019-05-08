@@ -103,7 +103,7 @@ process run_vardict {
     module purge
     module load R/3.5.1
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
-    VarDict -G ${ref} -f ${AF_THR} -N "$baseName" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
+    VarDict -G ${ref} -f ${AF_THR} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -E -f ${AF_THR} > "${baseName}.vcf"
     """
