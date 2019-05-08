@@ -19,7 +19,7 @@ millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_stand
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
-AF_THR           = 0.1
+af_thr           = 0.1
 
 //Annotation resources
 dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
@@ -103,9 +103,9 @@ process run_vardict {
     module purge
     module load R/3.5.1
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
-    VarDict -G ${ref} -f ${AF_THR} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
+    VarDict -G ${ref} -f ${af_thr} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} | \
         /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -E -f ${AF_THR} > "${baseName}.vcf"
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N ${baseName} -E -f ${af_thr} > "${baseName}.vcf"
     """
 }
 
