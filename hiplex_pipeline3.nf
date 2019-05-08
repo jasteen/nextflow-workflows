@@ -8,7 +8,7 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 //project specific bed files
 
 vardictBed       = file("/projects/vh83/reference/hiplex_complexo/COMPLEXO22_621716iii.8col.bed")
-intervalFile     = file("/projects/vh83/reference/hiplex_complexo/COMPLEXO22_621716iii_final_b37.bed")
+intervalFile     = file("/projects/vh83/reference/hiplex_complexo/COMPLEXO22_621716iii_final_b37_sorted.bed")
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -347,7 +347,7 @@ process CoverageBed {
     """
     module load bedtools/2.27.1-gcc5
     coverageBed -b ${bam} -a ${intervalFile} \
-        -hist -g ${genome_file} | \
+        -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
 }
