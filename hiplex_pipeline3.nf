@@ -84,7 +84,8 @@ process align_bwa {
     """
 }
 
-ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4}
+ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
+
 process run_vardict {
 
     input:
@@ -353,7 +354,7 @@ process CoverageBed {
 
 process ReadsMapped {
     input:
-        set sample, file(bam) from ch_3
+        set sample, file(bam) from ch_mappedBam4
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
@@ -374,7 +375,7 @@ process ReadsMapped {
 
 process ReadsTotal {
     input:
-        set sample, file(bam) from ch_4
+        set sample, file(bam) from ch_mappedBam5
     output:
         set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
 
