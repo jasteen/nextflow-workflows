@@ -111,7 +111,7 @@ process makeVCF {
     input:
         set baseName, file(tsv) from ch_vardictTSV
     output:
-        set baseName, file("${sample}.vardict.vcf") into ch_vardictVCFs
+        set baseName, file("${baseName}.vardict.vcf") into ch_vardictVCFs
     
     publishDir path: './output/intermediate', mode: 'copy'
     
