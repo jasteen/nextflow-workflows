@@ -17,7 +17,7 @@ refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
-
+genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
 af_thr           = 0.1
 
@@ -84,10 +84,11 @@ process align_bwa {
     """
 }
 
+ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4}
 process run_vardict {
 
     input:
-        set baseName, file(bam), file(bai) from ch_mappedBams                
+        set baseName, file(bam), file(bai) from ch_mappedBam1               
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardictTSV           
     
@@ -201,36 +202,18 @@ process indexVCFS {
     """
 }
 
-//ch_indexedVCF = Channel.from ( ['basenameA', file('A.vcf'), file('A.tbi')],
-//                              ['basenameB', file('B.vcf'), file('B.tbi')] )
-//                       .into { files_ch; list_ch }
-
+//duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
-
+//set one version to a list of filenames of the VCF
 ch_list.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
        .set {ch_list_f}
-
+//set the second to all the files
 ch_files
     .collect()
     .set {ch_all_files}
 
-/*
-process foo {
-
-    input:
-    file list from list_f
-    file '*' from all_files
-
-    script:
-    """
-    cat $list
-    """
-}
-*/
-
-
-
+//feed both to the merge so that the indexes are available to bcftools
 process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
@@ -323,11 +306,11 @@ process apply_vep {
 
 /*
 Stats Generation Section
-
+*/
 
 process InstersectBed {
     input:
-        set sample, file(bam) from ch_1
+        set sample, file(bam) from ch_mappedBam2
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
@@ -347,7 +330,7 @@ process InstersectBed {
 
 process CoverageBed {
     input:
-        set sample, file(bam) from ch_2
+        set sample, file(bam) from ch_mappedBam3
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
@@ -362,11 +345,12 @@ process CoverageBed {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    coverageBed -b ${bam} -a ${bed_target} \
+    coverageBed -b ${bam} -a ${interval_file} \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
 }
+
 process ReadsMapped {
     input:
         set sample, file(bam) from ch_3
@@ -385,6 +369,27 @@ process ReadsMapped {
     script:
     """
     samtools view -c -F4 ${bam} > "${sample}.mapped_to_genome.txt"
+    """
+}
+
+process ReadsTotal {
+    input:
+        set sample, file(bam) from ch_4
+    output:
+        set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    module      'samtools/1.9'
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    errorStrategy 'ignore'
+    
+    script:
+    """
+    samtools view -c ${bam} > "${sample}.total_raw_reads.txt"
     """
 }
     
@@ -409,16 +414,17 @@ process TargetMapped {
     """
 }
 
+
+
 ch_final = ch_bedtools.join(ch_onGenome)
 ch_final2 = ch_final.join(ch_onTarget)
+ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final2
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
-    
-    publishDir path: './output/', mode: 'copy'
 
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -432,13 +438,40 @@ process collateData {
     """
     module purge
     module load R/3.5.1
-    Rscript --vanilla /scratch/uc23/jste0021/stats.R \
+    Rscript --vanilla /projects/vh83/pipelines/code/modified_summary_stat.R \
             ${bedtools} \
             ${onGenome} \
             ${onTarget} \
+            ${onTotal} \
             ${sample} \
             "${sample}_summary_coverage.txt"
     """
 }
 
-*/
+ch_out.map{a,b -> b}.collect().set{ch_out2}
+
+process catStats {
+
+    input:
+        set file(stats) from ch_out2
+    output:
+        set sample, file("project_summary.txt") into ch_out
+    
+    publishDir path: './metrics/', mode: 'copy'
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+    errorStrategy 'ignore'
+
+    script:
+    """
+    cat ${stats} > project_summary.txt
+    """
+
+}
+
+
