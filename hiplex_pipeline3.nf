@@ -311,7 +311,7 @@ Stats Generation Section
 
 process InstersectBed {
     input:
-        set sample, file(bam) from ch_mappedBam2
+        set sample, file(bam), file(bai) from ch_mappedBam2
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
@@ -325,13 +325,13 @@ process InstersectBed {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    intersectBed -abam ${bam} -b ${bed_target} > ${sample}.intersectbed.bam
+    intersectBed -abam ${bam} -b ${interval_file} > ${sample}.intersectbed.bam
     """
 }
 
 process CoverageBed {
     input:
-        set sample, file(bam) from ch_mappedBam3
+        set sample, file(bam), file(bai) from ch_mappedBam3
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
@@ -354,7 +354,7 @@ process CoverageBed {
 
 process ReadsMapped {
     input:
-        set sample, file(bam) from ch_mappedBam4
+        set sample, file(bam), file(bai) from ch_mappedBam4
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
@@ -375,7 +375,7 @@ process ReadsMapped {
 
 process ReadsTotal {
     input:
-        set sample, file(bam) from ch_mappedBam5
+        set sample, file(bam), file(bai) from ch_mappedBam5
     output:
         set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
 
@@ -421,7 +421,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
     input:
-        set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final3
+        set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
 
