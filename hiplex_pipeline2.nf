@@ -188,7 +188,7 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    set baseName, file(vcf), file(tbi) from ch_indexedVCF.collect{"$it[1]"}.join("\n").view()
+    set baseName, file(vcf), file(tbi) from ch_indexedVCF.collect{"$it[1]"}
     
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
@@ -206,7 +206,7 @@ process mergeVCFS {
     
 
     """
-    echo $vcf > temp.list
+    echo ${vcf.join("\n")} > temp.list
     bcftools merge -O z -o "merged.vardict.vcf.gz" -l temp.list
     """
 }
