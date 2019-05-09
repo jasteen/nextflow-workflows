@@ -55,7 +55,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*.R{1,2}.fastq.gz")
+ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*.R{1,2}_001.fastq.gz")
 
 
 process align_bwa {
