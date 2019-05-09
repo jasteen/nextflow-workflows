@@ -11,6 +11,8 @@ vep_dbnsfp      = file("/projects/vh83/reference/annotation_databases/dbNSFP/dbN
 vep_dbscsnv     = file("/projects/vh83/reference/annotation_databases/dbscSNV/dbscSNV1.0-VEP/dbscSNV.txt.gz")
 vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-v1.3/1000G_phase3.tsv.gz")
 
+header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
+
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
