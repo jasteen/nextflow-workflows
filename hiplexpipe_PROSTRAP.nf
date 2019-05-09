@@ -8,7 +8,7 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 //project specific bed files
 
 vardictBed       = file("/projects/vh83/reference/prostrap/vardict/PROSTRAP_8Col.bed")
-intervalFile     = file("/projects/vh83/reference/prostrap/prostrap_final_b37.bed")
+intervalFile     = file("/projects/vh83/reference/prostrap/prostrap_final_b37_sorted.bed")
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
