@@ -24,7 +24,8 @@ globalTimeL       = '24h'
 globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
-ch_vcfIN = Channel.fromPath("./vcfs/*.vcf.gz")
+ch_vcfIN = Channel.fromPath("./vcfs/*.vcf").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
+
 
 process reheaderVCF {
     input:
