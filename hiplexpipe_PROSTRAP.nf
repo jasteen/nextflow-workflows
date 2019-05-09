@@ -20,6 +20,7 @@ dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
 af_thr           = 0.1
+rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 //Annotation resources
 dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
@@ -468,7 +469,7 @@ process catStats {
 
     script:
     """
-    cat ${stats} > "project_summary.txt"
+    cat ${rheader} ${stats} > "project_summary.txt"
     """
 
 }
