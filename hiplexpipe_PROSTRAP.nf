@@ -2,7 +2,7 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/home/jste0021/vh83_scratch/projects/PROSTRAP_repeats/fastqs')
+inputDirectory = file('/scratch/vh83/projects/PROSTRAP/stats_repeats/fastqs')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 //project specific bed files
