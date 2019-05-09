@@ -38,7 +38,6 @@ process reheaderVCF {
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    module      bwaModule
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -63,7 +62,6 @@ process sortVCFS {
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    module      bwaModule
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -85,7 +83,6 @@ process indexVCFS {
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    module      bwaModule
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
