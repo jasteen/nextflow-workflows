@@ -34,7 +34,7 @@ process reheaderVCF {
         set baseName, file(vcf) from ch_vcfIN
     
     output:
-        set baseName, file("${baseName}.reheader.vcf") into ch_reheaderVCF
+        set baseName, file("${baseName}.reheader.vcf.gz") into ch_reheaderVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
