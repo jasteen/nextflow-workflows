@@ -1,3 +1,8 @@
+refFolder        = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
+refBase          = "$refFolder/human_g1k_v37_decoy"
+ref              = file("${refBase}.fasta")
+
+
 
 //Annotation resources
 dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
