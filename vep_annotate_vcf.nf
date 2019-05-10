@@ -127,7 +127,7 @@ process apply_vep {
     input:
         set baseName, file(vcf), file(tbi) from ch_vtDecomposeVCF
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf.gz") into ch_vepVCF
+        set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './annotated_variants', mode: 'copy'
 
