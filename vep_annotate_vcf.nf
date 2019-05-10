@@ -125,7 +125,7 @@ process vt_decompose_normalise {
 process apply_vep {
 
     input:
-        set baseName, file(vcf), file(tbi) from ch_vtDecomposeVCF
+        set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
