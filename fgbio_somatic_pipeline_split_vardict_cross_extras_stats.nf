@@ -265,7 +265,7 @@ process makeVCFPREUMI {
     """
 }
 
-process reheaderUMIVCF {
+process reheaderPREUMIVCF {
     input:
         set sample, file(vcf) from ch_outputVCFPREUMI
     output:
