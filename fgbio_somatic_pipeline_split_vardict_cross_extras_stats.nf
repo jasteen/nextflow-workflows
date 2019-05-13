@@ -759,7 +759,7 @@ ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics
 process collectHSMetrics {
 
     input:
-        set sample, file(bam) from ch_forMultipleMetrics
+        set sample, file(bam) from ch_forHSMetrics
     output:
         set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics
     
@@ -793,7 +793,7 @@ process collectMultipleMetrics {
     input:
         set sample, file(bam) from ch_forMultipleMetrics
     output:
-        set sample, file("*multiple_metrics*") into ch_metrics
+        set sample, file("*multiple_metrics*") into ch_metrics2
     
     publishDir path: './output/metrics/multiple', mode: 'copy'
     
