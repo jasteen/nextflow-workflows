@@ -181,7 +181,7 @@ ch_tumorNormalPairsPREUMI = ch_tumorSplitPREUMI.join(ch_normalSplitPREUMI)
 
 ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardictPREUMI= ch_indexedMappedNoUMI.combine(ch_bedSegments2)
+ch_vardictPREUMI= ch_tumorNormalPairsPREUMI.combine(ch_bedSegments2)
 
 
 
