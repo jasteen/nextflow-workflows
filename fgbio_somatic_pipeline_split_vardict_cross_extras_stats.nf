@@ -781,7 +781,9 @@ process collectHSMetrics {
         -I ${bam} \
         -O "${sample}.HSmetrics.txt" \
         -R ${ref} \
-        --PER_BASE_COVERAGE "${sample}.perbase.txt"
+        -BI $panel_bed \
+        -TI $padded_bed \
+        --PER_BASE_COVERAGE "${sample}.perbase.txt" \
         --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
     """
 
