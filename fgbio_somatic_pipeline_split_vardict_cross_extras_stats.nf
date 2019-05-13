@@ -621,7 +621,7 @@ process makeVCF {
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardict
     output:
-        set sample, tbam, nbam, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
+        set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
     
     publishDir path: './output/UMI/intermediate', mode: 'copy'
     
