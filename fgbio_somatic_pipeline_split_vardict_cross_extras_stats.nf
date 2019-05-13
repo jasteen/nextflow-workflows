@@ -753,8 +753,8 @@ process apply_vep {
     """
 }
 
-
-ch_forMetrics1.concat(ch_forMetrics2).set{ch_forMultipleMetrics;ch_forHSMetrics}
+//ch_forMetrics = ch_forMetrics1.concat(ch_forMetrics2)
+ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
