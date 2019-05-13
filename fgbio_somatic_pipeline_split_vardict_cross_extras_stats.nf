@@ -3,8 +3,10 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
-panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.interval_list')
-padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.interval_list')
+panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.interval_list')
+padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.interval_list')
+panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.bed')
+padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Getting Reference Files
@@ -781,8 +783,8 @@ process collectHSMetrics {
         -I ${bam} \
         -O "${sample}.HSmetrics.txt" \
         -R ${ref} \
-        -BI $panel_bed \
-        -TI $padded_bed \
+        -BI $panel_int \
+        -TI $padded_int \
         --PER_BASE_COVERAGE "${sample}.perbase.txt" \
         --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
     """
