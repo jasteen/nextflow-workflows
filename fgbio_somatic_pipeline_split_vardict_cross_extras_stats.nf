@@ -167,7 +167,7 @@ ch_tumorPREUMI  = Channel.create()
 ch_normalPREUMI = Channel.create()
 
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
-ch_indexedConsensusBamsPREUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE$/ ? 0 : 1 }
+ch_indexedMappedNoUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE$/ ? 0 : 1 }
 
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
 ch_normalSplitPREUMI = ch_normalPREUMI.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
