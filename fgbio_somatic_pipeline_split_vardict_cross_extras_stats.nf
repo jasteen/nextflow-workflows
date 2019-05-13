@@ -786,6 +786,7 @@ process collectHSMetrics {
         --PER_BASE_COVERAGE "${sample}.perbase.txt" \
         --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
     """
+}
 
 process collectMultipleMetrics {
 
