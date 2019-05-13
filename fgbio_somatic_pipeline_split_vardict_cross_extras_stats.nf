@@ -246,7 +246,7 @@ process makeVCFPREUMI {
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardictPREUMI
     output:
-        set sample, tbam, nbam, file("${sample}.somatic.vardict.vcf") into ch_outputVCFPREUMI
+        set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCFPREUMI
     
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
