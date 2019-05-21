@@ -5,8 +5,8 @@ refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
 panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list')
 padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list')
-panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/TODO')
-padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/TODO')
+panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
+padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 
@@ -16,14 +16,15 @@ ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
+knownIndels      = file("${refFolder}/Homo_sapiens_assembly38.known_indels.vcf.gz")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 
 // Tools
 picardJar          = '~/picard.jar'
-gatkJar            = 'TODO'
+gatkJar            = '/usr/local/gatk/3.7/bin/gatk'
 bwaModule          = 'bwa/0.7.17-gcc5'
 samtoolsModule     = 'samtools/1.9'
-gatkModule         = 'TODO'
+gatkModule         = 'gatk/3.7'
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
@@ -146,6 +147,8 @@ process markDuplicatesPicard {
         set baseName, file("${baseName}.marked.bam") into ch_markedBamFiles
         set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics
 
+    publishDir path: './output/metrics/markduplicates', mode: 'copy'
+
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -171,8 +174,7 @@ process sortBam {
     input:
         set baseName, file(markedBam) from ch_markedBamFiles
     output:
-        set baseName,
-            file("${baseName}.marked.sorted.bam") into ch_sortedBamFiles
+        set baseName, file("${baseName}.marked.sorted.bam") into ch_sortedBamFiles
 
     executor    globalExecutor
     stageInMode globalStageInMode
