@@ -269,49 +269,6 @@ process reheaderPreUMIVCF {
     """
 
 }
-/*
-process preUMIVCFVEP {
-
-    input:
-        set sample, file(vcf) from ch_finalpreUMIVCF
-    output:
-        set sample, file("*.vcf.gz") into ch_annotatedFinalpreUMIVCF
-
-    publishDir path: './output/intermediate', mode: 'copy'
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    module      'vep/90'
-    script:
-    """
-    vep --cache --dir_cache {other_vep}  \
-        --assembly GRCh37 --refseq --offline \
-        --fasta ${ref} \
-        --sift b --polyphen b --symbol --numbers --biotype \
-        --total_length --hgvs --format vcf \
-        --vcf --force_overwrite --flag_pick --no_stats \
-        --custom {brcaexpath},brcaex,vcf,exact,0,Clinical_significance_ENIGMA, \
-        Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA, \
-        Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
-        --custom {gnomadpath},gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
-        --custom {revelpath},RVL,vcf,exact,0,REVEL_SCORE \
-        --plugin MaxEntScan,{maxentscanpath} \
-        --plugin ExAC,{exacpath},AC,AN \
-        --plugin dbNSFP,{dbnsfppath},REVEL_score,REVEL_rankscore \
-        --plugin dbscSNV,{dbscsnvpath} \
-        --plugin CADD,{caddpath} \
-        --fork {cores} \
-        -i {vcf_in} \
-        -o {vcf_out}
-
-    """
-
-}
-*/
 
 process groupreadsByUmi {
     input:
@@ -336,7 +293,6 @@ process groupreadsByUmi {
     """
 
 }
-
 
 process generateConsensusReads {
     input:
@@ -419,7 +375,6 @@ process mapConsensusReads {
     """
 
 }
-
 
 process indexBam {
     input:

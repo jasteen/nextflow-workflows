@@ -64,7 +64,6 @@ ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> 
 //join input files and index on the baseName
 ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
 
-
 process createUnmappedUMIBam {
     
     publishDir path: './output/intermediate', mode: 'copy'
@@ -92,7 +91,6 @@ process createUnmappedUMIBam {
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
-
 
 process markAdaptors {
 
@@ -122,12 +120,11 @@ process markAdaptors {
     """
 }
 
-
 process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.piped.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
+        set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
 
     publishDir path: './output/intermediate', mode: 'copy'
 
@@ -162,7 +159,7 @@ process indexPreUmiBam {
     input:
         set baseName, file(bam) from ch_mappedNoUMI
     output:
-        set baseName, file(bam), file("${baseName}.piped.bam.bai") into ch_indexedMappedNoUMI
+        set baseName, file(bam), file("${baseName}.aligned.bam.bai") into ch_indexedMappedNoUMI
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
@@ -176,7 +173,7 @@ process indexPreUmiBam {
 
     script:
     """
-    samtools index $bam ${baseName}.piped.bam.bai
+    samtools index $bam ${baseName}.aligned.bam.bai
     """
 
 }
@@ -195,19 +192,17 @@ ch_tumorSplitPREUMI = ch_tumorPREUMI.map{ baseName, bam, bai -> [ baseName.split
 ch_tumorNormalPairsPREUMI = ch_tumorSplitPREUMI.join(ch_normalSplitPREUMI)
 
 
-
-
 ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
-
 ch_vardictPREUMI= ch_tumorNormalPairsPREUMI.combine(ch_bedSegments2)
-
-
 
 process runVardictPREUMI {
     input:
-        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
+        set sample, ttype, file(tbam), file(tbai), ntype, 
+            file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
     output:
-        set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
+        set sample, file(tbam), file(nbam), 
+            file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") 
+            into ch_rawVardictSegmentsPREUMI
 
     
     cache       'deep'
@@ -217,7 +212,9 @@ process runVardictPREUMI {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-    
+    errorStrategy 'retry'
+    maxRetries  3
+
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -279,7 +276,8 @@ process makeVCFPREUMI {
     module purge
     module load R/3.5.1
     cat $tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
-    /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
+        /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "${tbam}|${nbam}"  \
+        -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
 
@@ -417,7 +415,7 @@ process groupreadsByUmi {
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
-    publishDir path: './output/metrics', mode: 'copy'
+    publishDir path: './output/metrics/UMI', mode: 'copy'
 
     cache       'deep'
     executor    globalExecutor
@@ -797,12 +795,12 @@ process collectHSMetrics {
     module load R/3.5.1
     java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectHsMetrics \
         -I ${bam} \
-        -O "${sample}.HSmetrics.txt" \
+        -O "${bam.baseName}.HSmetrics.txt" \
         -R ${ref} \
         -BI $panel_int \
         -TI $padded_int \
-        --PER_BASE_COVERAGE "${sample}.perbase.txt" \
-        --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
+        --PER_BASE_COVERAGE "${bam.baseName}.perbase.txt" \
+        --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
 
@@ -829,7 +827,7 @@ process collectMultipleMetrics {
     module load R/3.5.1
     java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
         -I $bam \
-        -O ${sample}.multiple_metrics \
+        -O ${bam.baseName}.multiple_metrics \
         -R $ref
     """
 

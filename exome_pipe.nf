@@ -3,9 +3,12 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
-panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
-padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
+panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list')
+padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list')
+panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/TODO')
+padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/TODO')
 tmp_dir        = file('/scratch/vh83/tmp/')
+
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -17,9 +20,10 @@ dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 
 // Tools
 picardJar          = '~/picard.jar'
+gatkJar            = 'TODO'
 bwaModule          = 'bwa/0.7.17-gcc5'
 samtoolsModule     = 'samtools/1.9'
-gatkModule         = 'gatk/4.0.11.0' 
+gatkModule         = 'TODO'
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
@@ -28,6 +32,7 @@ globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
 bwaCores	      = 12
+vardictCores      = 4
 globalMemoryS     = '6 GB'
 globalMemoryM     = '32 GB'
 globalMemoryL     = '64 GB'
@@ -42,7 +47,7 @@ globalQueueL      = 'comp'
 ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
 
 
-process createUnmappedUMIBam {
+process createUnmappedBam {
     
     publishDir path: './output/intermediate', mode: 'copy'
     
@@ -103,7 +108,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedBams
     output:
-        set baseName, file("${baseName}.mapped.bam") into ch_mappedBams, ch_forMetrics
+        set baseName, file("${baseName}.mapped.bam") into ch_mappedBams
 
     publishDir path: './output/intermediate', mode: 'copy'
 
@@ -130,15 +135,68 @@ process alignBwa {
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.piped.bam" -R "$ref" -ADD_MATE_CIGAR true \
         -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
-        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
+        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -SO queryname -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
+    """
+}
+
+process markDuplicatesPicard {
+    input:
+        set baseName, bam from ch_mappedBams 
+    output:
+        set baseName, file("${baseName}.marked.bam") into ch_markedBamFiles
+        set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    // TODO: CLEAR_DT=false option in GATK pipeline but not supported by 
+    //       this version of picard.
+    //       ADD_PG_TAG_TO_READS=false also not supported.
+    """
+    java -Xmx4000m -jar $picardJar MarkDuplicates \
+        INPUT=$bam \
+        OUTPUT=${baseName}.marked.bam \
+        METRICS_FILE=${baseName}.markduplicates.metrics \
+        VALIDATION_STRINGENCY=SILENT \
+        OPTICAL_DUPLICATE_PIXEL_DISTANCE=2500 \
+        ASSUME_SORT_ORDER=queryname
+    """
+}
+
+process sortBam {
+    input:
+        set baseName, file(markedBam) from ch_markedBamFiles
+    output:
+        set baseName,
+            file("${baseName}.marked.sorted.bam") into ch_sortedBamFiles
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    """
+    java -Xmx4000m -jar $picardJar SortSam \
+        INPUT=$markedBam \
+        OUTPUT=${baseName}.marked.sorted.bam \
+        SORT_ORDER=coordinate \
+        CREATE_INDEX=false \
+        CREATE_MD5_FILE=false \
+        MAX_RECORDS_IN_RAM=300000
     """
 }
 
 process indexBam {
     input:
-        set baseName, file(bam) from ch_mappedBams
+        set baseName, file(bam) from ch_sortedBamFiles
     output:
-        set baseName, file(bam), file("${baseName}.mapped.bam.bai") into ch_indexedMapped
+        set baseName, file(bam), file("${baseName}.mapped.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
@@ -154,15 +212,106 @@ process indexBam {
     """
     samtools index $bam ${baseName}.mapped.bam.bai
     """
+}
+
+
+//stupid un-needed GATK section
+
+
+process generateBqsrModel {
+    input:
+        set baseName, file(sortedBam), file(bamIndex) from ch_forGATK
+    output:
+        set baseName, file(sortedBam), file(bamIndex), file("${baseName}.recalreport") into ch_recalReportsBams
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      gatkModule
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    """
+    gatk -Xmx4g -jar gatkJar -T BaseRecalibrator \
+        --use-original-qualities \
+        -R $ref \
+        -I $sortedBam \
+        -O ${baseName}.recalreport \
+        --known-sites $millsIndels \
+        --known-sites $knownIndels \
+        --known-sites $dbSNP \
+        -L ${panel_int}
+    """
+}
+
+
+process applyBqsrModel {
+    input:
+        set baseName, file(sortedBam), file(bamIndex), file(recalReport) from ch_recalReportsBams
+    output:
+        set baseName, file("${baseName}.recal.bam") into ch_recalibratedBams
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      gatkModule
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+    """
+    java -Xmx3g -jar gatkJar -T ApplyBQSR \
+        --add-output-sam-program-record \
+        --use-original-qualities \
+        --static-quantized-quals 10 \
+        --static-quantized-quals 20 \
+        --static-quantized-quals 30 \
+        -R $ref \
+        -I $sortedBam \
+        -O ${baseName}.recal.bam \
+        -bqsr ${recalReport} \
+        -L ${panel_int}
+    """
+}
+
+process call_variants{
+
+    input:
+        set baseName, file(bam) from ch_recalibratedBams
+    output:
+        set baseName, file("${baseName}.g.vcf") into ch_gVcfs
+    
+    publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
+
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    module      gatkModule
+    cpus        1
+    memory      globalMemoryS
+    time        globalTimeS
+    queue       globalQueueS
+
+
+
+    """
+    java -Xmx3g -jar gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
+                    --variant_index_parameter 128000 --emitRefConfidence GVCF \
+                    --standard_min_confidence_threshold_for_calling 30.0 \
+                    --num_cpu_threads_per_data_thread 8 \
+                    --variant_index_type LINEAR \
+                    --standard_min_confidence_threshold_for_emitting 30.0 \
+                    -I ${bam} -L ${padded_int} -o "${baseName.g.vcf}"
+    """
 
 }
 
 
 ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardict= ch_indexedMapped.combine(ch_bedSegments)
+ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
 
-process vardictPreUMI {
+process vardict {
     
     input:
         set baseName, file(bam), file(bai), file(segment) from ch_vardict
@@ -171,7 +320,7 @@ process vardictPreUMI {
 
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        6
+    cpus        vardictCores
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
@@ -213,14 +362,13 @@ process catSegments {
 
 }
 
-
 process makeVCF {
     input:
         set sample, file(tsv) from ch_vardictCollated
     output:
         set sample, file("${sample}.vardict.vcf") into ch_outputVCF
     
-    publishDir path: './output/variants', mode: 'copy'
+    publishDir path: './output/variants/vardict', mode: 'copy'
     
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -241,11 +389,11 @@ process makeVCF {
 process collectMetrics {
 
     input:
-        set sample, file(bam) from ch_forMetrics
+        set sample, file(bam), file(bai) from ch_forMultipleMetrics
     output:
-        set sample, file(*multiple_metrics*) into ch_metrics
+        set sample, file(*multiple_metrics*) into ch_metrics_unused
     
-    publishDir path: './output/metrics', mode: 'copy'
+    publishDir path: './output/metrics/multiple', mode: 'copy'
     
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -264,4 +412,36 @@ process collectMetrics {
     """
 
 
+}
+
+process collectHSMetrics {
+
+    input:
+        set sample, file(bam), file(bai) from ch_forHSMetrics
+    output:
+        set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics_unused2
+    
+    publishDir path: './output/metrics/coverage', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
+    script:
+
+    """
+    module purge
+    module load R/3.5.1
+    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectHsMetrics \
+        -I ${bam} \
+        -O "${sample}.HSmetrics.txt" \
+        -R ${ref} \
+        -BI $panel_int \
+        -TI $padded_int \
+        --PER_BASE_COVERAGE "${sample}.perbase.txt" \
+        --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
+    """
 }
