@@ -131,7 +131,7 @@ process alignBwa {
         -I "$bam" \
         -FASTQ '/dev/stdout' -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 \
         -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" | \
-    bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
+    bwa mem -M -v 1 -t ${task.cpus} -p $ref /dev/stdin | \
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.piped.bam" -R "$ref" -ADD_MATE_CIGAR true \
