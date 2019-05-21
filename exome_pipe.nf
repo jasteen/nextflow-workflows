@@ -130,13 +130,13 @@ process alignBwa {
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
         -I "$bam" \
         -FASTQ '/dev/stdout' -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 \
-        -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" -VERBOSITY error | \
-    bwa mem -M -v 1 -t ${task.cpus} -p $ref /dev/stdin | \
+        -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" | \
+    bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.mapped.bam" -R "$ref" -ADD_MATE_CIGAR true \
         -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
-        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -SO queryname -ATTRIBUTES_TO_RETAIN XS -VERBOSITY error -TMP_DIR "$tmp_dir"
+        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -SO queryname -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
     """
 }
 
