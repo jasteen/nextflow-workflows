@@ -393,7 +393,7 @@ process collectMetrics {
     input:
         set sample, file(bam), file(bai) from ch_forMultipleMetrics
     output:
-        set sample, file(*multiple_metrics*) into ch_metrics_unused
+        set sample, file("*multiple_metrics*") into ch_metrics_unused
     
     publishDir path: './output/metrics/multiple', mode: 'copy'
     
