@@ -53,7 +53,7 @@ process createUnmappedBam {
     publishDir path: './output/intermediate', mode: 'copy'
     
     input:
-        set baseName, file(R1), file(R2), from ch_inputFiles
+        set baseName, file(R1), file(R2) from ch_inputFiles
     output:
         set baseName, file("${baseName}.unmapped.bam") into ch_unmappedBams
 
