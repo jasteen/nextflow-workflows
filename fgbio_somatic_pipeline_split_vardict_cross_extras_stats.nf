@@ -201,8 +201,7 @@ process runVardictPREUMI {
             file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
     output:
         set sample, file(tbam), file(nbam), 
-            file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") 
-            into ch_rawVardictSegmentsPREUMI
+            file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
 
     
     cache       'deep'
