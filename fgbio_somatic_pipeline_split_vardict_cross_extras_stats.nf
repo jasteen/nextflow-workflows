@@ -197,11 +197,9 @@ ch_vardictPREUMI= ch_tumorNormalPairsPREUMI.combine(ch_bedSegments2)
 
 process runVardictPREUMI {
     input:
-        set sample, ttype, file(tbam), file(tbai), ntype, 
-            file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
     output:
-        set sample, file(tbam), file(nbam), 
-            file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
+        set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
 
     
     cache       'deep'
