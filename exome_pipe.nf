@@ -152,7 +152,7 @@ process markDuplicatesPicard {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
-    memory      globalMemoryS
+    memory      globalMemoryM
     time        globalTimeS
     queue       globalQueueS
 
@@ -160,7 +160,7 @@ process markDuplicatesPicard {
     //       this version of picard.
     //       ADD_PG_TAG_TO_READS=false also not supported.
     """
-    java -Xmx4000m -jar $picardJar MarkDuplicates \
+    java -Xmx32G -jar $picardJar MarkDuplicates \
         INPUT=$bam \
         OUTPUT=${baseName}.mapped.marked.bam \
         METRICS_FILE=${baseName}.markduplicates.metrics \
