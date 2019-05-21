@@ -337,7 +337,7 @@ process vardict {
 
 }
 
-ch_collatedSegment = ch_vardictSegments.map{ sample, segment -> [sample, segment]}.groupTuple(by: [0])
+ch_collatedSegments = ch_vardictSegments.map{ sample, segment -> [sample, segment]}.groupTuple(by: [0])
 
 process catSegments {
     echo true
