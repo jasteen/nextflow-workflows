@@ -130,13 +130,13 @@ process alignBwa {
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
         -I "$bam" \
         -FASTQ '/dev/stdout' -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 \
-        -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" | \
+        -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" -VERBOSITY error | \
     bwa mem -M -v 1 -t ${task.cpus} -p $ref /dev/stdin | \
     java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
-        -OUTPUT "${baseName}.piped.bam" -R "$ref" -ADD_MATE_CIGAR true \
+        -OUTPUT "${baseName}.mapped.bam" -R "$ref" -ADD_MATE_CIGAR true \
         -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
-        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -SO queryname -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
+        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -SO queryname -ATTRIBUTES_TO_RETAIN XS -VERBOSITY error -TMP_DIR "$tmp_dir"
     """
 }
 
@@ -144,7 +144,7 @@ process markDuplicatesPicard {
     input:
         set baseName, bam from ch_mappedBams 
     output:
-        set baseName, file("${baseName}.marked.bam") into ch_markedBamFiles
+        set baseName, file("${baseName}.mapped.marked.bam") into ch_markedBamFiles
         set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics
 
     publishDir path: './output/metrics/markduplicates', mode: 'copy'
@@ -162,7 +162,7 @@ process markDuplicatesPicard {
     """
     java -Xmx4000m -jar $picardJar MarkDuplicates \
         INPUT=$bam \
-        OUTPUT=${baseName}.marked.bam \
+        OUTPUT=${baseName}.mapped.marked.bam \
         METRICS_FILE=${baseName}.markduplicates.metrics \
         VALIDATION_STRINGENCY=SILENT \
         OPTICAL_DUPLICATE_PIXEL_DISTANCE=2500 \
@@ -174,7 +174,7 @@ process sortBam {
     input:
         set baseName, file(markedBam) from ch_markedBamFiles
     output:
-        set baseName, file("${baseName}.marked.sorted.bam") into ch_sortedBamFiles
+        set baseName, file("${baseName}.mapped.marked.sorted.bam") into ch_sortedBamFiles
 
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -186,7 +186,7 @@ process sortBam {
     """
     java -Xmx4000m -jar $picardJar SortSam \
         INPUT=$markedBam \
-        OUTPUT=${baseName}.marked.sorted.bam \
+        OUTPUT=${baseName}.mapped.marked.sorted.bam \
         SORT_ORDER=coordinate \
         CREATE_INDEX=false \
         CREATE_MD5_FILE=false \
@@ -198,7 +198,7 @@ process indexBam {
     input:
         set baseName, file(bam) from ch_sortedBamFiles
     output:
-        set baseName, file(bam), file("${baseName}.mapped.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics
+        set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'deep'
