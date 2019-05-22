@@ -75,6 +75,7 @@ process createUnmappedUMIBam {
 
     publishDir path: './output/intermediate', mode: 'copy'
     
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -801,32 +802,3 @@ process collectHSMetrics {
     """
 }
 
-process collectMultipleMetrics {
-
-    input:
-        set sample, file(bam) from ch_forMultipleMetrics
-    output:
-        set sample, file("*multiple_metrics*") into ch_metrics2
-    
-    publishDir path: './output/metrics/multiple', mode: 'copy'
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
-    script:
-
-    """
-    module purge
-    module load R/3.5.1
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
-        -I $bam \
-        -O ${bam.baseName}.multiple_metrics \
-        -R $ref
-    """
-
-
-}
