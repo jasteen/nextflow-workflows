@@ -239,7 +239,7 @@ process generateBqsrModel {
         --use-original-qualities \
         -R $ref \
         -I $sortedBam \
-        -O ${baseName}.recalreport \
+        -o ${baseName}.recalreport \
         --known-sites $millsIndels \
         --known-sites $knownIndels \
         --known-sites $dbSNP \
