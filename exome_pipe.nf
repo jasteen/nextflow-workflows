@@ -74,6 +74,7 @@ process createUnmappedBam {
 
     publishDir path: './output/intermediate', mode: 'copy'
     
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -101,7 +102,7 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.marked.bam"),
                       file("${baseName}.unmapped.marked_metrics.tsv") into ch_markedBams
 
-
+    cache       'deep'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -199,7 +200,7 @@ process sortBam {
     queue       globalQueueL
 
     """
-    java -Dpicard.useLegacyParser=false -Xmx4g -jar $picardJar SortSam \
+    java -Djava.io.tmpdir=$tmp_dir -Dpicard.useLegacyParser=false -Xmx4g -jar $picardJar SortSam \
         -INPUT $markedBam \
         -OUTPUT ${baseName}.mapped.marked.sorted.bam \
         -SORT_ORDER coordinate \
