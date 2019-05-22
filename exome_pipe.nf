@@ -239,9 +239,9 @@ process generateBqsrModel {
         -R $ref \
         -I $sortedBam \
         -o ${baseName}.recalreport \
-        -known-sites $millsIndels \
-        -known-sites $knownIndels \
-        -known-sites $dbSNP \
+        -knownSites $millsIndels \
+        -knownSites $knownIndels \
+        -knownSites $dbSNP \
         -L ${panel_int}
     """
 }
