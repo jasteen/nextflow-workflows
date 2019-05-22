@@ -15,9 +15,24 @@ refBase          = "$refFolder/human_g1k_v37_decoy"
 ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
-millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
-knownIndels      = file("${refFolder}/Homo_sapiens_assembly38.known_indels.vcf.gz")
-dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
+millsIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
+knownIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+dbSNP            = file("/projects/vh83/reference/genomes/b37/accessory_files/accessory_files/dbsnp_138.b37.vcf")
+
+/*
+
+mills_grch37: reference/Mills_and_1000G_gold_standard.indels.b37.vcf
+one_k_g_grch37_indels: reference/1000G_phase1.indels.b37.vcf
+one_k_g_snps: reference/1000G_omni2.5.b37.vcf
+one_k_g_highconf_snps: reference/1000G_phase1.snps.high_confidence.b37.vcf
+one_k_g_indels: reference/1000G_phase1.indels.b37.vcf
+hapmap: reference/hapmap_3.3.b37.vcf
+interval_grch37: reference/Broad.human.exome.b37.interval_list
+dbsnp_grch37: reference/dbsnp_138.b37.vcf
+CEU_mergeGvcf: reference/CEU_mergeGvcf.vcf
+FIN_mergeGvcf: reference/FIN_mergeGvcf.vcf
+GBR_mergeGvcf: reference/GBR_mergeGvcf.vcf
+*/
 
 // Tools
 picardJar          = '~/picard.jar'
