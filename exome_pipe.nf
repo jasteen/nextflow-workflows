@@ -235,7 +235,7 @@ process generateBqsrModel {
     queue       globalQueueS
 
     """
-    java -Xmx4g -jar gatkJar -T BaseRecalibrator \
+    java -Xmx4g -jar $gatkJar -T BaseRecalibrator \
         --use-original-qualities \
         -R $ref \
         -I $sortedBam \
@@ -263,7 +263,7 @@ process applyBqsrModel {
     queue       globalQueueL
 
     """
-    java -Xmx4g -jar gatkJar -T ApplyBQSR \
+    java -Xmx4g -jar $gatkJar -T ApplyBQSR \
         --add-output-sam-program-record \
         --use-original-qualities \
         --static-quantized-quals 10 \
@@ -297,7 +297,7 @@ process call_variants{
 
 
     """
-    java -Xmx4g -jar gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
+    java -Xmx4g -jar $gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
                     --variant_index_parameter 128000 --emitRefConfidence GVCF \
                     --standard_min_confidence_threshold_for_calling 30.0 \
                     --num_cpu_threads_per_data_thread 8 \
