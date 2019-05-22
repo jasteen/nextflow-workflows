@@ -181,7 +181,7 @@ process sortBam {
     cpus        1
     memory      globalMemoryS
     time        globalTimeL
-    queue       globalQueueS
+    queue       globalQueueL
 
     """
     java -Xmx4g -jar $picardJar SortSam \
