@@ -402,33 +402,6 @@ process makeVCF {
     """
 }
 
-process collectMetrics {
-
-    input:
-        set sample, file(bam), file(bai) from ch_forMultipleMetrics
-    output:
-        set sample, file("*multiple_metrics*") into ch_metrics_unused
-    
-    publishDir path: './output/metrics/multiple', mode: 'copy'
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
-    script:
-
-    """
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
-        -I $bam \
-        -O ${sample}.multiple_metrics \
-        -R $ref 
-    """
-
-
-}
 
 process collectHSMetrics {
 
