@@ -294,7 +294,7 @@ process call_variants{
     executor    globalExecutor
     stageInMode globalStageInMode
     module      gatkModule
-    cpus        1
+    cpus        8
     memory      globalMemoryS
     time        globalTimeL
     queue       globalQueueL
@@ -303,11 +303,8 @@ process call_variants{
 
     """
     java -Xmx4g -jar $gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
-                    --variant_index_parameter 128000 --emitRefConfidence GVCF \
-                    --standard_min_confidence_threshold_for_calling 30.0 \
+                    --emitRefConfidence GVCF \
                     --num_cpu_threads_per_data_thread 8 \
-                    --variant_index_type LINEAR \
-                    --standard_min_confidence_threshold_for_emitting 30.0 \
                     -I ${bam} -L ${padded_int} -o "${baseName}.mapped.marked.sorted.recal.g.vcf"
     """
 
