@@ -212,7 +212,7 @@ process indexBam {
 
     script:
     """
-    samtools index $bam ${baseName}.mapped.bam.bai
+    samtools index $bam ${baseName}.mapped.marked.sorted.bam.bai
     """
 }
 
