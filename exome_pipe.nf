@@ -266,7 +266,7 @@ process applyBqsrModel {
     input:
         set baseName, file(sortedBam), file(bamIndex), file(recalReport) from ch_recalReportsBams
     output:
-        set baseName, file("${baseName}.recal.bam") into ch_recalibratedBams
+        set baseName, file("${baseName}.mapped.marked.sorted.recal.bam") into ch_recalibratedBams
 
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -277,17 +277,8 @@ process applyBqsrModel {
     queue       globalQueueL
 
     """
-    java -Xmx4g -jar $gatkJar -T ApplyBQSR \
-        --add-output-sam-program-record \
-        --use-original-qualities \
-        --static-quantized-quals 10 \
-        --static-quantized-quals 20 \
-        --static-quantized-quals 30 \
-        -R $ref \
-        -I $sortedBam \
-        -O ${baseName}.recal.bam \
-        -bqsr ${recalReport} \
-        -L ${panel_int}
+    java -Xmx4g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR {recalReport} \
+                   -o ${baseName}.mapped.marked.sorted.recal.bam
     """
 }
 
@@ -296,7 +287,7 @@ process call_variants{
     input:
         set baseName, file(bam) from ch_recalibratedBams
     output:
-        set baseName, file("${baseName}.g.vcf") into ch_gVcfs
+        set baseName, file("${baseName}.mapped.marked.sorted.recal.g.vcf") into ch_gVcfs
     
     publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
 
@@ -317,7 +308,7 @@ process call_variants{
                     --num_cpu_threads_per_data_thread 8 \
                     --variant_index_type LINEAR \
                     --standard_min_confidence_threshold_for_emitting 30.0 \
-                    -I ${bam} -L ${padded_int} -o "${baseName.g.vcf}"
+                    -I ${bam} -L ${padded_int} -o "${baseName}.mapped.marked.sorted.recal.g.vcf"
     """
 
 }
