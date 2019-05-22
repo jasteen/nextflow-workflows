@@ -21,7 +21,7 @@ dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 
 // Tools
 picardJar          = '~/picard.jar'
-gatkJar            = '/usr/local/gatk/3.7/bin//usr/local/gatk/3.7/bin/GenomeAnalysisTK.jar'
+gatkJar            = '/usr/local/gatk/3.7/bin/GenomeAnalysisTK.jar'
 bwaModule          = 'bwa/0.7.17-gcc5'
 samtoolsModule     = 'samtools/1.9'
 gatkModule         = 'gatk/3.7'
