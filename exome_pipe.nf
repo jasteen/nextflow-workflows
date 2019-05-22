@@ -153,20 +153,20 @@ process markDuplicatesPicard {
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
-    time        globalTimeS
+    time        globalTimeL
     queue       globalQueueS
 
     // TODO: CLEAR_DT=false option in GATK pipeline but not supported by 
     //       this version of picard.
     //       ADD_PG_TAG_TO_READS=false also not supported.
     """
-    java -Xmx32G -jar $picardJar MarkDuplicates \
-        INPUT=$bam \
-        OUTPUT=${baseName}.mapped.marked.bam \
-        METRICS_FILE=${baseName}.markduplicates.metrics \
-        VALIDATION_STRINGENCY=SILENT \
-        OPTICAL_DUPLICATE_PIXEL_DISTANCE=2500 \
-        ASSUME_SORT_ORDER=queryname
+    java -Dpicard.useLegacyParser=false -Xmx32G -jar $picardJar MarkDuplicates \
+        -INPUT $bam \
+        -OUTPUT ${baseName}.mapped.marked.bam \
+        -METRICS_FILE ${baseName}.markduplicates.metrics \
+        -VALIDATION_STRINGENCY SILENT \
+        -OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
+        -ASSUME_SORT_ORDER queryname
     """
 }
 
@@ -180,17 +180,17 @@ process sortBam {
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryS
-    time        globalTimeS
+    time        globalTimeL
     queue       globalQueueS
 
     """
-    java -Xmx4000m -jar $picardJar SortSam \
-        INPUT=$markedBam \
-        OUTPUT=${baseName}.mapped.marked.sorted.bam \
-        SORT_ORDER=coordinate \
-        CREATE_INDEX=false \
-        CREATE_MD5_FILE=false \
-        MAX_RECORDS_IN_RAM=300000
+    java -Xmx4g -jar $picardJar SortSam \
+        -INPUT $markedBam \
+        -OUTPUT ${baseName}.mapped.marked.sorted.bam \
+        -SORT_ORDER coordinate \
+        -CREATE_INDEX false \
+        -CREATE_MD5_FILE false \
+        -MAX_RECORDS_IN_RAM 300000
     """
 }
 
