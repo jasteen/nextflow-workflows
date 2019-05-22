@@ -17,7 +17,7 @@ refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 knownIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
-dbSNP            = file("/projects/vh83/reference/genomes/b37/accessory_files/accessory_files/dbsnp_138.b37.vcf")
+dbSNP            = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
 
 /*
 
