@@ -184,7 +184,7 @@ process sortBam {
     queue       globalQueueL
 
     """
-    java -Xmx4g -jar $picardJar SortSam \
+    java -Dpicard.useLegacyParser=false -Xmx4g -jar $picardJar SortSam \
         -INPUT $markedBam \
         -OUTPUT ${baseName}.mapped.marked.sorted.bam \
         -SORT_ORDER coordinate \
