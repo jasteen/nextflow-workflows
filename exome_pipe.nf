@@ -277,7 +277,7 @@ process applyBqsrModel {
     queue       globalQueueL
 
     """
-    java -Xmx4g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR {recalReport} \
+    java -Xmx4g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR ${recalReport} \
                    -o ${baseName}.mapped.marked.sorted.recal.bam
     """
 }
