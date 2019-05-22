@@ -154,7 +154,7 @@ process markDuplicatesPicard {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueS
+    queue       globalQueueL
 
     // TODO: CLEAR_DT=false option in GATK pipeline but not supported by 
     //       this version of picard.
