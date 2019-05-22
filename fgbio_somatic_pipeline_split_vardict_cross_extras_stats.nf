@@ -3,8 +3,8 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
-panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/intervals_Broad.human.exome.b37.interval_list')
-padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/intervals_Broad.human.exome.b37.interval_list')
+panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.interval_list')
+padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.interval_list')
 panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.bed')
 padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
@@ -802,3 +802,32 @@ process collectHSMetrics {
     """
 }
 
+process collectMultipleMetrics {
+
+    input:
+        set sample, file(bam) from ch_forMultipleMetrics
+    output:
+        set sample, file("*multiple_metrics*") into ch_metrics2
+    
+    publishDir path: './output/metrics/multiple', mode: 'copy'
+    
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeL
+    queue       globalQueueL
+
+    script:
+
+    """
+    module purge
+    module load R/3.5.1
+    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
+        -I $bam \
+        -O ${bam.baseName}.multiple_metrics \
+        -R $ref
+    """
+
+
+}

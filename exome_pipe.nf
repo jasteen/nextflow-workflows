@@ -246,8 +246,8 @@ process generateBqsrModel {
     module      gatkModule
     cpus        1
     memory      globalMemoryS
-    time        globalTimeS
-    queue       globalQueueS
+    time        globalTimeL
+    queue       globalQueueL
 
     """
     java -Xmx4g -jar $gatkJar -T BaseRecalibrator \
