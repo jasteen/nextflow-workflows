@@ -236,7 +236,6 @@ process generateBqsrModel {
 
     """
     java -Xmx4g -jar $gatkJar -T BaseRecalibrator \
-        --use-original-qualities \
         -R $ref \
         -I $sortedBam \
         -o ${baseName}.recalreport \
