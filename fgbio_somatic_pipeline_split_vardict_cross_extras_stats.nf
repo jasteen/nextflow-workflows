@@ -379,7 +379,7 @@ process apply_vepPREUMI {
 
     publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
 
-    cache.      'lenient'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        12
