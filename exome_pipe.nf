@@ -74,7 +74,7 @@ process createUnmappedBam {
 
     publishDir path: './output/intermediate', mode: 'copy'
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -102,7 +102,7 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.marked.bam"),
                       file("${baseName}.unmapped.marked_metrics.tsv") into ch_markedBams
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -129,7 +129,7 @@ process alignBwa {
 
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      bwaModule
@@ -165,6 +165,7 @@ process markDuplicatesPicard {
 
     publishDir path: './output/metrics/markduplicates', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -192,6 +193,7 @@ process sortBam {
     output:
         set baseName, file("${baseName}.mapped.marked.sorted.bam") into ch_sortedBamFiles
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -217,7 +219,7 @@ process indexBam {
         set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'samtools'
@@ -242,6 +244,7 @@ process generateBqsrModel {
     output:
         set baseName, file(sortedBam), file(bamIndex), file("${baseName}.recalreport") into ch_recalReportsBams
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      gatkModule
@@ -269,6 +272,7 @@ process applyBqsrModel {
     output:
         set baseName, file("${baseName}.mapped.marked.sorted.recal.bam") into ch_recalibratedBams
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      gatkModule
@@ -292,6 +296,7 @@ process call_variants{
     
     publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      gatkModule
@@ -323,6 +328,7 @@ process vardict {
     output:
         set baseName, file("${baseName}.${segment}.vardict.tsv") into ch_vardictSegments
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        vardictCores
