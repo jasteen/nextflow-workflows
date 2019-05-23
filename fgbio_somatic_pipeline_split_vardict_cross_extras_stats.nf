@@ -75,7 +75,7 @@ process createUnmappedUMIBam {
 
     publishDir path: './output/intermediate', mode: 'copy'
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -103,7 +103,7 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -129,7 +129,7 @@ process alignBwa {
 
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      bwaModule
@@ -163,7 +163,7 @@ process indexPreUmiBam {
         set baseName, file(bam), file("${baseName}.aligned.bam.bai") into ch_indexedMappedNoUMI
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'samtools'
@@ -203,7 +203,7 @@ process runVardictPREUMI {
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
 
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        6
@@ -235,7 +235,7 @@ process catSegmentsPREUMI {
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
 
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -261,7 +261,7 @@ process makeVCFPREUMI {
     
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -287,6 +287,7 @@ process reheaderPREUMIVCF {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -312,7 +313,8 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    module     'bcftools/1.8'
+    cache.      'lenient'
+    module      'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryM 
@@ -333,7 +335,8 @@ process indexVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    module     'bcftools/1.8'
+    cache       'lenient'
+    module      'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryM 
@@ -374,8 +377,9 @@ process apply_vepPREUMI {
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
 
-    publishDir path: '.output/preUMI/somatic_annotated', mode: 'copy'
+    publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
 
+    cache.      'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        12
@@ -415,7 +419,7 @@ process groupreadsByUmi {
     
     publishDir path: './output/metrics/UMI', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        globalCores
@@ -438,7 +442,7 @@ process generateConsensusReads {
         set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        globalCores
@@ -488,7 +492,7 @@ process mapConsensusReads {
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module 	    bwaModule
@@ -521,7 +525,7 @@ process indexBam {
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'samtools'
@@ -564,7 +568,7 @@ process runVardict {
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
 
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        6
@@ -594,7 +598,7 @@ process catSegments {
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -621,7 +625,7 @@ process makeVCF {
     
     publishDir path: './output/UMI/intermediate', mode: 'copy'
     
-    cache       'deep'
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -736,6 +740,7 @@ process apply_vep {
 
     publishDir path: './output/UMI/somatic_annotated', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        12
