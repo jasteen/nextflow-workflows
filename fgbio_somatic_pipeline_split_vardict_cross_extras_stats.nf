@@ -313,7 +313,7 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    cache.      'lenient'
+    cache       'lenient'
     module      'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 

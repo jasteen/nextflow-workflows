@@ -1,0 +1,7 @@
+2019-05-23 12:35:03	1.7s	tiny_poisson	OK	36d83062dbdb791f1cde5c2230ac0cab	934b935d-e15e-4e53-9026-c50112b45ab5	nextflow run whatever.nf
+2019-05-23 12:35:57	1.1s	silly_stonebraker	OK	6d0ec05a414654ebc385afa263d52249	f6da3fa9-0c4e-47f4-8f5f-f7325aba5a1f	nextflow run whatever.nf
+2019-05-23 12:36:30	1.2s	condescending_kimura	ERR	677e48c1f947d0182034b2adb7a7901e	278b2c23-3d50-421a-ac77-017a902b7dc9	nextflow run whatever.nf
+2019-05-23 12:37:31	-	romantic_wozniak	-	874b45d185149102b5d7f2b2c012f383	c13834d7-8eef-44e0-80e4-aa7bee1c104e	nextflow run whatever.nf
+2019-05-23 12:38:01	1.1s	condescending_swirles	OK	36d83062dbdb791f1cde5c2230ac0cab	2f51fde4-9d25-4946-b2a7-78ccea2d5f40	nextflow run whatever.nf
+2019-05-23 12:38:35	1.3s	jolly_mcnulty	OK	bf1e22783813db4739711782c1b6ff74	dea5c2c7-02ea-4aa8-99c1-339e3444cd42	nextflow run whatever.nf
+2019-05-23 12:38:55	1.5s	maniac_northcutt	OK	896d368a09eac06bba06a22267a5fb2f	bd366da2-18d2-4935-b386-fc4c0ccfe928	nextflow run whatever.nf
