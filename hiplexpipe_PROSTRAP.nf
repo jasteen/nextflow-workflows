@@ -96,6 +96,7 @@ process run_vardict {
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
+    cache       'lenient'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryM 
@@ -116,6 +117,7 @@ process makeVCF {
     
     publishDir path: './variants_raw_out', mode: 'copy'
     
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -143,6 +145,7 @@ process reheaderVCF {
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
+    cache       'lenient'
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
@@ -168,6 +171,7 @@ process sortVCFS {
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
+    cache       'lenient'
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
@@ -190,6 +194,7 @@ process indexVCFS {
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
+    cache       'lenient'
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
@@ -226,6 +231,7 @@ process mergeVCFS {
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
 
+    cache       'lenient'
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
@@ -251,6 +257,7 @@ process vt_decompose_normalise {
 
     publishDir path: './variants_merged', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     module      'vt'
@@ -274,6 +281,7 @@ process apply_vep {
 
     publishDir path: './variants_merged', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        vepCores
@@ -314,6 +322,7 @@ process InstersectBed {
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -334,6 +343,7 @@ process CoverageBed {
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -357,6 +367,7 @@ process ReadsMapped {
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -378,6 +389,7 @@ process ReadsTotal {
     output:
         set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -399,6 +411,7 @@ process TargetMapped {
     output:
         set sample, file("${sample}.mapped_to_target.txt") into ch_onTarget
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -424,6 +437,7 @@ process collateData {
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
@@ -457,6 +471,7 @@ process catStats {
     
     publishDir path: './metrics/', mode: 'copy'
 
+    cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
