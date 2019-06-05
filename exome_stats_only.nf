@@ -3,10 +3,10 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
-panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
-padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
-panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
-padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
+panel_int      = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
+padded_int     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
+panel_bed      = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.bed')
+padded_bed     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 
@@ -216,7 +216,7 @@ process indexBam {
     input:
         set baseName, file(bam) from ch_sortedBamFiles
     output:
-        set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics
+        set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forHSMetrics
     publishDir path: './output/intermediate', mode: 'copy'
 
     cache       'lenient'
@@ -233,170 +233,6 @@ process indexBam {
     samtools index $bam ${baseName}.mapped.marked.sorted.bam.bai
     """
 }
-
-
-//stupid un-needed GATK section
-
-
-process generateBqsrModel {
-    input:
-        set baseName, file(sortedBam), file(bamIndex) from ch_forGATK
-    output:
-        set baseName, file(sortedBam), file(bamIndex), file("${baseName}.recalreport") into ch_recalReportsBams
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    module      gatkModule
-    cpus        1
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
-
-    """
-    java -Xmx4g -jar $gatkJar -T BaseRecalibrator \
-        -R $ref \
-        -I $sortedBam \
-        -o ${baseName}.recalreport \
-        -knownSites $millsIndels \
-        -knownSites $knownIndels \
-        -knownSites $dbSNP \
-        -L ${panel_int}
-    """
-}
-
-
-process applyBqsrModel {
-    input:
-        set baseName, file(sortedBam), file(bamIndex), file(recalReport) from ch_recalReportsBams
-    output:
-        set baseName, file("${baseName}.mapped.marked.sorted.recal.bam") into ch_recalibratedBams
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    module      gatkModule
-    cpus        1
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
-
-    """
-    java -Xmx4g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR ${recalReport} \
-                   -o ${baseName}.mapped.marked.sorted.recal.bam
-    """
-}
-
-process call_variants{
-
-    input:
-        set baseName, file(bam) from ch_recalibratedBams
-    output:
-        set baseName, file("${baseName}.mapped.marked.sorted.recal.g.vcf") into ch_gVcfs
-    
-    publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    module      gatkModule
-    cpus        8
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
-
-
-
-    """
-    java -Xmx4g -jar $gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
-                    --emitRefConfidence GVCF \
-                    --num_cpu_threads_per_data_thread 8 \
-                    -I ${bam} -L ${padded_int} -o "${baseName}.mapped.marked.sorted.recal.g.vcf"
-    """
-
-}
-
-
-ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
-
-ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
-
-process vardict {
-    
-    input:
-        set baseName, file(bam), file(bai), file(segment) from ch_vardict
-    output:
-        set baseName, file("${baseName}.${segment}.vardict.tsv") into ch_vardictSegments
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        vardictCores
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
-    script:
-    """
-    export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
-    VarDict -G ${ref} -f 0.01 -N "$baseName" \
-        -b "$bam" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
-        > "${baseName}.${segment}.vardict.tsv"
-    """
-
-}
-
-ch_collatedSegments = ch_vardictSegments.map{ sample, segment -> [sample, segment]}.groupTuple(by: [0])
-
-process catSegments {
-    echo true
-
-    input: 
-        set baseName, file(tsv) from ch_collatedSegments
-    output: 
-        set baseName, file("${baseName}.collated.vardict.tsv") into ch_vardictCollated
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    
-    script:
-    
-    myfiles = tsv.collect().join(' ')
-
-    """
-    cat ${myfiles} > ${baseName}.collated.vardict.tsv
-    """
-
-}
-
-process makeVCF {
-    input:
-        set sample, file(tsv) from ch_vardictCollated
-    output:
-        set sample, file("${sample}.vardict.vcf") into ch_outputVCF
-    
-    publishDir path: './output/variants/vardict', mode: 'copy'
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
-    script:
-    """  
-    module purge
-    module load R/3.5.1
-    cat $tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/teststrandbias.R | \
-    /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
-    """
-}
-
 
 process collectHSMetrics {
 
