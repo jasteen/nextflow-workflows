@@ -60,7 +60,7 @@ globalQueueL      = 'comp'
 
 // Creating channel from input directory
 //create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
-ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
+ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*R{1,2}.fastq.gz", flat: true)
 
 
 process createUnmappedBam {
