@@ -3,7 +3,14 @@ panel_int      = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Target
 padded_int     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
 
 //Variables
-ref=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
+refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
+refBase          = "$refFolder/human_g1k_v37_decoy"
+ref              = file("${refBase}.fasta")
+refDict          = file("${refBase}.dict")
+refFai           = file("${refBase}.fasta.fai")
+
+
+
 picardJar          = '~/picard.jar'
 
 // Global Resource Configuration Options
@@ -23,12 +30,12 @@ globalQueueL      = 'comp'
 Channel
     .fromPath("${input_path}/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
-    .into { ch_1 }
+    .set { ch_1 }
 
 Channel
     .fromPath("${input_path}/*.bai")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
-    .into { ch_2 }
+    .set { ch_2 }
 
 
 process collectHSMetrics {
