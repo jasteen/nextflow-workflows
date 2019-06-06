@@ -1,10 +1,9 @@
-input_path = "/scratch/uc23/hfettke/cfDNA_BAMs/batch2"
-bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
-
+input_path =file("./bams")
+panel_int      = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
+padded_int     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
 
 //Variables
-reference=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
-genome_file=file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
+ref=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
 
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
@@ -29,7 +28,6 @@ Channel
     .fromPath("${input_path}/*.bai")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_2 }
-
 
 
 process collectHSMetrics {
