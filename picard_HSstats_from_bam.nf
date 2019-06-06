@@ -1,10 +1,11 @@
 input_path =file("./bams")
-panel_int      = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
-padded_int     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Targets_Standard.b37.interval_list')
+panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Covered_UCSChg19.interval_list ')
+padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_UCSChg19.interval_list')
 
 //Variables
-refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-refBase          = "$refFolder/human_g1k_v37_decoy"
+
+refFolder      = file("/projects/vh83/reference/genomes/hg19/")
+refBase          = "$refFolder/ucsc.hg19"
 ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
