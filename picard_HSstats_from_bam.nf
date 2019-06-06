@@ -33,16 +33,10 @@ Channel
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .set { ch_1 }
 
-Channel
-    .fromPath("${input_path}/*.bai")
-    .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
-    .set { ch_2 }
-
-
 process collectHSMetrics {
 
     input:
-        set sample, file(bam), file(bai) from ch_1.join(ch_2)
+        set sample, file(bam), file(bai) from ch_1
     output:
         set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics_unused2
     
