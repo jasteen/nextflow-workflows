@@ -4,6 +4,7 @@ padded_int     = file('/projects/vh83/reference/IDT_exome_panel/AML_AMLv3_Target
 
 //Variables
 ref=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
+picardJar          = '~/picard.jar'
 
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
