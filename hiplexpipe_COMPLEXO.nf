@@ -343,7 +343,7 @@ process CoverageBed {
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
     output:
-        set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
+        set sample, file("${sample}.bedtools_hist_all.txt"), file("${sample}.bedtools_amplicon.txt") into ch_bedtools
     
     publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
