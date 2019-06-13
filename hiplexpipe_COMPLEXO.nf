@@ -361,7 +361,7 @@ process CoverageBed {
     coverageBed -b ${bam} -a ${intervalFile} \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
-    bedtools coverage -f 5E-1 -a ${intervalFile} -b ${bam} | sed "s/$/    ${sample.name}/g" > "${sample}.bedtools_amplicon.txt"
+    bedtools coverage -f 5E-1 -a ${intervalFile} -b ${bam} | sed "s/\$/    ${sample.name}/g" > "${sample}.bedtools_amplicon.txt"
     """
 }
 
