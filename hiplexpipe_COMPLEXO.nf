@@ -322,6 +322,8 @@ process InstersectBed {
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
+    publishDir path: './metrics/raw', mode: 'copy'
+
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -343,6 +345,7 @@ process CoverageBed {
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
+    publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -367,6 +370,7 @@ process ReadsMapped {
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
+    publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -389,6 +393,7 @@ process ReadsTotal {
     output:
         set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
 
+    publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -411,6 +416,7 @@ process TargetMapped {
     output:
         set sample, file("${sample}.mapped_to_target.txt") into ch_onTarget
 
+    publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
@@ -437,6 +443,7 @@ process collateData {
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
 
+    publishDir path: './metrics/raw', mode: 'copy'
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
