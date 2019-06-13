@@ -440,7 +440,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
     input:
-        set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
+        set sample, file(bedtools), file(bedtools2), file(onGenome), file(onTarget), file(onTotal) from ch_final3
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
 
