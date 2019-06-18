@@ -4,7 +4,7 @@
 
 project_name   = "PALB2_isoform_analysis"
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('~/vh83/raw_data/nanopore/20190606_0415_MN30054_FAK12693_3bcbffef/fastq_pass')
+inputDirectory = file('/projects/vh83/raw_data/nanopore/20190606_0415_MN30054_FAK12693_3bcbffef/fastq_pass')
 tmp_dir        = file('/scratch/vh83/tmp/')
 chromsizes     = file('/scratch/vh83/projects/small_projects/palb2_nanopore/chrom_sizes.txt')
 humanGTF       = file('/scratch/vh83/projects/small_projects/palb2_nanopore/Homo_sapiens.GRCh37.87.chr.gtf')
@@ -33,7 +33,7 @@ globalTimeL       = '24h'
 globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
-ch_fastqs = Channel.fromPath("$inputDirectory/*.fastq").collect()
+ch_fastqs = Channel.fromPath("${inputDirectory}/*.fastq").collect()
 
 process catFastqs {
     
