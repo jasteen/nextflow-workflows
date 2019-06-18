@@ -77,7 +77,7 @@ process flairAlign {
     stageInMode globalStageInMode
     cpus        8
     module      condaModule
-    conda       '~/.conda/envs/py3.5/'
+    conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
@@ -106,7 +106,7 @@ process flairCorrect {
     stageInMode globalStageInMode
     cpus        1
     module      condaModule
-    conda       '~/.conda/envs/py3.5/'
+    conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
@@ -136,7 +136,7 @@ process flairCollapse {
     stageInMode globalStageInMode
     cpus        1
     module      condaModule
-    conda       '~/.conda/envs/py3.5/'
+    conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
