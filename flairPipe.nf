@@ -77,6 +77,7 @@ process flairAlign {
     stageInMode globalStageInMode
     cpus        8
     module      condaModule
+    conda       '~/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
@@ -84,7 +85,6 @@ process flairAlign {
 
     script:
     """
-    source activate py3.5
     python ~/scripts/gitcontrolled/flair/flair.py align -g ${ref} -r ${fastq} -t ${task.cpus} \
            -o "${project_name}.flair_aligned" -p
     """
@@ -106,6 +106,7 @@ process flairCorrect {
     stageInMode globalStageInMode
     cpus        1
     module      condaModule
+    conda       '~/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
@@ -113,7 +114,6 @@ process flairCorrect {
 
     script:
     """
-    source activate py3.5
     python flair.py correct -g ${ref} -q ${bed} -f $humanGTF -c $chromsizes
     """
 }
@@ -136,6 +136,7 @@ process flairCollapse {
     stageInMode globalStageInMode
     cpus        1
     module      condaModule
+    conda       '~/.conda/envs/py3.5/'
     module      samtoolsModule
     memory      globalMemoryM
     time        '6h'
@@ -143,7 +144,6 @@ process flairCollapse {
 
     script:
     """
-    source activate py3.5
     python ~/scripts/git_controlled/flair/flair.py collapse -g ${ref} -r ${fastq} -q ${psl}
     """
 }
