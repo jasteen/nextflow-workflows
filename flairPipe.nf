@@ -88,6 +88,7 @@ process flairAlign {
     python ~/scripts/gitcontrolled/flair/flair.py align -g ${ref} -r ${fastq} -t ${task.cpus} \
            -o "${project_name}.flair_aligned" -p
     """
+}
 
 process flairCorrect {
     
@@ -146,4 +147,3 @@ process flairCollapse {
     python ~/scripts/git_controlled/flair/flair.py collapse -g ${ref} -r ${fastq} -q ${psl}
     """
 }
-
