@@ -42,7 +42,7 @@ process catFastqs {
     input:
         file '*.fastq' from ch_fastqs
     output:
-        file "${project_name}.all.fastq.gz" into ch_catFastq, ch_catFastq2
+        file "${project_name}.all.fastq" into ch_catFastq, ch_catFastq2
 
     publishDir path: './output', mode: 'copy'
     
@@ -56,7 +56,7 @@ process catFastqs {
 
     script:
     """
-    cat *.fastq > "${project_name}.all.fastq.gz"
+    cat *.fastq > "${project_name}.all.fastq"
     """
 }
 
