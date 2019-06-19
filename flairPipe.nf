@@ -68,7 +68,7 @@ process flairAlign {
     input:
         file(fastq) from ch_catFastq
     output:
-        set file("${project_name}.flair_aligned.sam"), file("${project_name}.flair_aligned.bed"), file("${project_name}.flair_aligned.psl")  into ch_align
+        set file("${project_name}.flair_aligned.sam"), file("${project_name}.flair_aligned.bed")  into ch_align
 
     publishDir path: './output', mode: 'copy'
     
@@ -86,7 +86,7 @@ process flairAlign {
     script:
     """
     python ~/scripts/git_controlled/flair/flair.py align -g ${ref} -r ${fastq} -t ${task.cpus} \
-           -o "${project_name}.flair_aligned" -p
+           -o "${project_name}.flair_aligned"
     """
 }
 
