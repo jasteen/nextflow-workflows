@@ -85,7 +85,7 @@ process flairAlign {
 
     script:
     """
-    python ~/scripts/git_controlled/flair/flair.py align -g ${ref} -r ${fastq} -t ${task.cpus} \
+    python ~/scripts/git_controlled/flair/flair.py align -v1.3 -g ${ref} -r ${fastq} -t ${task.cpus} \
            -o "${project_name}.flair_aligned"
     """
 }
