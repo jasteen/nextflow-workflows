@@ -95,7 +95,7 @@ process flairCorrect {
     publishDir path: './output', mode: 'copy'
     
     input:
-        set file(sam), file(bed), file(psl) from ch_align
+        set file(sam), file(bed) from ch_align
     output:
         set file("*_all_corrected.bed"), file("*_all_inconsistent.bed"), file("*.psl") into ch_correct
 
