@@ -68,7 +68,7 @@ process flairAlign {
     input:
         file(fastq) from ch_catFastq
     output:
-        set file("${project_name}.flair_aligned.sam"), file("${project_name}.flair_aligned.bed")  into ch_align
+        set file("${project_name}.flair_aligned.sam"), file("${project_name}.flair_aligned.bed")  into ch_align, ch_align2
 
     publishDir path: './output', mode: 'copy'
     
@@ -90,6 +90,35 @@ process flairAlign {
     """
 }
 
+process makeBam{
+
+    publishDir path: './output', mode: 'copy'
+    
+    input:
+        set file(sam), file(bed) from ch_align2
+    output:
+        set file("*.bam"), file("*.bai") into ch_bams
+
+    publishDir path: './output', mode: 'copy'
+    
+    cache         'lenient'
+    executor      globalExecutor
+    stageInMode.  globalStageInMode
+    cpus          1
+    module        samtoolsModule
+    memory        globalMemoryM
+    time          '6h'
+    queue         globalQueueL
+    errorStrategy 'ignore'
+
+    script:
+    """
+    samtools view -bS ${sam} | sort -o "${sam}.bam"
+    samtools index "${sam}.bam"
+    """
+}
+
+
 process flairCorrect {
     
     publishDir path: './output', mode: 'copy'
@@ -104,7 +133,7 @@ process flairCorrect {
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        1
+    cpus        8
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
@@ -114,7 +143,7 @@ process flairCorrect {
 
     script:
     """
-    python ~/scripts/git_controlled/flair/flair.py correct -q ${bed} -f $humanGTF -c $chromsizes
+    python ~/scripts/git_controlled/flair/flair.py correct -q ${bed} -f $humanGTF -c $chromsizes -t ${task.cpus}
     """
 }
 
@@ -134,7 +163,7 @@ process flairCollapse {
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        1
+    cpus        8
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
@@ -144,6 +173,6 @@ process flairCollapse {
 
     script:
     """
-    python ~/scripts/git_controlled/flair/flair.py collapse -g ${ref} -r ${fastq} -q ${psl}
+    python ~/scripts/git_controlled/flair/flair.py collapse --keep_intermediate -g ${ref} -r ${fastq} -q ${psl} -t ${task.cpus}
     """
 }
