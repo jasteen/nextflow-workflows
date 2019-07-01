@@ -6,8 +6,8 @@ project_name   = "PALB2_isoform_analysis"
 refFolder      = file("/projects/vh83/reference/nanopore_references/chr16_only")
 inputDirectory = file('./fastqs')
 tmp_dir        = file('/scratch/vh83/tmp/')
-chromsizes     = file('$refFolder/chr16_size.txt')
-humanGTF       = file('$refFolder/chr16.gtf')
+chromsizes     = file("$refFolder/chr16_size.txt")
+humanGTF       = file("$refFolder/chr16.gtf")
 
 // Getting Reference Files
 refBase          = "$refFolder/chr16"
