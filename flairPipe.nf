@@ -143,7 +143,7 @@ process flairCorrect {
 
     script:
     """
-    python ~/scripts/git_controlled/flair/flair.py correct -q ${bed} -f $humanGTF -c $chromsizes -t ${task.cpus}
+    python ~/scripts/git_controlled/flair/flair.py correct -g ${ref} -q ${bed} -f $humanGTF -c $chromsizes -t ${task.cpus}
     """
 }
 
