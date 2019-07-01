@@ -133,7 +133,7 @@ process flairCorrect {
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        8
+    cpus        1
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
     module      samtoolsModule
@@ -143,7 +143,7 @@ process flairCorrect {
 
     script:
     """
-    python ~/scripts/git_controlled/flair/flair.py correct -g ${ref} -q ${bed} -f $humanGTF -c $chromsizes -t ${task.cpus}
+    python ~/scripts/git_controlled/flair/flair.py correct -g ${ref} -q ${bed} -f $humanGTF -c $chromsizes
     """
 }
 
