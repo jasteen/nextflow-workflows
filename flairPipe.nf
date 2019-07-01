@@ -103,7 +103,7 @@ process makeBam{
     
     cache         'lenient'
     executor      globalExecutor
-    stageInMode.  globalStageInMode
+    stageInMode   globalStageInMode
     cpus          1
     module        samtoolsModule
     memory        globalMemoryM
