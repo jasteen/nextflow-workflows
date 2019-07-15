@@ -132,8 +132,8 @@ process generatePerbaseMetrics {
     
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    memory      globalMemoryM 
-    time        globalTimeM
+    memory      globalMemory 
+    time        globalTimeL
     queue       globalQueueL 
     module      'samtools'
     cpus        '8'
