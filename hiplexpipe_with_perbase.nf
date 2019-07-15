@@ -164,7 +164,7 @@ process reduceMpileup{
         awk 'BEGIN{FS=OFS="\t"} \
         { \
             for(i=1; i<=NF; i+=( i<4 ? 1 : 3)) \
-                printf "%s%s", $i, ( (i+3)>NF ? ORS : OFS) \
+                printf "%s%s", \$i, ( (i+3)>NF ? ORS : OFS) \
         }' $pileup > mpileup_out_reduced.txt
     """
 }
