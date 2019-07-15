@@ -168,6 +168,8 @@ process reduceMpileup{
         }' $pileup > mpileup_out.txt
     """
 }
+
+/*
 process run_vardict {
 
     input:
@@ -385,7 +387,7 @@ process apply_vep {
                       -o merged.vt.vep.vcf.gz
     """
 }
-
+*/
 
 /*
 Stats Generation Section
