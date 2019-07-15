@@ -105,7 +105,7 @@ process run_bamClipper {
     module      'samtools'
 
     """
-    ${bamclipper_exe} -b ${bam} -p ${primer_bedpe_file} -n ${task.cpus} > ${baseName}.primerclipped.bam
+    ${bamclipper_exe} -b ${bam} -p ${primer_bedpe_file} -n ${task.cpus} > ${baseName}.primerclipped.bam; samtools index ${baseName}.primerclipped.bam
     """
 }
 
