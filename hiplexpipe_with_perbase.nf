@@ -126,7 +126,7 @@ process generatePerbaseMetrics {
         file list from ch_bamList_f
         file '*' from ch_all_bams               
     output: 
-        file("mpileup_out.txt") into ch_mpileupOUT           
+        file("mpileup_out.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -136,13 +136,17 @@ process generatePerbaseMetrics {
     time        globalTimeM
     queue       globalQueueL 
     module      'samtools'
+    cpus        '8'
+    module      'bcftools'
 
     """
-    samtools mpileup -b ${list} -o mpileup_out.txt
+    bcftools mpileup --threads ${task.cpus} -Ou -d 1000 -f ${ref} -b ${list} | bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
     """
 
 }
 
+
+/*
 process reduceMpileup{
 
     input:
@@ -168,7 +172,7 @@ process reduceMpileup{
         }' $pileup > mpileup_out_reduced.txt
     """
 }
-
+*/
 /*
 process run_vardict {
 
