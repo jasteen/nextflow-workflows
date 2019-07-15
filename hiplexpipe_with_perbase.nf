@@ -147,9 +147,9 @@ process reduceMpileup{
 
     input:
         file pileup from ch_mpileupOUT
-        file '*' from ch_mpileupOUT_reduced               
+                       
     output: 
-        file("mpileup_out.txt") into ch_mpileupOUT           
+        file("mpileup_out_reduced.txt") into ch_mpileupOUT_reduced           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -165,7 +165,7 @@ process reduceMpileup{
         { \
             for(i=1; i<=NF; i+=( i<4 ? 1 : 3)) \
                 printf "%s%s", $i, ( (i+3)>NF ? ORS : OFS) \
-        }' $pileup > mpileup_out.txt
+        }' $pileup > mpileup_out_reduced.txt
     """
 }
 
