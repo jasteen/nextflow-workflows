@@ -109,7 +109,7 @@ process run_bamClipper {
     """
 }
 
-***magic sample collection right here generate list.txt***
+//***magic sample collection right here generate list.txt***
 ch_forperBase.into{ch_bamList;ch_bams}
 //set one version to a list of filenames of the VCF
 ch_bamList.map { it -> it[1].name }
