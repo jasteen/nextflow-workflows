@@ -92,7 +92,7 @@ process run_bamClipper {
     input:
         set baseName, file(bam), file(bai) from ch_forBamClipper               
     output: 
-        set baseName, file("${baseName}.primerclipped.bam"), file("${baseName}.primerclipped.bam.bai") into ch_forperBase           
+        set baseName, file("${baseName}.hq.sorted.primerclipped.bam"), file("${baseName}.hq.sorted.primerclipped.bam.bai") into ch_forperBase           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -105,7 +105,7 @@ process run_bamClipper {
     module      'samtools'
 
     """
-    ${bamclipper_exe} -b ${bam} -p ${primer_bedpe_file} -n ${task.cpus} > ${baseName}.primerclipped.bam; samtools index ${baseName}.primerclipped.bam
+    ${bamclipper_exe} -b ${bam} -p ${primer_bedpe_file} -n ${task.cpus}
     """
 }
 
