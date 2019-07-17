@@ -362,7 +362,7 @@ process apply_vep {
                       -o merged.vt.vep.vcf.gz
     """
 }
-*/
+
 
 /*
 Stats Generation Section
