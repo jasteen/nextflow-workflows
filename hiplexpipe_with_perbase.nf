@@ -120,6 +120,7 @@ ch_bams
     .collect()
     .set {ch_all_bams}
 
+//awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
 
 process generatePerbaseMetrics {
     input:
@@ -145,35 +146,6 @@ process generatePerbaseMetrics {
 
 }
 
-
-/*
-process reduceMpileup{
-
-    input:
-        file pileup from ch_mpileupOUT
-                       
-    output: 
-        file("mpileup_out_reduced.txt") into ch_mpileupOUT_reduced           
-    
-    publishDir path: './bamclipper', mode: 'copy'                                    
-    
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL 
-    module      'samtools'
-
-    """
-        awk 'BEGIN{FS=OFS="\t"} \
-        { \
-            for(i=1; i<=NF; i+=( i<4 ? 1 : 3)) \
-                printf "%s%s", \$i, ( (i+3)>NF ? ORS : OFS) \
-        }' $pileup > mpileup_out_reduced.txt
-    """
-}
-*/
-/*
 process run_vardict {
 
     input:
@@ -244,7 +216,6 @@ process reheaderVCF {
     """
 
 }
-
 
 process sortVCFS {
 
