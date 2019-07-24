@@ -8,8 +8,9 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 //project specific bed files
 
 vardictBed       = file("/projects/vh83/reference/prostrap/vardict/PROSTRAP_8Col.bed")
-intervalFile     = file("//projects/vh83/reference/prostrap/prostrap_final_b37_sorted.bed")
+intervalFile     = file("/projects/vh83/reference/prostrap/prostrap_final_b37_sorted.bed")
 primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
+exome_bed        = file("/projects/vh83/reference/prostrap/prostrap_exon.bed")
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -127,7 +128,7 @@ process generatePerbaseMetrics {
         file list from ch_bamList_f
         file '*' from ch_all_bams               
     output: 
-        file("mpileup_out.txt") into ch_mpileupOUT           
+        file("mpileup_out.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -141,7 +142,7 @@ process generatePerbaseMetrics {
     module      'bcftools'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Ou -d 1000 -f ${ref} -b ${list} > mpileup_out.txt
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${exome_bed} -f ${ref} -b ${list} -o mpileup_out.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
