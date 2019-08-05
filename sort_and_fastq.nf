@@ -36,7 +36,7 @@ process namesort {
 
     script:
     """
-    samtools sort -n -@${task.cpus} ${bam} ${baseName}.qsort.bam
+    samtools sort -n -@${task.cpus} ${bam} -o ${baseName}.qsort.bam
     """
 }
 
