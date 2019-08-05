@@ -1,30 +1,75 @@
 //sort_and_fastq.nf
 
+ch_inputFiles = Channel.fromPath("*.bam", flat: true).map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
+
 process namesort {
 
-    publishDir path: './output/intermediate', mode: 'copy'
-
     input:
-        set baseName, file(bam) from ch_unmappedBams
+        set baseName, file(bam) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.unmapped.marked.bam"),
-                      file("${baseName}.unmapped.marked_metrics.tsv") into ch_markedBams
-
+        set baseName, file("${baseName}.qsort.bam") into ch_sortedBams
+            
     cache       'lenient'
     executor    globalExecutor
     stageInMode globalStageInMode
-    cpus        1
-    module      'java'
+    cpus        4
+    module      'samtools'
     memory      globalMemoryM
     time        '3h'
     queue       globalQueueL
 
     script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
-        -INPUT $bam \
-        -OUTPUT "${baseName}.unmapped.marked.bam" \
-        -METRICS "${baseName}.unmapped.marked_metrics.tsv"
+    samtools sort -n -@${task.cpus} ${bam} ${baseName}.qsort.bam
     """
 }
 
+process makeFastq {
+
+    input:
+        set baseName, file(bam) from ch_Bams
+    output:
+        set baseName, file("${baseName}.R1.fastq"), file("${baseName}.R2.fastq") into ch_sortedBams
+            
+    cache       'lenient'
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    module      'bedtools'
+    memory      globalMemoryM
+    time        '3h'
+    queue       globalQueueL
+
+    script:
+    """
+    bedtools bamtofastq -i ${bam} \
+                      -fq ${baseName}.R1.fastq \
+                      -fq2 ${baseName}.R2.fastq
+    """
+}
+
+
+ch_CollectedFastqs = ch_sortedBams.collect()
+
+process gzipFastq {
+
+    publishDir path: './processed', mode: 'copy'
+
+    input:
+        file(fastq) from ch_CollectedFastqs
+    output:
+        file("${fastq}.gz") into ch_zippedFastqs
+            
+    cache       'lenient'
+    executor    globalExecutor
+    stageInMode globalStageInMode
+    cpus        1
+    memory      globalMemoryM
+    time        '3h'
+    queue       globalQueueL
+
+    script:
+    """
+    gzip fastq
+    """
+}
