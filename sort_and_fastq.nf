@@ -1,6 +1,6 @@
 //sort_and_fastq.nf
 
-ch_inputFiles = Channel.fromPath("*.bam", flat: true).map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
+ch_inputFiles = Channel.fromPath("./*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 process namesort {
 
