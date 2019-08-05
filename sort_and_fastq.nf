@@ -1,5 +1,21 @@
 //sort_and_fastq.nf
 
+// Global Resource Configuration Options
+globalExecutor    = 'slurm'
+globalStageInMode = 'symlink'
+globalCores       = 1
+bwaCores        = 12
+vardictCores      = 4
+globalMemoryS     = '6 GB'
+globalMemoryM     = '32 GB'
+globalMemoryL     = '64 GB'
+globalTimeS       = '8m'
+globalTimeM       = '1h'
+globalTimeL       = '24h'
+globalQueueS      = 'short'
+globalQueueL      = 'comp'
+
+
 ch_inputFiles = Channel.fromPath("./*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 process namesort {
