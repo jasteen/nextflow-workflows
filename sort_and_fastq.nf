@@ -43,9 +43,9 @@ process namesort {
 process makeFastq {
 
     input:
-        set baseName, file(bam) from ch_Bams
+        set baseName, file(bam) from ch_sortedBams
     output:
-        set baseName, file("${baseName}.R1.fastq"), file("${baseName}.R2.fastq") into ch_sortedBams
+        set baseName, file("${baseName}.R1.fastq"), file("${baseName}.R2.fastq") into ch_fastqs
             
     cache       'lenient'
     executor    globalExecutor
@@ -65,7 +65,7 @@ process makeFastq {
 }
 
 
-ch_CollectedFastqs = ch_sortedBams.collect()
+ch_CollectedFastqs = ch_fastqs.collect()
 
 process gzipFastq {
 
