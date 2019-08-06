@@ -66,7 +66,9 @@ process makeFastq {
 
 
 ch_CollectedFastqs = ch_fastqs.collect()
+ch_CollectedFastqs.println()
 
+/*
 process gzipFastq {
 
     publishDir path: './processed', mode: 'copy'
@@ -89,3 +91,4 @@ process gzipFastq {
     gzip fastq
     """
 }
+*/
