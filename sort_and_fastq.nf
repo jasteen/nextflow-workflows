@@ -88,4 +88,3 @@ process gzipFastq {
     gzip fastq
     """
 }
-*/
