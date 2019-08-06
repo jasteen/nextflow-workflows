@@ -45,7 +45,7 @@ process makeFastq {
     input:
         set baseName, file(bam) from ch_sortedBams
     output:
-        set baseName, file("${baseName}.R1.fastq"), file("${baseName}.R2.fastq") into ch_fastqs
+        file("*.fastq") into ch_fastqs
             
     cache       'lenient'
     executor    globalExecutor
@@ -65,16 +65,13 @@ process makeFastq {
 }
 
 
-ch_CollectedFastqs = ch_fastqs.collect()
-ch_CollectedFastqs.subscribe {  println "Got: $it"  }
 
-/*
 process gzipFastq {
 
     publishDir path: './processed', mode: 'copy'
 
     input:
-        file(fastq) from ch_CollectedFastqs
+        file(fastq) from ch_fastqs.flatten()
     output:
         file("${fastq}.gz") into ch_zippedFastqs
             
