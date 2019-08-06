@@ -64,8 +64,6 @@ process makeFastq {
     """
 }
 
-
-
 process gzipFastq {
 
     publishDir path: './processed', mode: 'copy'
@@ -85,6 +83,6 @@ process gzipFastq {
 
     script:
     """
-    gzip fastq
+    gzip ${fastq}
     """
 }
