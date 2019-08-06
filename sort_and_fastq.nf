@@ -75,7 +75,7 @@ process gzipFastq {
             
     cache       'lenient'
     executor    globalExecutor
-    stageInMode globalStageInMode
+    stageInMode 'copy'
     cpus        1
     memory      globalMemoryM
     time        '3h'
