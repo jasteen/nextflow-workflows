@@ -66,7 +66,7 @@ process makeFastq {
 
 
 ch_CollectedFastqs = ch_fastqs.collect()
-ch_CollectedFastqs.println()
+ch_CollectedFastqs.subscribe {  println "Got: $it"  }
 
 /*
 process gzipFastq {
