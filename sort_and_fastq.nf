@@ -4,8 +4,6 @@
 globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
-bwaCores        = 12
-vardictCores      = 4
 globalMemoryS     = '6 GB'
 globalMemoryM     = '32 GB'
 globalMemoryL     = '64 GB'
@@ -14,6 +12,7 @@ globalTimeM       = '1h'
 globalTimeL       = '24h'
 globalQueueS      = 'short'
 globalQueueL      = 'comp'
+picardJar          = '~/picard.jar'
 
 
 ch_inputFiles = Channel.fromPath("./*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
@@ -42,6 +41,7 @@ process namesort {
 
 process makeFastq {
 
+    publishDir path: './processed', mode: 'copy' 
     input:
         set baseName, file(bam) from ch_sortedBams
     output:
@@ -58,31 +58,11 @@ process makeFastq {
 
     script:
     """
-    bedtools bamtofastq -i ${bam} \
-                      -fq ${baseName}.R1.fastq \
-                      -fq2 ${baseName}.R2.fastq
+    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar SamToFastq \
+     -I $bam \
+     -F ${baseName}_R1.fastq.gz \
+     -F2 ${baseName}_R2.fastq.gz \
+     -GZOPRG TRUE
     """
 }
 
-process gzipFastq {
-
-    publishDir path: './processed', mode: 'copy'
-
-    input:
-        file(fastq) from ch_fastqs.flatten()
-    output:
-        file("${fastq}.gz") into ch_zippedFastqs
-            
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode 'copy'
-    cpus        1
-    memory      globalMemoryM
-    time        '3h'
-    queue       globalQueueL
-
-    script:
-    """
-    gzip ${fastq}
-    """
-}
