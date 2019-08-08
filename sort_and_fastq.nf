@@ -45,7 +45,7 @@ process makeFastq {
     input:
         set baseName, file(bam) from ch_sortedBams
     output:
-        file("*.fastq") into ch_fastqs
+        file("*.fastq.gz") into ch_fastqs
             
     cache       'lenient'
     executor    globalExecutor
