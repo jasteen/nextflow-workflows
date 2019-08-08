@@ -62,7 +62,6 @@ process makeFastq {
      -I $bam \
      -F ${baseName}_R1.fastq.gz \
      -F2 ${baseName}_R2.fastq.gz \
-     -GZOPRG TRUE
-    """
+     """
 }
 
