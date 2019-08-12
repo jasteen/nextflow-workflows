@@ -3,6 +3,7 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
+inputDirectory = file('./fastqs_partial')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 //project specific bed files
