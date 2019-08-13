@@ -10,6 +10,7 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 vardictBed       = file("/projects/vh83/reference/brastrap_specific/vardict/BRASTRAP_721717_8column.bed")
 intervalFile     = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_621717_100.final.roverfile_g37.numsort.sorted.bed")
 restrictedBed    = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed")
+primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -39,7 +40,7 @@ vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-
 picardJar      = '~/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
-
+bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
@@ -86,7 +87,66 @@ process align_bwa {
     """
 }
 
-ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
+ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_forBamClipper}
+
+process run_bamClipper {
+    input:
+        set baseName, file(bam), file(bai) from ch_forBamClipper               
+    output: 
+        set baseName, file("${baseName}.hq.sorted.primerclipped.bam"), file("${baseName}.hq.sorted.primerclipped.bam.bai") into ch_forperBase           
+    
+    publishDir path: './bamclipper', mode: 'copy'                                    
+    
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL 
+    module      'gnuparallel/20190122'
+    module      'samtools'
+
+    """
+    ${bamclipper_exe} -b ${bam} -p ${primer_bedpe_file} -n ${task.cpus}
+    """
+}
+
+//***magic sample collection right here generate list.txt***
+ch_forperBase.into{ch_bamList;ch_bams}
+//set one version to a list of filenames of the VCF
+ch_bamList.map { it -> it[1].name }
+       .collectFile(name: 'list.txt', newLine: true)
+       .set {ch_bamList_f}
+//set the second to all the files
+ch_bams
+    .collect()
+    .set {ch_all_bams}
+
+//awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
+
+process generatePerbaseMetrics {
+    input:
+        file list from ch_bamList_f
+        file '*' from ch_all_bams               
+    output: 
+        file("mpileup_out.vcf.gz") into ch_mpileupOUT           
+    
+    publishDir path: './bamclipper', mode: 'copy'                                    
+    
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    memory      globalMemoryL 
+    time        globalTimeL
+    queue       globalQueueL 
+    module      'samtools'
+    cpus        '8'
+    module      'bcftools'
+
+    """
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_out.vcf.gz
+
+    """
+//| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
+}
 
 process run_vardict {
 
