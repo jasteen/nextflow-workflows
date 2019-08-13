@@ -473,7 +473,7 @@ process TargetMapped {
 
     script:
     """
-    samtools view -c -F4 -R ${restrictedBed} ${bam} > ${sample}.mapped_to_target.txt
+    samtools view -c -F4 ${bam} > ${sample}.mapped_to_target.txt
     """
 }
 
