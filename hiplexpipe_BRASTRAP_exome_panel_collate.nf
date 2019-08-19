@@ -154,7 +154,7 @@ process generatePerbaseMetrics {
     
     """
     echo "${vcf}" | tr " " "\n" > mylist.txt
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b mylist.txt -o ${baseMname}.mpileup.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b mylist.txt -o ${baseName}.mpileup.vcf.gz
     """
 
 
