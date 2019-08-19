@@ -359,15 +359,18 @@ process indexVCFS {
 //duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
-//ch_list.map { it -> it[1].name }
-ch_list.map { a,file(b),file(c) -> b.name, c.name }
+ch_list.map { it -> it[1].name }
+
        .collectFile(name: 'list2.txt', newLine: true)
        .splitText( by: 100 )
        .set {ch_list_f}
 //set the second to all the files
-//ch_files
-//    .collect()
-//    .set {ch_all_files}
+Channel.fromPath("list2.txt")
+    .map {it -> it.tbi}
+//   ch_files
+    .collect()
+    
+    .set {ch_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
 
