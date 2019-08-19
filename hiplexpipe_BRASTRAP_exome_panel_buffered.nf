@@ -93,7 +93,7 @@ process run_bamClipper {
     input:
         set baseName, file(bam), file(bai) from ch_forBamClipper               
     output: 
-        set baseName, file("${baseName}.hq.sorted.primerclipped.bam"), file("${baseName}.hq.sorted.primerclipped.bam.bai") into ch_forperBase           
+        set baseName, file("${baseName}.hq.sorted.primerclipped.bam"), file("${baseName}.hq.sorted.primerclipped.bam.bai") into ch_forperBase          
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -111,7 +111,9 @@ process run_bamClipper {
 }
 
 //***magic sample collection right here generate list.txt***
-ch_forperBase.into{ch_bamList.buffer( size: 10, remainder: true );ch_bams.buffer( size: 10, remainder: true )}
+ch_forperBase
+    .buffer( size: 10, remainder: true )
+    .into{ch_bamList;ch_bams}
 
 //set one version to a list of filenames of the VCF
 
