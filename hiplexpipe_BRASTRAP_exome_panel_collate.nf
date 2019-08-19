@@ -163,6 +163,7 @@ process generatePerbaseMetrics {
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
 }
 
+/*
 process sortpileupVCFS {
 
     input:
@@ -185,7 +186,7 @@ process sortpileupVCFS {
     bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
     """
 }
-/*
+
 process indexpileupVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
