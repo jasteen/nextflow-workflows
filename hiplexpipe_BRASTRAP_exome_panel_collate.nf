@@ -234,7 +234,7 @@ process mergeVCFS {
     script: 
     
     """
-    bcftools merge -R ${restrictedBed} -O z -o "merged.mpileup.vcf.gz" -l list.txt
+    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
 
