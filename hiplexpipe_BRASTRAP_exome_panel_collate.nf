@@ -137,8 +137,8 @@ process generatePerbaseMetrics {
     input:
         set file(vcf), file(index) from ch_fucks_given
                  
-    output: 
-        file("mpileup.vcf.gz") into ch_mpileupOUT           
+    //output: 
+    //    file("mpileup.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
