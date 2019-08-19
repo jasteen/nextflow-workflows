@@ -439,7 +439,7 @@ process mergepreVCFS {
     file '*' from ch_premerge_all_files
     
     output:
-    file "merged.mpileup.vcf.gz" into ch_mergedVCF
+    file "merged.mpileup.vcf.gz" into ch_mergedfinalVCF
 
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -459,7 +459,7 @@ process mergepreVCFS {
 process vt_decompose_normalise {
         
     input:
-        file(vcf) from ch_mergedVCF
+        file(vcf) from ch_mergedfinalVCF
     output:
         file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
 
