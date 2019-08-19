@@ -182,7 +182,7 @@ process indexVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
     output:
-        set file(vcf), file(index) into ch_indexedmpileupVCF
+        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
