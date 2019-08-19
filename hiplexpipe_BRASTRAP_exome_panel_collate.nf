@@ -183,7 +183,7 @@ process sortpileupVCFS {
     bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
     """
 }
-
+/*
 process indexpileupVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
