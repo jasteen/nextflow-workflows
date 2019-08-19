@@ -115,6 +115,8 @@ ch_forperBase
     .buffer(size:10, remainder: true)
     .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
+
+ch_fucks_given.subscribe{println.it}
 //set one version to a list of filenames of the VCF
 
 //ch_bamList
@@ -129,7 +131,7 @@ ch_forperBase
 //    .set {ch_all_bams}
 
 //awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
-
+/*
 process generatePerbaseMetrics {
     echo true
     input:
@@ -201,7 +203,7 @@ process indexpileupVCFS {
     bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
-/*
+z
 //duplicate ch_indexedVCF
 ch_indexedmpileupVCF
     .into{ch_mpileuplist;ch_mpileup_files}
