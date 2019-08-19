@@ -148,7 +148,7 @@ process generatePerbaseMetrics {
     module      'bcftools'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_out.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_${list}.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
