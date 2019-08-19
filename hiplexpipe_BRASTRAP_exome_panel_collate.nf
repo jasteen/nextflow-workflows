@@ -217,7 +217,7 @@ process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file(vcf), file(index) list from ch_fucks2
+    file(vcf), file(index) from ch_fucks2
         
     output:
     file "merged.mpileup.vcf.gz" into ch_mergedVCF
