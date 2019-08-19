@@ -359,13 +359,14 @@ process indexVCFS {
 //duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
-ch_files.collectFile(name: 'list2.txt', newLine: true)
-       .splitText( by: 100 )
-       .set {ch_list_f}
+ch_files.map {it -> it[1].name}
+    .collectFile(name: 'list2.txt', newLine: true)
+    .splitText( by: 100 )
+    .set {ch_list_f}
 //set the second to all the files
-//ch_files
-//   .collect()
-//    .set {ch_all_files}
+ch_files
+    .collect()
+    .set {ch_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
 
@@ -374,7 +375,7 @@ process mergeVCFS {
     publishDir './variants_merged/', mode: 'copy'
     input:
     file(list) from ch_list_f
-//    file('*') from ch_all_files
+    file('*.gz*') from ch_all_files
     
     output:
     file "merged.vardict.${list}.vcf.gz" into ch_premergedVCF
@@ -390,7 +391,6 @@ process mergeVCFS {
     script: 
     
     """
-    \$(cat ${list}) | ln -s - task.workdir
     bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l ${list}
     """
 }
