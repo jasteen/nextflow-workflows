@@ -364,9 +364,9 @@ ch_list.map { it -> it[1].name }
        .splitText( by: 100 )
        .set {ch_list_f}
 //set the second to all the files
-ch_files
-    .collect()
-    .set {ch_all_files}
+//ch_files
+//    .collect()
+//    .set {ch_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
 
@@ -375,7 +375,7 @@ process mergeVCFS {
     publishDir './variants_merged/', mode: 'copy'
     input:
     file(list) from ch_list_f
-    file('*') from ch_all_files
+//    file('*') from ch_all_files
     
     output:
     file "merged.vardict.${list}.vcf.gz" into ch_premergedVCF
