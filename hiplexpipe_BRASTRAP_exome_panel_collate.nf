@@ -193,7 +193,7 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file list from ch_mpileuplist_f
+    file list from ch_mpileup_list_f
     file '*' from ch_mpileup_all_files
     
     output:
