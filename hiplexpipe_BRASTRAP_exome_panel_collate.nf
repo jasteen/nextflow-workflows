@@ -158,7 +158,7 @@ process indexVCFS {
     input:
         file(vcf) from ch_mpileupOUT
     output:
-        file(index) into ch_indexedmpileupVCF
+        set file(vcf), file(index) into ch_indexedmpileupVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -172,7 +172,7 @@ process indexVCFS {
 
     script:
     """
-    bcftools index -f --tbi ${vcf} -o ${baseName}.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
 
@@ -180,7 +180,7 @@ process indexVCFS {
 ch_indexedmpileupVCF
     .into{ch_mpileuplist;ch_mpileup_files}
 //set one version to a list of filenames of the VCF
-ch_mpileuplist.map { it -> it[1].name }
+ch_mpileuplist.map { it -> it[0].name }
        .collectFile(name: 'list.txt', newLine: true)
        .set {ch_mpileup_list_f}
 //set the second to all the files
