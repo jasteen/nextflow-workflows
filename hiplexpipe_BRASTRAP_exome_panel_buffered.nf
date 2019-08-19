@@ -115,7 +115,7 @@ ch_forperBase.into{ch_bamList;ch_bams}.buffer( size: 10, remainder: true ).subsc
 
 //set one version to a list of filenames of the VCF
 
-ch_bamList.map { it -> it[1].name }
+ch_bamList.map { it[it] -> it[it][1].name }
        .collectFile(name: 'list.txt', newLine: true)
        .set {ch_bamList_f}
 //set the second to all the files
