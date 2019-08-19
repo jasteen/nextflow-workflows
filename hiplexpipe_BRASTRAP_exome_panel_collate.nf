@@ -137,7 +137,7 @@ process generatePerbaseMetrics {
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
-    errorStrategy 'ignore'
+    
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryL 
@@ -154,9 +154,33 @@ process generatePerbaseMetrics {
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
 }
 
-process indexVCFS {
+process sortVCFS {
+
     input:
         file(vcf) from ch_mpileupOUT
+    output:
+        file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
+
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    script:
+    """
+    bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
+    """
+}
+
+
+process indexVCFS {
+    input:
+        file(vcf) from ch_mpileupsortedVCF
     output:
         set file(vcf), file(index) into ch_indexedmpileupVCF
 
