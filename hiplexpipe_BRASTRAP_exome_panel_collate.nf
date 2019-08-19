@@ -111,13 +111,13 @@ process run_bamClipper {
 }
 
 //***magic sample collection right here generate list.txt***
-ch_forperBase.collate(by: 10).into{ch_bamList;ch_bams}
+ch_forperBase.collate(10).into{ch_bamList;ch_bams}
 
 //set one version to a list of filenames of the VCF
 
 ch_bamList.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
-       .splitText( by: 10, file: "temp")
+//       .splitText( by: 10, file: "temp")
        .set {ch_bamList_f}
 
 //set the second to all the files
