@@ -113,7 +113,7 @@ process run_bamClipper {
 //***magic sample collection right here generate list.txt***
 ch_forperBase
     .buffer(size:10, remainder: true)
-    .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
+    .map { mytuple -> [ it[0].name, mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
 
 //ch_fucks_given.subscribe{println it}
@@ -135,10 +135,10 @@ ch_forperBase
 process generatePerbaseMetrics {
     echo true
     input:
-        set file(vcf), file(index) from ch_fucks_given
+        set baseName, file(vcf), file(index) from ch_fucks_given
                  
     output: 
-       file("mpileup.vcf.gz") into ch_mpileupOUT                                    
+       file("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT                                    
     
     
     executor    globalExecutor                                                    
@@ -154,7 +154,7 @@ process generatePerbaseMetrics {
     
     """
     echo "${vcf}" | tr " " "\n" > mylist.txt
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b mylist.txt -o mpileup.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b mylist.txt -o ${baseMname}.mpileup.vcf.gz
     """
 
 
