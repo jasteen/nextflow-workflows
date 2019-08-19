@@ -361,7 +361,7 @@ ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
 ch_list.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
-       .splitText( by: 100, file: "temp")
+       .splitText( by: 200, file: "temp")
        .set {ch_list_f}
 //set the second to all the files
 ch_files
@@ -391,7 +391,7 @@ process mergeVCFS {
     script: 
     
     """
-    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l list.txt
+    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l ${list}
     """
 }
 
