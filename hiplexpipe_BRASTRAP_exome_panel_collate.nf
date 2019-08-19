@@ -116,7 +116,7 @@ ch_forperBase
     .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
 
-ch_fucks_given.subscribe{println it}
+//ch_fucks_given.subscribe{println it}
 //set one version to a list of filenames of the VCF
 
 //ch_bamList
@@ -131,11 +131,11 @@ ch_fucks_given.subscribe{println it}
 //    .set {ch_all_bams}
 
 //awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
-/*
+
 process generatePerbaseMetrics {
     echo true
     input:
-        set file(vcf), file(index) from ch_fucks_given
+        set file(vcf), file(index) from ch_fucks_given.collect()
                  
     output: 
         file("mpileup.vcf.gz") into ch_mpileupOUT           
@@ -152,8 +152,10 @@ process generatePerbaseMetrics {
     cpus        '8'
     module      'bcftools'
 
+    list = vcf.join(' ')
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${vcf} -o mpileup.vcf.gz
+
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
