@@ -138,9 +138,7 @@ process generatePerbaseMetrics {
         set file(vcf), file(index) from ch_fucks_given
                  
     output: 
-       file("mpileup.vcf.gz") into ch_mpileupOUT           
-    
-    publishDir path: './bamclipper', mode: 'copy'                                    
+       file("mpileup.vcf.gz") into ch_mpileupOUT                                    
     
     
     executor    globalExecutor                                                    
@@ -171,7 +169,6 @@ process sortpileupVCFS {
     output:
         file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
     
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -192,9 +189,7 @@ process indexpileupVCFS {
         file(vcf) from ch_mpileupsortedVCF
     output:
         set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
-
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
+ 
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
