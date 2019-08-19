@@ -116,7 +116,7 @@ ch_forperBase
     .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
 
-ch_fucks_given.subscribe{println.it}
+ch_fucks_given.subscribe{println it}
 //set one version to a list of filenames of the VCF
 
 //ch_bamList
