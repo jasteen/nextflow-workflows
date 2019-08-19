@@ -111,29 +111,32 @@ process run_bamClipper {
 }
 
 //***magic sample collection right here generate list.txt***
-ch_forperBase.toList().splitText(by: 12).into{ch_bamList;ch_bams}
-
+ch_forperBase
+    .buffer(size:10, remainder: true)
+    .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
+    .set{ch_fucks_given}
 //set one version to a list of filenames of the VCF
 
-ch_bamList
-    .filter( ~/\*.gz/)
-    .collectFile(name: 'list.txt', newLine: true)
-    .set {ch_bamList_f}
+//ch_bamList
+//    .filter( ~/\*.gz/)
+//    .collectFile(name: 'list.txt', newLine: true)
+//    .set {ch_bamList_f}
 
 //set the second to all the files
 
-ch_bams
-    .collect()
-    .set {ch_all_bams}
+//ch_bams
+//    .collect()
+//    .set {ch_all_bams}
 
 //awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
 
 process generatePerbaseMetrics {
+    echo true
     input:
-        file list from ch_bamList_f
-        file '*' from ch_all_bams               
+        file set file(vcf), file(index) from ch_fucks_given
+                 
     output: 
-        file("mpileup_${list}.vcf.gz") into ch_mpileupOUT           
+        file("mpileup.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -148,7 +151,7 @@ process generatePerbaseMetrics {
     module      'bcftools'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_${list}.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${vcf} -o mpileup.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
