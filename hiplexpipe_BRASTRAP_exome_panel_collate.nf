@@ -111,7 +111,7 @@ process run_bamClipper {
 }
 
 //***magic sample collection right here generate list.txt***
-ch_forperBase.into{ch_bamList;ch_bams}
+ch_forperBase.collate(by: 10).into{ch_bamList;ch_bams}
 
 //set one version to a list of filenames of the VCF
 
@@ -154,7 +154,7 @@ process generatePerbaseMetrics {
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
 }
 
-process sortVCFS {
+process sortpileupVCFS {
 
     input:
         file(vcf) from ch_mpileupOUT
@@ -177,8 +177,7 @@ process sortVCFS {
     """
 }
 
-
-process indexVCFS {
+process indexpileupVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
     output:
@@ -213,7 +212,7 @@ ch_mpileup_files
     .set {ch_mpileup_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
-process mergeVCFS {
+process mergepileipVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
