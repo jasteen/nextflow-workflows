@@ -157,14 +157,13 @@ process generatePerbaseMetrics {
     """
     echo "${vcf}" | tr " " "\n" > mylist.txt
     bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b mylist.txt -o mpileup.vcf.gz
-
     """
 
 
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
 }
 
-/*
+
 process sortpileupVCFS {
 
     input:
@@ -209,27 +208,17 @@ process indexpileupVCFS {
     bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
-z
-//duplicate ch_indexedVCF
-ch_indexedmpileupVCF
-    .into{ch_mpileuplist;ch_mpileup_files}
-//set one version to a list of filenames of the VCF
-ch_mpileuplist.map { it -> it[0].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .set {ch_mpileup_list_f}
-//set the second to all the files
-ch_mpileup_files
-    .collect()
-    .set {ch_mpileup_all_files}
 
-//feed both to the merge so that the indexes are available to bcftools
-process mergepileipVCFS {
+ch_indexedmpileupVCF
+    .map { mytuple -> [ mytuple.collect{ it[0] }, mytuple.collect{ it[1] } ] }
+    .set {ch_fucks2}
+
+process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file list from ch_mpileup_list_f
-    file '*' from ch_mpileup_all_files
-    
+    file(vcf), file(index) list from ch_fucks2
+        
     output:
     file "merged.mpileup.vcf.gz" into ch_mergedVCF
 
@@ -244,9 +233,9 @@ process mergepileipVCFS {
     script: 
     
     """
+    echo "${vcf}" | tr " " "\n" > list.txt
     bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
-*/
 
 
