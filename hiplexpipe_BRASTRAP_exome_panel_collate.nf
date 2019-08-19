@@ -111,7 +111,7 @@ process run_bamClipper {
 }
 
 //***magic sample collection right here generate list.txt***
-ch_forperBase.flatten().splitText(by: 12).into{ch_bamList;ch_bams}
+ch_forperBase.toList().splitText(by: 12).into{ch_bamList;ch_bams}
 
 //set one version to a list of filenames of the VCF
 
