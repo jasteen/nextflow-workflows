@@ -431,7 +431,7 @@ ch_premerge_files
     .set {ch_premerge_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
-process mergepileipVCFS {
+process mergepreVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
