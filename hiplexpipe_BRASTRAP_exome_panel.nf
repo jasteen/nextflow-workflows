@@ -400,7 +400,7 @@ process indexpremergedVCFS {
     input:
         file(vcf) from ch_premergedVCF
     output:
-        file(vcf), file("*.tbi") into ch_indexedpreVCF
+        set file(vcf), file("*.tbi") into ch_indexedpreVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
