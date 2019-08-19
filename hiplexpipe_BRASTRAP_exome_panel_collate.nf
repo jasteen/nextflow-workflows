@@ -52,10 +52,10 @@ globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
 globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
+globalTimeM       = '15m'
+globalTimeL       = '15m'
 globalQueueS      = 'short'
-globalQueueL      = 'comp'
+globalQueueL      = 'short'
 
 // Creating channel from input directory
 ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
@@ -141,7 +141,7 @@ process generatePerbaseMetrics {
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryL 
-    time        globalTimeL
+    time        globalTimeM
     queue       globalQueueL 
     module      'samtools'
     cpus        '8'
