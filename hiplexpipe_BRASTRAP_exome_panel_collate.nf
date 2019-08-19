@@ -151,12 +151,12 @@ process generatePerbaseMetrics {
     module      'samtools'
     cpus        '8'
     module      'bcftools'
-
     
+
+    mylist = vcf.collect().join("\n")
     """
-    echo "vcfs: ${vcf}"
-    echo "indexes: ${index}"    
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${vcf} -o mpileup.vcf.gz
+    echo "${mylist}" 
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${mylist} -o mpileup.vcf.gz
 
     """
 
