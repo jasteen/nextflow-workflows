@@ -135,7 +135,7 @@ ch_forperBase
 process generatePerbaseMetrics {
     echo true
     input:
-        set file(vcf), file(index) from ch_fucks_given.collect()
+        set file(vcf), file(index) from ch_fucks_given
                  
     output: 
         file("mpileup.vcf.gz") into ch_mpileupOUT           
