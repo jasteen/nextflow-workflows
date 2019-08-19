@@ -132,6 +132,7 @@ process generatePerbaseMetrics {
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
+    errorStrategy 'ignore'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryL 
@@ -403,7 +404,7 @@ process CoverageBed {
     memory      globalMemoryM
     time        globalTimeM
     queue       globalQueueL
-    errorStrategy 'ignore'
+    
 
     script:
     """
@@ -427,7 +428,7 @@ process ReadsMapped {
     memory      globalMemoryM
     time        globalTimeM
     queue       globalQueueL
-    errorStrategy 'ignore'
+    
     
     script:
     """
@@ -448,7 +449,7 @@ process ReadsTotal {
     memory      globalMemoryM
     time        globalTimeM
     queue       globalQueueL
-    errorStrategy 'ignore'
+    
     
     script:
     """
@@ -469,7 +470,7 @@ process TargetMapped {
     module      'samtools/1.9'
     time        globalTimeM
     queue       globalQueueL
-    errorStrategy 'ignore'
+    
 
     script:
     """
@@ -493,7 +494,7 @@ process collateData {
     memory      globalMemoryM
     time        globalTimeM
     queue       globalQueueL
-    errorStrategy 'ignore'
+    
 
     script:
     """
