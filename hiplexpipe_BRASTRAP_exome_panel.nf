@@ -359,7 +359,8 @@ process indexVCFS {
 //duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
-ch_list.map { it -> it[1].name, it[2].name }
+//ch_list.map { it -> it[1].name }
+ch_list.map { a,file(b),file(c) -> b.name, c.name }
        .collectFile(name: 'list2.txt', newLine: true)
        .splitText( by: 100 )
        .set {ch_list_f}
