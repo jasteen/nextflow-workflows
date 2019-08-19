@@ -117,7 +117,7 @@ ch_forperBase.into{ch_bamList;ch_bams}
 
 ch_bamList.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
-       .splitText( by: 10, file: "temp")
+       .splitText( by: 200, file: "temp")
        .set {ch_bamList_f}
 
 //set the second to all the files
