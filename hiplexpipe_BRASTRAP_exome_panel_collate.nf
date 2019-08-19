@@ -133,7 +133,7 @@ ch_forperBase
 process generatePerbaseMetrics {
     echo true
     input:
-        file set file(vcf), file(index) from ch_fucks_given
+        set file(vcf), file(index) from ch_fucks_given
                  
     output: 
         file("mpileup.vcf.gz") into ch_mpileupOUT           
@@ -201,7 +201,7 @@ process indexpileupVCFS {
     bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
-
+/*
 //duplicate ch_indexedVCF
 ch_indexedmpileupVCF
     .into{ch_mpileuplist;ch_mpileup_files}
@@ -239,6 +239,6 @@ process mergepileipVCFS {
     bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
-
+*/
 
 
