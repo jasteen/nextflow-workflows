@@ -112,11 +112,16 @@ process run_bamClipper {
 
 //***magic sample collection right here generate list.txt***
 ch_forperBase.into{ch_bamList;ch_bams}
+
 //set one version to a list of filenames of the VCF
+
 ch_bamList.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
+       .splitText( by: 10, file: "temp")
        .set {ch_bamList_f}
+
 //set the second to all the files
+
 ch_bams
     .collect()
     .set {ch_all_bams}
@@ -128,26 +133,111 @@ process generatePerbaseMetrics {
         file list from ch_bamList_f
         file '*' from ch_all_bams               
     output: 
-        file("mpileup_out.vcf.gz") into ch_mpileupOUT           
+        file("mpileup_${list}.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
-    errorStrategy 'ignore'
+    
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryL 
-    time        globalTimeL
+    time        globalTimeM
     queue       globalQueueL 
     module      'samtools'
     cpus        '8'
     module      'bcftools'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_out.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_${list}.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
 }
+
+process sortpileupVCFS {
+
+    input:
+        file(vcf) from ch_mpileupOUT
+    output:
+        file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
+
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    script:
+    """
+    bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
+    """
+}
+
+process indexpileupVCFS {
+    input:
+        file(vcf) from ch_mpileupsortedVCF
+    output:
+        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
+
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    script:
+    """
+    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
+    """
+}
+
+//duplicate ch_indexedVCF
+ch_indexedmpileupVCF
+    .into{ch_mpileuplist;ch_mpileup_files}
+//set one version to a list of filenames of the VCF
+ch_mpileuplist.map { it -> it[0].name }
+       .collectFile(name: 'list.txt', newLine: true)
+       .set {ch_mpileup_list_f}
+//set the second to all the files
+ch_mpileup_files
+    .collect()
+    .set {ch_mpileup_all_files}
+
+//feed both to the merge so that the indexes are available to bcftools
+
+process mergepileipVCFS {
+    echo true
+    publishDir './variants_merged/', mode: 'copy'
+    input:
+    file list from ch_mpileup_list_f
+    file '*' from ch_mpileup_all_files
+    
+    output:
+    file "merged.mpileup.vcf.gz" into ch_mergedVCF
+
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    
+    script: 
+    
+    """
+    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
+    """
+}
+
 
 process run_vardict {
 
@@ -271,6 +361,7 @@ ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
 ch_list.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
+       .splitText( by: 200, file: "temp")
        .set {ch_list_f}
 //set the second to all the files
 ch_files
@@ -278,6 +369,7 @@ ch_files
     .set {ch_all_files}
 
 //feed both to the merge so that the indexes are available to bcftools
+
 process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
@@ -286,7 +378,7 @@ process mergeVCFS {
     file '*' from ch_all_files
     
     output:
-    file "merged.vardict.vcf.gz" into ch_mergedVCF
+    file "merged.vardict.${list}.vcf.gz" into ch_premergedVCF
 
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -299,10 +391,70 @@ process mergeVCFS {
     script: 
     
     """
-    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.vcf.gz" -l list.txt
+    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l list.txt
     """
 }
 
+
+process indexpremergedVCFS {
+    input:
+        file(vcf) from ch_premergedVCF
+    output:
+        file(vcf), file("*.tbi") into ch_indexedpreVCF
+
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    module      bwaModule
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    script:
+    """
+    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
+    """
+}
+
+//duplicate ch_indexedVCF
+ch_indexedpreVCF
+    .into{ch_premergelist;ch_premerge_files}
+//set one version to a list of filenames of the VCF
+ch_premergelist.map { it -> it[0].name }
+       .collectFile(name: 'list.txt', newLine: true)
+       .set {ch_premerge_list_f}
+//set the second to all the files
+ch_premerge_files
+    .collect()
+    .set {ch_premerge_all_files}
+
+//feed both to the merge so that the indexes are available to bcftools
+process mergepileipVCFS {
+    echo true
+    publishDir './variants_merged/', mode: 'copy'
+    input:
+    file list from ch_premerge_list_f
+    file '*' from ch_premerge_all_files
+    
+    output:
+    file "merged.mpileup.vcf.gz" into ch_mergedVCF
+
+    module     'bcftools/1.8'
+    executor    globalExecutor                                                    
+    stageInMode globalStageInMode                                                 
+    memory      globalMemoryM 
+    time        globalTimeM
+    queue       globalQueueL
+
+    
+    script: 
+    
+    """
+    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
+    """
+}
 
 process vt_decompose_normalise {
         
