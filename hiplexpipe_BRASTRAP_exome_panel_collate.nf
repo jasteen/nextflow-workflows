@@ -113,7 +113,7 @@ process run_bamClipper {
 //***magic sample collection right here generate list.txt***
 ch_forperBase
     .buffer(size:10, remainder: true)
-    .map { mytuple -> [ it[0].name, mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
+    .map { mytuple -> [ mytuple.it[0].name}, mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
 
 //ch_fucks_given.subscribe{println it}
