@@ -137,8 +137,8 @@ process generatePerbaseMetrics {
     input:
         set file(vcf), file(index) from ch_fucks_given
                  
-    //output: 
-    //    file("mpileup.vcf.gz") into ch_mpileupOUT           
+    output: 
+       file("mpileup.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -156,8 +156,9 @@ process generatePerbaseMetrics {
     """
     echo "vcfs: ${vcf}"
     echo "indexes: ${index}"    
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${vcf} -o mpileup.vcf.gz
+
     """
-//bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup.vcf.gz
 
 
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
