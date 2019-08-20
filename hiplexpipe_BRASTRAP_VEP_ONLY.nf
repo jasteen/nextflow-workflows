@@ -47,7 +47,7 @@ globalExecutor    = 'slurm'
 globalStageInMode = 'symlink'
 globalCores       = 1
 bwaCores	      = 4
-vepCores          = 4
+vepCores          = 8
 globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
 globalMemoryL     = '64 GB'
@@ -72,8 +72,8 @@ process apply_vep {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        vepCores
-    memory      globalMemoryM
-    time        globalTimeM
+    memory      globalMemoryL
+    time        globalTimeL
     queue       globalQueueL
     module      'vep/90'
 
