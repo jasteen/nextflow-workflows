@@ -204,7 +204,7 @@ process indexpileupVCFS {
     """
 }
 
-   
+/*   
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
@@ -229,4 +229,4 @@ process mergepileupVCFS {
     """
 }
 
-
+*/
