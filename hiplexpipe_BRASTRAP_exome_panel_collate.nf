@@ -138,7 +138,7 @@ process generatePerbaseMetrics {
         set baseName, file(vcf), file(index) from ch_fucks_given
                  
     output: 
-       file("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT                                    
+        set baseName, file("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT                                    
     
     
     executor    globalExecutor                                                    
@@ -205,8 +205,13 @@ process indexpileupVCFS {
 }
 
 ch_indexedmpileupVCF.subscribe{println it}
-    //.set {ch_fucks2}
-/*   
+
+/*
+
+ch_indexedmpileupVCF
+    .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
+    .set {ch_fucks2}
+   
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
