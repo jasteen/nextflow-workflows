@@ -110,45 +110,23 @@ process run_bamClipper {
     """
 }
 
-//***magic sample collection right here generate list.txt***
-ch_forperBase.into{ch_bamList;ch_bams}
-
-//set one version to a list of filenames of the VCF
-
-ch_bamList.map { it -> it[1].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .splitText( by: 200, file: "temp")
-       .set {ch_bamList_f}
-
-//set the second to all the files
-
-ch_bams
-    .collect()
-    .set {ch_all_bams}
-
-//awk 'BEGIN{FS=OFS="\t"}{if($0 ~ /^#/)next;call=0; nocall=0;for(i=10; i<=NF; i++)if($i ~ /^\.\/\.:/)nocall++;else call++;print $1, $2, $4, $5, call, nocall}'
-
 process generatePerbaseMetrics {
     input:
-        file list from ch_bamList_f
-        file '*' from ch_all_bams               
+        set baseName, file(bam), file(index) from ch_forperBase       
     output: 
-        file("mpileup_${list}.vcf.gz") into ch_mpileupOUT           
-    
-    publishDir path: './bamclipper', mode: 'copy'                                    
-    
+        set baseName, file(("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT           
     
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
-    memory      globalMemoryL 
+    memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL 
     module      'samtools'
-    cpus        '8'
+    cpus        '2'
     module      'bcftools'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_${list}.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -o ${baseName}.mpileup.vcf.gz ${bam}
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
@@ -157,12 +135,10 @@ process generatePerbaseMetrics {
 process sortpileupVCFS {
 
     input:
-        file(vcf) from ch_mpileupOUT
+        set baseName, file(vcf) from ch_mpileupOUT
     output:
-        file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
-
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
+        set baseName, file("${baseName}.mpileup.sorted.vcf.gz") into ch_mpileupsortedVCF
+ 
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
@@ -173,17 +149,17 @@ process sortpileupVCFS {
 
     script:
     """
-    bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
+    bcftools sort -o "${baseName}.mpileup.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
 process indexpileupVCFS {
     input:
-        file(vcf) from ch_mpileupsortedVCF
+        set baseName, file(vcf) from ch_mpileupsortedVCF
     output:
-        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
+        set baseName, file(vcf), file("*.tbi") into ch_indexedmpileupVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    publishDir path: './mpileup_out', mode: 'copy'                                    
     
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -195,49 +171,9 @@ process indexpileupVCFS {
 
     script:
     """
-    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
+    bcftools index -f --tbi ${vcf} -o ${baseName}.mpileup.sorted.vcf.gz.tbi
     """
 }
-
-//duplicate ch_indexedVCF
-ch_indexedmpileupVCF
-    .into{ch_mpileuplist;ch_mpileup_files}
-//set one version to a list of filenames of the VCF
-ch_mpileuplist.map { it -> it[0].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .set {ch_mpileup_list_f}
-//set the second to all the files
-ch_mpileup_files
-    .collect()
-    .set {ch_mpileup_all_files}
-
-//feed both to the merge so that the indexes are available to bcftools
-
-process mergepileipVCFS {
-    echo true
-    publishDir './variants_merged/', mode: 'copy'
-    input:
-    file list from ch_mpileup_list_f
-    file '*' from ch_mpileup_all_files
-    
-    output:
-    file "merged.mpileup.vcf.gz" into ch_mergedVCF
-
-    module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL
-
-    
-    script: 
-    
-    """
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
-    """
-}
-
 
 process run_vardict {
 
@@ -310,7 +246,6 @@ process reheaderVCF {
 
 }
 
-
 process sortVCFS {
 
     input:
@@ -355,7 +290,7 @@ process indexVCFS {
     bcftools index -f --tbi ${vcf} -o ${baseName}.sorted.vcf.gz.tbi
     """
 }
-
+/*
 //duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
@@ -519,10 +454,7 @@ process apply_vep {
     """
 }
 
-
-/*
-Stats Generation Section
-*/
+//stats
 
 process InstersectBed {
     input:
@@ -687,5 +619,5 @@ process catStats {
     """
 
 }
-
+*/
 
