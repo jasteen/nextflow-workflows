@@ -208,7 +208,7 @@ ch_indexedmpileupVCF
     .map { mytuple -> [ mytuple.collect{ it[0] }, mytuple.collect{ it[1] } ] }
     .subscribe{println it}
     //.set {ch_fucks2}
-    
+/*   
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
@@ -234,4 +234,4 @@ process mergepileupVCFS {
     """
 }
 
-
+*/
