@@ -132,7 +132,7 @@ process generatePerbaseMetrics {
     
     """
     bcftools mpileup --threads ${task.cpus} -Ou -d 250 -B -R ${restrictedBed} \
-        -a "FORMAT/DP" -f ${ref} ${bam} | bcftools sort -o "${baseName}.mpileup.sorted.vcf.gz" -O z ${vcf}
+        -a "FORMAT/DP" -f ${ref} ${bam} | bcftools sort -o "${baseName}.mpileup.sorted.vcf.gz" -O z
     bcftools index -f --tbi "${baseName}.sorted.vcf.gz"
     """
 }
