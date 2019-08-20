@@ -138,7 +138,7 @@ process generatePerbaseMetrics {
 }
 
 
-ch_forperBase
+ch_ch_mpileupOUT
     .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
     .set{ch_fucks_given}
 
