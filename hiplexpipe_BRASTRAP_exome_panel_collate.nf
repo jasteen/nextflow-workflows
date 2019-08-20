@@ -165,7 +165,7 @@ process generatePerbaseMetrics {
 process sortpileupVCFS {
 
     input:
-        file(vcf) from ch_mpileupOUT
+        baseName, file(vcf) from ch_mpileupOUT
     output:
         file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
 
