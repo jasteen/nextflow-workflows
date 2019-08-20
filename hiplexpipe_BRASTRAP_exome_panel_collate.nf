@@ -204,17 +204,12 @@ process indexpileupVCFS {
     """
 }
 
-//ch_indexedmpileupVCF.subscribe{println it}
-
-ch_indexedmpileupVCF
-    .map { mytuple -> [ mytuple.collect{ it }, mytuple.collect{ it } ] }
-    .set {ch_fucks2}
    
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    set file(vcf), file(index) from ch_fucks2
+    set file(vcf), file(index) from ch_indexedmpileupVCF.collect()
         
     output:
     file "merged.mpileup.vcf.gz" into ch_mergedVCF
