@@ -203,10 +203,10 @@ process indexpileupVCFS {
     bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
+//
+ch_indexedmpileupVCF.map{a,b -> [a,b]}
 
-ch_indexedmpileupVCF.subscribe{println it}
-
-/*   
+   
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
@@ -227,8 +227,7 @@ process mergepileupVCFS {
     script: 
     
     """
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" "*.vcf"
+    cat *.gz > list.txt
+    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
-
-*/
