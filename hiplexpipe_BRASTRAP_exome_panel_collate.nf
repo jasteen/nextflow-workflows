@@ -188,7 +188,7 @@ process indexpileupVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
     output:
-        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
+        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF.subscribe{println it}
  
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -225,8 +225,7 @@ process mergepileupVCFS {
     script: 
     
     """
-    echo "${vcf}" | tr " " "\n" > list.txt
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
+    bcftools merge -O z -o "merged.mpileup.vcf.gz" "*.vcf"
     """
 }
 
