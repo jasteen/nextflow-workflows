@@ -204,14 +204,14 @@ process indexpileupVCFS {
     """
 }
 //
-ch_indexedmpileupVCF.map{a,b -> [a,b]}
+ch_indexedmpileupVCF.map{a,b -> [a,b]}.collect().set{ch_fuck2}
 
    
 process mergepileupVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    set file(vcf), file(index) from ch_indexedmpileupVCF.collect()
+    set file(vcf), file(index) from ch_fuck2
         
     output:
     file "merged.mpileup.vcf.gz" into ch_mergedVCF
@@ -227,7 +227,7 @@ process mergepileupVCFS {
     script: 
     
     """
-    cat *.gz > list.txt
+    echo "${vcf}" | tr " " "\n" > mylist.txt
     bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
