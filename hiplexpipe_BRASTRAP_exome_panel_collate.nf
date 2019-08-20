@@ -207,7 +207,7 @@ process indexpileupVCFS {
 //ch_indexedmpileupVCF.subscribe{println it}
 
 ch_indexedmpileupVCF
-    .map { mytuple -> [ mytuple.collect{ it[1] }, mytuple.collect{ it[2] } ] }
+    .map { mytuple -> [ mytuple.collect{ it }, mytuple.collect{ it } ] }
     .set {ch_fucks2}
    
 process mergepileupVCFS {
