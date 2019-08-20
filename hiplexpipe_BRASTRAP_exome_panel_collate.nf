@@ -168,4 +168,5 @@ process mergepileupVCFS {
         -l \$i; mpileup index -f --tbi \${i}.mpileup_merged.vcf.gz; done
     ls "*.mpileup_merged.vcf.gz" > temp.txt
     bcftools merge -l temp.txt -O z -o "full_merged_mpileup.vcf.gz"
+    """
 }
