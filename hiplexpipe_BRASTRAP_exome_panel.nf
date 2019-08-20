@@ -114,7 +114,7 @@ process generatePerbaseMetrics {
     input:
         set baseName, file(bam), file(index) from ch_forperBase       
     output: 
-        set baseName, file(("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT           
+        set baseName, file("${baseName}.mpileup.vcf.gz") into ch_mpileupOUT           
     
     executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
