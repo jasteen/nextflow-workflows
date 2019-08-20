@@ -113,7 +113,7 @@ process run_bamClipper {
 process generatePerbaseMetrics {
     echo true
     input:
-        set baseName, file(bam), file(index) from ch_fucks_given
+        set baseName, file(bam), file(index) from ch_forperBase
                  
     output: 
         set baseName, file("${baseName}.mpileup.sorted.vcf.gz"), file("${baseName}.mpileup.sorted.vcf.gz.tbi")  into ch_mpileupOUT                                    
