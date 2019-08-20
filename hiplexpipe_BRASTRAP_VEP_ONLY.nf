@@ -96,7 +96,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o all_merged.vt.vep.vcf.gz
+                      -o all_merged.vt.vep.vcf
     """
 }
 
