@@ -93,7 +93,7 @@ process run_bamClipper {
     input:
         set baseName, file(bam), file(bai) from ch_forBamClipper               
     output: 
-        set baseName, file("${baseName}.hq.sorted.pc.bam"), file("${baseName}.hq.sorted.pc.bam.bai") into ch_forperBase          
+        set baseName, file("${baseName}.hq.sorted.primerclipped.bam"), file("${baseName}.hq.sorted.primerclipped.bam.bai") into ch_forperBase          
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
