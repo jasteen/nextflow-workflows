@@ -188,7 +188,7 @@ process indexpileupVCFS {
     input:
         file(vcf) from ch_mpileupsortedVCF
     output:
-        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF.subscribe{println it}
+        set file(vcf), file("*.tbi") into ch_indexedmpileupVCF
  
     module     'bcftools/1.8'
     executor    globalExecutor                                                    
@@ -203,6 +203,8 @@ process indexpileupVCFS {
     bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
     """
 }
+
+ch_indexedmpileupVCF.subscribe{println it}
 
 /*   
 process mergepileupVCFS {
