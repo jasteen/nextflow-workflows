@@ -58,14 +58,15 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromFilePairs("./mpileup/*.{gz,gz.tbi}", flat: true) //.map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
-//ch_combined = ch_inputFiles.groupTuple().subscribe{println it}
+ch_inputFiles = Channel.fromPath("./mpileup/*.gz}").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_inputIndexes = Channel.fromPath("./mpileup/*.gz.tbi}").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_combined = ch_inputFiles.join(ch_inputIndexes).take(5)
 
 
 
 process CoverageBed {
     input:
-        set sample, file(vcf), file(index) from ch_inputFiles
+        set sample, file(vcf), file(index) from ch_combined
     output:
         set sample, file("${sample}.vcftable.txt") into ch_tables
     
