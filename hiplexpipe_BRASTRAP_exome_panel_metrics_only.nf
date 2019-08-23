@@ -58,12 +58,12 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("./bams/*.bam")
+ch_inputFiles = Channel.fromPath("./bams/*.bam").take(5).map{it <- tuple(it.name.split([_-])[-5], it)}
 
 
 process CoverageBed {
     input:
-        set sample, file(bam), file(bai) from ch_inputFiles
+        set bam.simpleName, file(bam) from ch_inputFiles
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
