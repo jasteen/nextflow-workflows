@@ -41,6 +41,7 @@ picardJar      = '~/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
 bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
+gatkJar        = '/usr/local/gatk/3.7/bin/GenomeAnalysisTK.jar'
 
 // Global Resource Configuration Options
 globalExecutor    = 'slurm'
@@ -48,7 +49,7 @@ globalStageInMode = 'symlink'
 globalCores       = 1
 bwaCores	      = 4
 vepCores          = 4
-globalMemoryS     = '2 GB'
+globalMemoryS     = '4 GB'
 globalMemoryM     = '8 GB'
 globalMemoryL     = '64 GB'
 globalTimeS       = '10m'
@@ -78,11 +79,11 @@ process CoverageBed {
     memory      globalMemoryS
     time        globalTimeS
     queue       globalQueueL
-    module      'gatk'
+    module      'gatk/4.0.11.0'
     
 
     script:
     """
-     gatk -T VariantsToTable -V ${vcf} -R ${ref} -F CHROM -F POS -F DP -o ${sample}.vcftable.txt
+    java -Xmx4g -jar $gatkJar -T VariantsToTable -V ${vcf} -R ${ref} -F CHROM -F POS -F DP -o ${sample}.vcftable.txt
     """
 }
