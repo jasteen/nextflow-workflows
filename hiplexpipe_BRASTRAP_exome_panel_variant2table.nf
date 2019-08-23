@@ -79,7 +79,7 @@ process CoverageBed {
     memory      globalMemoryS
     time        globalTimeS
     queue       globalQueueL
-    module      'gatk/4.0.11.0'
+    module      'gatk/3.7'
     
 
     script:
