@@ -51,7 +51,7 @@ vepCores          = 4
 globalMemoryS     = '6 GB'
 globalMemoryM     = '8 GB'
 globalMemoryL     = '64 GB'
-globalTimeS       = '8m'
+globalTimeS       = '15m'
 globalTimeM       = '1h'
 globalTimeL       = '24h'
 globalQueueS      = 'short'
@@ -73,7 +73,7 @@ process CoverageBed {
     stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
-    time        globalTimeM
+    time        globalTimeS
     queue       globalQueueL
     
 
