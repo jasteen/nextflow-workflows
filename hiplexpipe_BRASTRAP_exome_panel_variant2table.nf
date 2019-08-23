@@ -80,8 +80,6 @@ process CoverageBed {
 
     script:
     """
-     gatk -T VariantsToTable -V ${vcf} \
-              -R ${ref} -F CHROM -F POS -F DP | \
-        sed "s/\$/\t${sample}/g" > ${sample}.vcftable.txt
+     gatk -T VariantsToTable -V ${vcf} -R ${ref} -F CHROM -F POS -F DP -o ${sample}.vcftable.txt
     """
 }
