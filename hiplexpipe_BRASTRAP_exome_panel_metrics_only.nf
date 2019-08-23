@@ -58,7 +58,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("./bams/*.bam").take(5).map{it <- tuple(it.name.split([_-])[-5], it)}
+ch_inputFiles = Channel.fromPath("./bams/*.bam").take(5).map{it <- [it.name.split('_-')[-5], it]}
 
 
 process CoverageBed {
