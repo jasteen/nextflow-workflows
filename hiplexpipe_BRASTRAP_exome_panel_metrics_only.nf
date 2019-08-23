@@ -58,7 +58,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("./bams/*.bam").take(5).map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_inputFiles = Channel.fromPath("./bams/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
 
 process CoverageBed {
@@ -82,6 +82,6 @@ process CoverageBed {
     module load bedtools/2.27.1-gcc5
     coverageBed -b ${bam} -a ${restrictedBed} \
         -sorted -g ${genome_file} | \
-        sed "s/\$/\t${sample}/g" > ${sample}.bedtools_metrics_all.txt
+        sed "s/\$/\t${sample}/g" | cut -f4,5,9 > ${sample}.bedtools_metrics_all.txt
     """
 }
