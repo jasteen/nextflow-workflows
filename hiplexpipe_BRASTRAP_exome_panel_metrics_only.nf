@@ -60,10 +60,10 @@ globalQueueL      = 'comp'
 // Creating channel from input directory
 ch_inputFiles = Channel.fromPath("./bams/*.bam").take(5).map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
-/*
+
 process CoverageBed {
     input:
-        set bam.simpleName, file(bam) from ch_inputFiles
+        set sample, file(bam) from ch_inputFiles
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
     
