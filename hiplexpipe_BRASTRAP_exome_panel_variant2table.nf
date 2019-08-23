@@ -61,7 +61,7 @@ globalQueueL      = 'comp'
 // Creating channel from input directory
 ch_inputFiles = Channel.fromPath("./mpileup/*.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 ch_inputIndexes = Channel.fromPath("./mpileup/*.gz.tbi").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
-ch_combined = ch_inputFiles.join(ch_inputIndexes).take(10)
+ch_combined = ch_inputFiles.join(ch_inputIndexes)
 
 
 
