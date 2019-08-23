@@ -72,7 +72,7 @@ process CoverageBed {
     executor    globalExecutor
     stageInMode globalStageInMode
     cpus        1
-    memory      globalMemorys
+    memory      globalMemoryS
     time        globalTimeS
     queue       globalQueueL
     module      'gatk'
