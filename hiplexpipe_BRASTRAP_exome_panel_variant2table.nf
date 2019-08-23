@@ -58,7 +58,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromfilePairs("./mpileup/*.{gz,gz.tbi}") //.map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_inputFiles = Channel.fromFilePairs("./mpileup/*.{gz,gz.tbi}") //.map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 //ch_combined = ch_inputFiles.groupTuple().subscribe{println it}
 
 
