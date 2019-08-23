@@ -65,7 +65,7 @@ process CoverageBed {
     input:
         set sample, file(bam) from ch_inputFiles
     output:
-        set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
+        set sample, file("${sample}.bedtools_metrics_all.txt") into ch_bedtools
     
     publishDir path: './metrics_for_R', mode: 'copy'
 
