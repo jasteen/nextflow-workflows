@@ -58,7 +58,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("./mpileup/*.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+ch_inputFiles = Channel.fromPath("./mpileup/*.gz").take(5).map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
 
 process CoverageBed {
