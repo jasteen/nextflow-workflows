@@ -85,5 +85,3 @@ process CoverageBed {
         sed "s/\$/\t${sample}/g" > ${sample}.bedtools_metrics_all.txt
     """
 }
-
-*/
