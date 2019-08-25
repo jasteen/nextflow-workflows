@@ -58,7 +58,7 @@ globalQueueS      = 'short'
 globalQueueL      = 'comp'
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("./bams/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}.take(500)
+ch_inputFiles = Channel.fromPath("./bams/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}.take(50)
 
 
 process CoverageBed {
@@ -75,7 +75,7 @@ process CoverageBed {
     memory      globalMemoryM
     time        globalTimeS
     queue       globalQueueL
-    module      samtoolsMod
+    
 
     script:
     """
