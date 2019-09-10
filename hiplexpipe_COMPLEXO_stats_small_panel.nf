@@ -81,7 +81,7 @@ process CoverageBed {
     """
     module load bedtools/2.27.1-gcc5
     coverageBed -b ${bam} -a ${vardictBed} \
-        -d -sorted -g ${genome_file} | \
-        sed "s/\$/\t${sample}/g" > ${sample}.bedtools_metrics_all.txt
+        -sorted -hist -g ${genome_file} | \
+        grep all > ${sample}.bedtools_metrics_all.txt
     """
 }
