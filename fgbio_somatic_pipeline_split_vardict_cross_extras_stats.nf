@@ -90,7 +90,7 @@ process createUnmappedUMIBam {
 
 process markAdaptors {
 
-    publishDir path: './output/intermediate', mode: 'copy', pattern: '*.tsv'
+    publishDir path: './output/metrics/UMI/adaptor_marking', mode: 'copy', pattern: '*.tsv'
 
     input:
         set baseName, file(bam) from ch_unmappedUMIbams
@@ -380,7 +380,7 @@ process groupreadsByUmi {
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
-    publishDir path: './output/metrics/UMI', mode: 'copy', pattern: "*.tsv"
+    publishDir path: './output/metrics/UMI/family_sizes', mode: 'copy', pattern: "*.tsv"
 
     cpus        globalCores
     memory      globalMemoryM
@@ -712,7 +712,7 @@ process collectHSMetrics {
     input:
         set sample, file(bam) from ch_forHSMetrics
     output:
-        set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics
+        set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
     
