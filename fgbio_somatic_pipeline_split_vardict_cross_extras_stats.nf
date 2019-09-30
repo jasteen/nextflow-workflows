@@ -288,7 +288,7 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    stageInMode globalStageInMode                                                 
+                                                 
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
