@@ -57,23 +57,23 @@ globalQueueL      = 'comp'
 
 // Creating channel from input directory
 //create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
-ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
+ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size=3, flat: true)
 //i'm sure there is a better way to map the basename, but this works for the moment.
-ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+//ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
 
 //join input files and index on the baseName
-ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
+//ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
 
 process createUnmappedUMIBam {
     
     publishDir path: './output/intermediate', mode: 'copy'
     
     input:
-        set baseName, file(R1), file(R2), file(I2) from ch_umiMap
+        set baseName, file(R1), file(R2), file(I2) from ch_inputFiles
     output:
         set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
 
-    publishDir path: './output/intermediate', mode: 'copy'
+    //publishDir path: './output/intermediate', mode: 'copy'
     
     cache       'lenient'
     executor    globalExecutor
@@ -95,7 +95,7 @@ process createUnmappedUMIBam {
 
 process markAdaptors {
 
-    publishDir path: './output/intermediate', mode: 'copy'
+    //publishDir path: './output/intermediate', mode: 'copy'
 
     input:
         set baseName, file(bam) from ch_unmappedUMIbams
