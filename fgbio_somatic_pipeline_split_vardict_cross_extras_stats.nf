@@ -75,9 +75,6 @@ process createUnmappedUMIBam {
 
     //publishDir path: './output/intermediate', mode: 'copy'
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     module      'fgbio'
     module      'java'
@@ -103,9 +100,6 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     module      'java'
     memory      globalMemoryM
@@ -129,9 +123,6 @@ process alignBwa {
 
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      bwaModule
     module	    'samtools'
     module      'picard'
@@ -163,9 +154,7 @@ process indexPreUmiBam {
         set baseName, file(bam), file("${baseName}.aligned.bam.bai") into ch_indexedMappedNoUMI
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+ 
     module      'samtools'
     cpus        globalCores
     memory      globalMemoryM
@@ -203,9 +192,7 @@ process runVardictPREUMI {
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
 
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+ 
     cpus        6
     memory      globalMemoryM
     time        globalTimeL
@@ -235,9 +222,7 @@ process catSegmentsPREUMI {
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
 
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+  
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -261,9 +246,6 @@ process makeVCFPREUMI {
     
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -287,9 +269,6 @@ process reheaderPREUMIVCF {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -313,9 +292,6 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    cache       'lenient'
-    module      'bcftools/1.8'
-    executor    globalExecutor                                                    
     stageInMode globalStageInMode                                                 
     memory      globalMemoryM 
     time        globalTimeM
@@ -335,10 +311,8 @@ process indexVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-    cache       'lenient'
-    module      'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
+    
+    module      'bcftools/1.8'                                         
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -358,8 +332,6 @@ process vt_decompose_normalisePREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      'vt'
     memory      globalMemoryM
     time        globalTimeM
@@ -379,9 +351,6 @@ process apply_vepPREUMI {
 
     publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        12
     memory      globalMemoryL
     time        globalTimeL
@@ -419,9 +388,6 @@ process groupreadsByUmi {
     
     publishDir path: './output/metrics/UMI', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
@@ -442,9 +408,6 @@ process generateConsensusReads {
         set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
@@ -492,9 +455,6 @@ process mapConsensusReads {
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module 	    bwaModule
     cpus        bwaCores 
     memory      globalMemoryM
@@ -525,9 +485,7 @@ process indexBam {
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+ 
     module      'samtools'
     cpus        globalCores
     memory      globalMemoryM
@@ -567,10 +525,7 @@ process runVardict {
     output:
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
 
-    
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+ 
     cpus        6
     memory      globalMemoryM
     time        globalTimeL
@@ -598,9 +553,6 @@ process catSegments {
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -625,9 +577,6 @@ process makeVCF {
     
     publishDir path: './output/UMI/intermediate', mode: 'copy'
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -651,8 +600,6 @@ process reheaderUMIVCF {
 
     publishDir path: './output/UMI/intermediate', mode: 'copy'
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -676,9 +623,7 @@ process sortVCFS {
 
     publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
     
-    module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
+    module     'bcftools/1.8'                       
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -698,8 +643,6 @@ process indexVCFS {
     publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
     
     module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
     memory      globalMemoryM 
     time        globalTimeM
     queue       globalQueueL
@@ -719,8 +662,6 @@ process vt_decompose_normalise {
 
     publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      'vt'
     memory      globalMemoryM
     time        globalTimeM
@@ -740,9 +681,6 @@ process apply_vep {
 
     publishDir path: './output/UMI/somatic_annotated', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        12
     memory      globalMemoryL
     time        globalTimeL
@@ -784,8 +722,6 @@ process collectHSMetrics {
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
@@ -816,8 +752,6 @@ process collectMultipleMetrics {
     
     publishDir path: './output/metrics/multiple', mode: 'copy'
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
