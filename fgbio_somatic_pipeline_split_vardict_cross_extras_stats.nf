@@ -42,8 +42,6 @@ rModule            = 'R/3.5.1'
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
 // Global Resource Configuration Options
-globalExecutor    = 'slurm'
-globalStageInMode = 'symlink'
 globalCores       = 1
 bwaCores	      = 12
 globalMemoryS     = '6 GB'
@@ -92,7 +90,7 @@ process createUnmappedUMIBam {
 
 process markAdaptors {
 
-    //publishDir path: './output/intermediate', mode: 'copy'
+    publishDir path: './output/intermediate', mode: 'copy', pattern: '*.tsv'
 
     input:
         set baseName, file(bam) from ch_unmappedUMIbams
@@ -197,9 +195,7 @@ process runVardictPREUMI {
     memory      globalMemoryM
     time        globalTimeL
     queue       globalQueueL
-    errorStrategy 'retry'
-    maxRetries  3
-
+    
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -244,7 +240,7 @@ process makeVCFPREUMI {
     output:
         set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCFPREUMI
     
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'
+    //publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
     cpus        1
     memory      globalMemoryM
@@ -267,7 +263,7 @@ process reheaderPREUMIVCF {
     output:
         set sample, file("*.vcf.gz") into ch_reheaderVCFPREUMI
 
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'
+    //publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
     cpus        1
     memory      globalMemoryM
@@ -330,7 +326,7 @@ process vt_decompose_normalisePREUMI {
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
 
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'
+    //publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
     module      'vt'
     memory      globalMemoryM
@@ -364,9 +360,7 @@ process apply_vepPREUMI {
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
                       --vcf --force_overwrite --flag_pick --no_stats \
-                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,\
-                      Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,\
-                      Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
+                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
                       --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
                       --custom $vep_revel,RVL,vcf,exact,0,REVEL_SCORE \
                       --plugin MaxEntScan,$vep_maxentscan \
@@ -386,7 +380,7 @@ process groupreadsByUmi {
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
-    publishDir path: './output/metrics/UMI', mode: 'copy'
+    publishDir path: './output/metrics/UMI', mode: 'copy', pattern: "*.tsv"
 
     cpus        globalCores
     memory      globalMemoryM
@@ -406,7 +400,7 @@ process generateConsensusReads {
         set baseName, file(hist), file(bam) from ch_umiGroupedBams
     output:
         set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
     cpus        globalCores
     memory      globalMemoryM
@@ -453,7 +447,7 @@ process mapConsensusReads {
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    publishDir path: './output/UMI/bam', mode: 'copy'
 
     module 	    bwaModule
     cpus        bwaCores 
@@ -483,7 +477,7 @@ process indexBam {
         set baseName, file(bam) from ch_mappedConsensusBams
     output:
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    publishDir path: './output/UMI/bam', mode: 'copy'
 
  
     module      'samtools'
@@ -575,7 +569,7 @@ process makeVCF {
     output:
         set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
     
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'
     
     cpus        1
     memory      globalMemoryM
@@ -598,7 +592,7 @@ process reheaderUMIVCF {
     output:
         set sample, file("*.vcf.gz") into ch_reheaderVCF
 
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'
     
     cpus        1
     memory      globalMemoryM
@@ -621,7 +615,7 @@ process sortVCFS {
     output:
         set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCF
 
-    publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
     
     module     'bcftools/1.8'                       
     memory      globalMemoryM 
@@ -640,7 +634,7 @@ process indexVCFS {
     output:
         set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCF
 
-    publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
     
     module     'bcftools/1.8'
     memory      globalMemoryM 
@@ -660,7 +654,7 @@ process vt_decompose_normalise {
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCF
 
-    publishDir path: './output/UMI/intermediate', mode: 'copy'
+    //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
     module      'vt'
     memory      globalMemoryM
@@ -738,7 +732,6 @@ process collectHSMetrics {
         -R ${ref} \
         -BI $panel_int \
         -TI $padded_int \
-        --PER_BASE_COVERAGE "${bam.baseName}.perbase.txt" \
         --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
