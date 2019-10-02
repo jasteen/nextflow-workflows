@@ -50,8 +50,7 @@ globalMemoryL     = '64 GB'
 globalTimeS       = '8m'
 globalTimeM       = '1h'
 globalTimeL       = '24h'
-globalQueueS      = 'short'
-globalQueueL      = 'comp'
+
 
 // Creating channel from input directory
 //create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
@@ -78,8 +77,7 @@ process createUnmappedUMIBam {
     module      'java'
     memory      globalMemoryM
     time        '6h'
-    queue       globalQueueL
-
+    
     script:
     """
     java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
@@ -102,7 +100,7 @@ process markAdaptors {
     module      'java'
     memory      globalMemoryM
     time        '3h'
-    queue       globalQueueL
+    
 
     script:
     """
@@ -127,7 +125,7 @@ process alignBwa {
     cpus        bwaCores
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """
@@ -157,7 +155,7 @@ process indexPreUmiBam {
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """
@@ -194,7 +192,7 @@ process runVardictPREUMI {
     cpus        6
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     
     script:
     """
@@ -222,7 +220,7 @@ process catSegmentsPREUMI {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     
     script:
     
@@ -245,7 +243,7 @@ process makeVCFPREUMI {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """  
@@ -268,7 +266,7 @@ process reheaderPREUMIVCF {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     module      'bcftools/1.8'
 
     script:
@@ -291,7 +289,7 @@ process sortVCFSPREUMI {
                                                  
     memory      globalMemoryM 
     time        globalTimeM
-    queue       globalQueueL
+    
 
     script:
     """
@@ -311,7 +309,7 @@ process indexVCFSPREUMI {
     module      'bcftools/1.8'                                         
     memory      globalMemoryM 
     time        globalTimeM
-    queue       globalQueueL
+    
 
     script:
     """
@@ -331,7 +329,7 @@ process vt_decompose_normalisePREUMI {
     module      'vt'
     memory      globalMemoryM
     time        globalTimeM
-    queue       globalQueueL
+    
 
     """
     vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
@@ -350,7 +348,7 @@ process apply_vepPREUMI {
     cpus        12
     memory      globalMemoryL
     time        globalTimeL
-    queue       globalQueueL
+    
     module      'vep/90'
 
     """
@@ -385,7 +383,7 @@ process groupreadsByUmi {
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     
     script:
     """
@@ -405,7 +403,7 @@ process generateConsensusReads {
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """
@@ -453,7 +451,7 @@ process mapConsensusReads {
     cpus        bwaCores 
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """
@@ -484,7 +482,7 @@ process indexBam {
     cpus        globalCores
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """
@@ -523,7 +521,7 @@ process runVardict {
     cpus        6
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     
     script:
     """
@@ -550,7 +548,7 @@ process catSegments {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     
     script:
     
@@ -574,7 +572,7 @@ process makeVCF {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
     """  
@@ -597,7 +595,7 @@ process reheaderUMIVCF {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
     module      'bcftools/1.8'
 
     script:
@@ -620,7 +618,7 @@ process sortVCFS {
     module     'bcftools/1.8'                       
     memory      globalMemoryM 
     time        globalTimeM
-    queue       globalQueueL
+    
 
     script:
     """
@@ -639,7 +637,7 @@ process indexVCFS {
     module     'bcftools/1.8'
     memory      globalMemoryM 
     time        globalTimeM
-    queue       globalQueueL
+    
 
     script:
     """
@@ -659,7 +657,7 @@ process vt_decompose_normalise {
     module      'vt'
     memory      globalMemoryM
     time        globalTimeM
-    queue       globalQueueL
+    
 
     """
     vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
@@ -678,7 +676,7 @@ process apply_vep {
     cpus        12
     memory      globalMemoryL
     time        globalTimeL
-    queue       globalQueueL
+    
     module      'vep/90'
 
     """
@@ -719,7 +717,7 @@ process collectHSMetrics {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
 
@@ -748,7 +746,7 @@ process collectMultipleMetrics {
     cpus        1
     memory      globalMemoryM
     time        globalTimeL
-    queue       globalQueueL
+    
 
     script:
 
