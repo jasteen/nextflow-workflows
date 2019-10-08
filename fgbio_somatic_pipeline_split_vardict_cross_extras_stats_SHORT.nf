@@ -73,7 +73,7 @@ process runFASTQC {
     memory      globalMemoryM
     time        '30m'
     
-    script
+    script:
     """
     fastqc -t 2 -q $R1 $R2
     """
