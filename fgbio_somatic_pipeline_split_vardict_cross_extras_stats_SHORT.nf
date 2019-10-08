@@ -88,7 +88,7 @@ process createUnmappedUMIBam {
 
 process markAdaptors {
 
-    publishDir path: './output/metrics/UMI/adaptor_marking', mode: 'copy', pattern: '*.tsv'
+    publishDir path: './output/metrics/adaptor_marking', mode: 'copy', pattern: '*.tsv'
 
     input:
         set baseName, file(bam) from ch_unmappedUMIbams
@@ -117,7 +117,7 @@ process alignBwa {
     output:
         set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
 
-    publishDir path: './output/intermediate', mode: 'copy'
+    publishDir path: './output/bams', mode: 'copy'
 
     module      bwaModule
     module	    'samtools'
@@ -148,7 +148,7 @@ process indexPreUmiBam {
         set baseName, file(bam) from ch_mappedNoUMI
     output:
         set baseName, file(bam), file("${baseName}.aligned.bam.bai") into ch_indexedMappedNoUMI
-    publishDir path: './output/intermediate', mode: 'copy'
+    publishDir path: './output/bams', mode: 'copy'
 
  
     module      'samtools'
@@ -238,7 +238,7 @@ process makeVCFPREUMI {
     output:
         set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCFPREUMI
     
-    //publishDir path: './output/preUMI/intermediate', mode: 'copy'
+    //publishDir path: './output/vcf/somatic', mode: 'copy'
     
     cpus        1
     memory      globalMemoryM
@@ -283,7 +283,7 @@ process sortVCFSPREUMI {
     output:
         set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
 
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
+    publishDir path: './output/vcf/somatic', mode: 'copy'                                    
     
                                                  
     memory      globalMemoryM 
@@ -302,7 +302,7 @@ process indexVCFSPREUMI {
     output:
         set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
 
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
+    publishDir path: './output/vcf/somatic', mode: 'copy'                                    
     
     
     module      'bcftools/1.8'                                         
@@ -342,7 +342,7 @@ process apply_vepPREUMI {
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
 
-    publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
+    publishDir path: './output/vcf/somatic', mode: 'copy'
 
     cpus        12
     memory      globalMemoryL
@@ -444,7 +444,7 @@ process mapConsensusReads {
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
-    publishDir path: './output/UMI/bam', mode: 'copy'
+    publishDir path: './output/bam', mode: 'copy'
 
     module 	    bwaModule
     cpus        bwaCores 
@@ -474,7 +474,7 @@ process indexBam {
         set baseName, file(bam) from ch_mappedConsensusBams
     output:
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
-    publishDir path: './output/UMI/bam', mode: 'copy'
+    publishDir path: './output/bam', mode: 'copy'
 
  
     module      'samtools'
@@ -612,7 +612,7 @@ process sortVCFS {
     output:
         set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCF
 
-    //publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
+    publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
     module     'bcftools/1.8'                       
     memory      globalMemoryM 
@@ -631,7 +631,7 @@ process indexVCFS {
     output:
         set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCF
 
-    //publishDir path: './output/UMI/intermediate', mode: 'copy'                                    
+    publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
     module     'bcftools/1.8'
     memory      globalMemoryM 
@@ -670,7 +670,7 @@ process apply_vep {
     output:
         set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
-    publishDir path: './output/UMI/somatic_annotated', mode: 'copy'
+    publishDir path: './output/vcf/UMI', mode: 'copy'
 
     cpus        12
     memory      globalMemoryL
