@@ -40,6 +40,7 @@ samtoolsModule     = 'samtools/1.9'
 gatkModule         = 'gatk/4.0.11.0' 
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
+condaModule        = 'miniconda3/4.1.11-python3.5' 
 
 // Global Resource Configuration Options
 globalCores       = 1
@@ -53,13 +54,32 @@ globalTimeL       = '24h'
 
 
 // Creating channel from input directory
-//create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
-ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true)
-//i'm sure there is a better way to map the basename, but this works for the moment.
-//ch_inputIndexes = Channel.fromPath("$inputDirectory/*_I2.fastq.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('_')), file)}
+Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
 
-//join input files and index on the baseName
-//ch_umiMap = ch_inputFiles.join(ch_inputIndexes)
+
+process runFASTQC {
+
+    publishDir path: './metrics/fastqc', mode: 'copy'
+    
+    input:
+        file(reads) from ch_forFastqc
+    output:
+        set file("*.html"), file("*.zip") into ch_fastqcReports
+
+    publishDir path: './metrics/fastqc', mode: 'copy'
+    
+    cpus        2
+    module      'fastqc'
+    memory      globalMemoryM
+    time        '30m'
+    
+    script
+    """
+    fastqc -t 2 -q $R1 $R2
+    """
+
+}
+
 
 process createUnmappedUMIBam {
     
@@ -94,7 +114,7 @@ process markAdaptors {
         set baseName, file(bam) from ch_unmappedUMIbams
     output:
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
-                      file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams
+                      file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams, ch_adaptorQC
 
     cpus        1
     module      'java'
@@ -600,7 +620,7 @@ process reheaderUMIVCF {
     script:
     """
     bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
-        bcftools sort -o ${sample}.varditc.sorted.vcf.gz -O z -
+        bcftools sort -o ${sample}.vardict.sorted.vcf.gz -O z -
     """
 
 }
@@ -668,14 +688,15 @@ process apply_vep {
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
+        set baseName, file("VEP_UMI_Stats.html"), file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
-    publishDir path: './output/vcf/UMI', mode: 'copy'
+    publishDir path: './output/vcf/UMI', mode: 'copy', pattern: "*.vcf"
+    publishDir path: './output/metrics/vep_stats', mode: 'copy', pattern: "*.html"
+
 
     cpus        12
     memory      globalMemoryL
     time        globalTimeS
-    
     module      'vep/90'
 
     """
@@ -684,10 +705,8 @@ process apply_vep {
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
-                      --vcf --force_overwrite --flag_pick --no_stats \
-                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,\
-                      Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,\
-                      Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
+                      --vcf --force_overwrite --flag_pick --stats_file "${basename}.UMI.VEP_Stats.html"  \
+                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
                       --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
                       --custom $vep_revel,RVL,vcf,exact,0,REVEL_SCORE \
                       --plugin MaxEntScan,$vep_maxentscan \
@@ -757,6 +776,36 @@ process collectMultipleMetrics {
         -O ${bam.baseName}.multiple_metrics \
         -R $ref
     """
+
+
+}
+
+process multiQC {
+
+    input:
+        file('coverage/*') from ch_metrics2.collect()
+        file('multiple/*') from ch_metrics.collect()
+        file('fastqc/*') from ch_fastqcReports.collect()
+        file('adaptor/*') from ch_adaptorQC.collect()
+    output:
+        set file("*multiqc_report.html"), file("*multiqc_data") into ch_multiQCOut
+
+    publishDir path: './output/metrics/report', mode: 'copy'
+
+    cpus        1
+    memory      globalMemoryM
+    time        globalTimeS
+    module      condaModule
+    conda       '/home/jste0021/.conda/envs/py3.5/'
+
+
+
+    script:
+    """
+    multiqc -f -v .
+    """
+
+
 
 
 }
