@@ -266,13 +266,12 @@ process reheaderPREUMIVCF {
     cpus        1
     memory      globalMemoryM
     time        globalTimeS
-    
     module      'bcftools/1.8'
 
     script:
     """
     bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
-        bcftools sort -o ${sample}.varditc.sorted.vcf.gz -O z -
+        bcftools sort -o ${sample}.vardict.sorted.vcf.gz -O z -
     """
 
 }
@@ -289,7 +288,7 @@ process sortVCFSPREUMI {
                                                  
     memory      globalMemoryM 
     time        globalTimeS
-    
+    module      'bcftools/1.8'
 
     script:
     """
