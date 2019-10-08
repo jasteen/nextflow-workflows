@@ -65,8 +65,6 @@ process runFASTQC {
         set sample, file(R1), file(R2), file(I2) from ch_forFastqc
     output:
         set file("*.html"), file("*.zip") into ch_fastqcReports
-
-    publishDir path: './metrics/fastqc', mode: 'copy'
     
     cpus        2
     module      'fastqc'
@@ -464,7 +462,7 @@ process mapConsensusReads {
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
         set baseName, file("${baseName}.consensus.aligned.bam") into ch_mappedConsensusBams, ch_forMetrics2
-    publishDir path: './output/bam', mode: 'copy'
+    publishDir path: './output/bams', mode: 'copy'
 
     module 	    bwaModule
     cpus        bwaCores 
@@ -494,7 +492,7 @@ process indexBam {
         set baseName, file(bam) from ch_mappedConsensusBams
     output:
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
-    publishDir path: './output/bam', mode: 'copy'
+    publishDir path: './output/bams', mode: 'copy'
 
  
     module      'samtools'
