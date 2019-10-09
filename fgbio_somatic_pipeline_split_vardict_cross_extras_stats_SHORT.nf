@@ -64,7 +64,7 @@ process runFASTQC {
     output:
         file("*.{html,zip}") into ch_fastqcReports
     
-    publishDir path: './metrics/fastqc', mode: 'copy'
+    publishDir path: './output/metrics/fastqc', mode: 'copy'
 
     cpus        2
     module      'fastqc'
