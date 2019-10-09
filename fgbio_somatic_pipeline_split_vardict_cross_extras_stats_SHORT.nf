@@ -72,8 +72,9 @@ process runFASTQC {
     time        '30m'
     
     script:
+    
     """
-    fastqc -t 2 -q $R1 $R2
+    fastqc -t 2 -q $R1 $R2 $I2
     """
 
 }
@@ -762,8 +763,7 @@ process collectMultipleMetrics {
     cpus        1
     memory      globalMemoryM
     time        globalTimeS
-    
-
+ 
     script:
 
     """
@@ -796,9 +796,8 @@ process multiQC {
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
 
-
-
     script:
+    
     """
     multiqc -f -v .
     """
