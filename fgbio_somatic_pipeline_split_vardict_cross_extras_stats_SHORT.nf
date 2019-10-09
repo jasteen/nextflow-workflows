@@ -62,7 +62,7 @@ process runFASTQC {
     input:
         set baseName, file(R1), file(R2), file(I2) from ch_forFastqc
     output:
-        set file("*.html"), file("*.zip") into ch_fastqcReports
+        file("*.{html,zip}") into ch_fastqcReports
     
     publishDir path: './metrics/fastqc', mode: 'copy'
 
