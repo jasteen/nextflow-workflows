@@ -59,13 +59,13 @@ Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: tr
 
 process runFASTQC {
 
-    publishDir path: './metrics/fastqc', mode: 'copy'
-    
     input:
-        set sample, file(R1), file(R2), file(I2) from ch_forFastqc
+        set baseName, file(R1), file(R2), file(I2) from ch_forFastqc
     output:
         set file("*.html"), file("*.zip") into ch_fastqcReports
     
+    publishDir path: './metrics/fastqc', mode: 'copy'
+
     cpus        2
     module      'fastqc'
     memory      globalMemoryM
