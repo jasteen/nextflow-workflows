@@ -678,7 +678,7 @@ process apply_vep {
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
-        set baseName, file("VEP_UMI_Stats.html"), file("${baseName}.UMI.reheader.sorted.vt.vep.vcf") into ch_vepVCF
+        set baseName, file("${baseName}.UMI.VEP_Stats.html"), file("${baseName}.UMI.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './output/vcf/UMI', mode: 'copy', pattern: "*.vcf"
     publishDir path: './output/metrics/vep_stats', mode: 'copy', pattern: "*.html"
