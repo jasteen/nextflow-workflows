@@ -697,7 +697,7 @@ process apply_vep {
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
-                      --vcf --force_overwrite --flag_pick --stats_file "${basename}.UMI.VEP_Stats.html"  \
+                      --vcf --force_overwrite --flag_pick --stats_file "${baseName}.UMI.VEP_Stats.html"  \
                       --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
                       --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
                       --custom $vep_revel,RVL,vcf,exact,0,REVEL_SCORE \
