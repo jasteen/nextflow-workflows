@@ -56,7 +56,6 @@ globalTimeL       = '24h'
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
 
-
 process runFASTQC {
 
     input:
@@ -78,7 +77,6 @@ process runFASTQC {
     """
 
 }
-
 
 process createUnmappedUMIBam {
     
@@ -180,7 +178,6 @@ process indexPreUmiBam {
     """
     samtools index $bam ${baseName}.aligned.bam.bai
     """
-
 }
 
 ch_tumorPREUMI  = Channel.create()
@@ -220,12 +217,9 @@ process runVardictPREUMI {
         -b "${tbam}|${nbam}" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
         > "${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv"
     """ 
-
 }
 
-
 ch_collatedSegmentsPREUMI = ch_rawVardictSegmentsPREUMI.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
-
 
 process catSegmentsPREUMI {
     echo true
@@ -300,9 +294,9 @@ process sortVCFSPREUMI {
     input:
         set baseName, file(vcf) from ch_reheaderVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
+        set baseName, file("${baseName}.NoUMI.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
 
-    publishDir path: './output/vcf/somatic', mode: 'copy'                                    
+    publishDir path: './output/vcf/noUMI', mode: 'copy'                                    
     
                                                  
     memory      globalMemoryM 
@@ -311,7 +305,7 @@ process sortVCFSPREUMI {
 
     script:
     """
-    bcftools sort -o "${baseName}.reheader.sorted.vcf.gz" -O z ${vcf}
+    bcftools sort -o "${baseName}.NoUMI.reheader.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
@@ -319,9 +313,9 @@ process indexVCFSPREUMI {
     input:
         set baseName, file(vcf) from ch_sortedVCFPREUMI
     output:
-        set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
+        set baseName, file(vcf), file("${baseName}.NoUMI.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
 
-    publishDir path: './output/vcf/somatic', mode: 'copy'                                    
+    publishDir path: './output/vcf/noUMI', mode: 'copy'                                    
     
     
     module      'bcftools/1.8'                                         
@@ -331,7 +325,7 @@ process indexVCFSPREUMI {
 
     script:
     """
-    bcftools index -f --tbi ${vcf} -o ${baseName}.reheader.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${baseName}.NoUMI.reheader.sorted.vcf.gz.tbi
     """
 }
 
@@ -340,7 +334,7 @@ process vt_decompose_normalisePREUMI {
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
+        set baseName, file("${baseName}.NoUMI.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
 
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
@@ -350,7 +344,7 @@ process vt_decompose_normalisePREUMI {
     
 
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
+    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.NoUMI.reheader.sorted.vt.vcf.gz" -
     """
 }
 
@@ -359,9 +353,9 @@ process apply_vepPREUMI {
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
+        set baseName, file("${baseName}.NoUMI.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
 
-    publishDir path: './output/vcf/somatic', mode: 'copy'
+    publishDir path: './output/vcf/noUMI', mode: 'copy'
 
     cpus        12
     memory      globalMemoryL
@@ -386,7 +380,7 @@ process apply_vepPREUMI {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o "${baseName}.reheader.sorted.vt.vep.vcf"
+                      -o "${baseName}.NoUMI.reheader.sorted.vt.vep.vcf"
     """
 }
 
@@ -487,7 +481,6 @@ process mapConsensusReads {
 
 }
 
-
 process indexBam {
     input:
         set baseName, file(bam) from ch_mappedConsensusBams
@@ -551,9 +544,7 @@ process runVardict {
 
 }
 
-
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
-
 
 process catSegments {
     echo true
@@ -568,16 +559,13 @@ process catSegments {
     time        globalTimeS
     
     
-    script:
-    
+    script:  
     myfiles = tsv.collect().join(' ')
-
     """
     cat ${myfiles} > ${sample}.collated.vardict.tsv
     """
 
 }
-
 
 process makeVCF {
     input:
@@ -593,6 +581,7 @@ process makeVCF {
     
 
     script:
+ 
     """  
     module purge
     module load R/3.5.1
@@ -600,7 +589,6 @@ process makeVCF {
     /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "${tbam}|${nbam}" -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
-
 
 process reheaderUMIVCF {
     input:
@@ -617,11 +605,11 @@ process reheaderUMIVCF {
     module      'bcftools/1.8'
 
     script:
+  
     """
     bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
         bcftools sort -o ${sample}.vardict.sorted.vcf.gz -O z -
     """
-
 }
 
 process sortVCFS {
@@ -629,7 +617,7 @@ process sortVCFS {
     input:
         set baseName, file(vcf) from ch_reheaderVCF
     output:
-        set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCF
+        set baseName, file("${baseName}.UMI.reheader.sorted.vcf.gz") into ch_sortedVCF
 
     publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
@@ -639,8 +627,9 @@ process sortVCFS {
     
 
     script:
+ 
     """
-    bcftools sort -o "${baseName}.reheader.sorted.vcf.gz" -O z ${vcf}
+    bcftools sort -o "${baseName}.UMI.reheader.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
@@ -648,7 +637,7 @@ process indexVCFS {
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
-        set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCF
+        set baseName, file(vcf), file("${baseName}.UMI.reheader.sorted.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
@@ -658,8 +647,9 @@ process indexVCFS {
     
 
     script:
+  
     """
-    bcftools index -f --tbi ${vcf} -o ${baseName}.reheader.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${baseName}.UMI.reheader.sorted.vcf.gz.tbi
     """
 }
 
@@ -668,7 +658,7 @@ process vt_decompose_normalise {
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCF
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCF
+        set baseName, file("${baseName}.UMI.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCF
 
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
@@ -676,9 +666,10 @@ process vt_decompose_normalise {
     memory      globalMemoryM
     time        globalTimeS
     
+    script:
 
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
+    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.UMI.reheader.sorted.vt.vcf.gz" -
     """
 }
 
@@ -687,7 +678,7 @@ process apply_vep {
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
-        set baseName, file("VEP_UMI_Stats.html"), file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCF
+        set baseName, file("VEP_UMI_Stats.html"), file("${baseName}.UMI.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './output/vcf/UMI', mode: 'copy', pattern: "*.vcf"
     publishDir path: './output/metrics/vep_stats', mode: 'copy', pattern: "*.html"
@@ -697,6 +688,8 @@ process apply_vep {
     memory      globalMemoryL
     time        globalTimeS
     module      'vep/90'
+
+    script:
 
     """
     vep --cache --dir_cache $other_vep \
@@ -715,7 +708,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o "${baseName}.reheader.sorted.vt.vep.vcf"
+                      -o "${baseName}.UMI.reheader.sorted.vt.vep.vcf"
     """
 }
 
@@ -735,7 +728,6 @@ process collectHSMetrics {
     memory      globalMemoryM
     time        globalTimeS
     
-
     script:
 
     """
@@ -774,8 +766,6 @@ process collectMultipleMetrics {
         -O ${bam.baseName}.multiple_metrics \
         -R $ref
     """
-
-
 }
 
 process multiQC {
@@ -801,8 +791,4 @@ process multiQC {
     """
     multiqc -f -v .
     """
-
-
-
-
 }
