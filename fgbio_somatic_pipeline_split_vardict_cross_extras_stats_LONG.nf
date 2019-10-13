@@ -97,7 +97,7 @@ process createUnmappedUMIBam {
     
     script:
     """
-    java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
+    java -Xmx30g -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
