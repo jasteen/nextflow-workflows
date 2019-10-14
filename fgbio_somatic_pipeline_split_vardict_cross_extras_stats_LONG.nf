@@ -66,6 +66,7 @@ process runFASTQC {
 }
 
 process createUnmappedUMIBam {
+    
     label 'medium_6h'
 
     publishDir path: './output/intermediate', mode: 'copy'
