@@ -43,12 +43,10 @@ fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT
 condaModule        = 'miniconda3/4.1.11-python3.5' 
 
 // Global Resource Configuration Options
-def memory_mod(task_mem, task_att) { (task_att == 1) ? task_mem : (task_mem + (task_att * (task_mem / 2))) }
-def time_mod(task_time, task_att) { (task_att == 1) ? task_time : (task_time + (task_att * (task_time / 2))) }
 
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
-/*
+
 process runFASTQC {
     
     input:
@@ -59,9 +57,7 @@ process runFASTQC {
     publishDir path: './output/metrics/fastqc', mode: 'copy'
 
     module      'fastqc'
-    memory      memory_mod(task)
-    time        time_mod(task)
-
+    
     script:
     
     """
@@ -69,12 +65,13 @@ process runFASTQC {
     """
 
 }
-*/
 
 process createUnmappedUMIBam {
     
+    label 'medium'
+
     publishDir path: './output/intermediate', mode: 'copy'
-    echo true
+    
     input:
         set baseName, file(I2), file(R1), file(R2) from ch_inputFiles
     output:
@@ -84,20 +81,20 @@ process createUnmappedUMIBam {
     
     module      'fgbio'
     module      'java'
-    memory      { memory_mod(task.memory, task.attempt)}
-    time        { time_mod(task.time, task.attempt)}
-    
+        
     script:
         
     """
-    echo 'java -Xmx${task.memory.toGiga() - 2}gb -Djava.io.tmpdir=$tmp_dir \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
-        --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true' > temp.please.txt
+        --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
-/*
-process markAdaptors {
 
+process markAdaptors {
+    
+    label 'medium'
+    
     publishDir path: './output/metrics/adaptor_marking', mode: 'copy', pattern: '*.tsv'
 
     input:
@@ -107,18 +104,17 @@ process markAdaptors {
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams, ch_adaptorQC
 
     module      'java'
-    memory      memory_mod(task)
-    time        time_mod(task)
+    
 
     script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkIlluminaAdapters \
         -INPUT $bam \
         -OUTPUT "${baseName}.unmapped.umi.marked.bam" \
         -METRICS "${baseName}.unmapped.umi.marked_metrics.tsv"
     """
 }
-
+/*
 process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
