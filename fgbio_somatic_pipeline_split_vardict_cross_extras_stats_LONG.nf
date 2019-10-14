@@ -222,7 +222,7 @@ process catSegmentsPREUMI {
 
 process makeVCFPREUMI {
     
-    label medium_6h
+    label 'medium_6h'
 
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardictPREUMI
