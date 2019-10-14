@@ -312,9 +312,7 @@ process vt_decompose_normalisePREUMI {
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
     module      'vt'
-    memory      globalMemoryM
-    time        '1h'
-    
+        
     script:
     """
     vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.NoUMI.reheader.sorted.vt.vcf.gz" -
