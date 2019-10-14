@@ -118,7 +118,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.aligned.*") into ch_pipedBams.flatten(), ch_mappedNoUMI, ch_forMetrics1
+        set baseName, file("${baseName}.aligned.*") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
 
     publishDir path: './output/bams', mode: 'copy'
 
@@ -166,7 +166,9 @@ ch_tumorPREUMI  = Channel.create()
 ch_normalPREUMI = Channel.create()
 
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
-ch_indexedMappedNoUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+//ch_indexedMappedNoUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+ch_MappedNoUMI.flatten().choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+
 
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
 ch_normalSplitPREUMI = ch_normalPREUMI.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
@@ -361,7 +363,7 @@ process groupreadsByUmi {
     label 'medium_6h'
 
     input:
-        set baseName, file(bam) from ch_pipedBams
+        set baseName, file(bam), file(index) from ch_pipedBams.flatten()
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
@@ -662,7 +664,7 @@ process apply_vep {
 }
 
 //ch_forMetrics = ch_forMetrics1.concat(ch_forMetrics2)
-ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
+ch_forMetrics1.flatten().concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
