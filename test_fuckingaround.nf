@@ -57,7 +57,7 @@ globalTimeL       = '24h'
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}.view()
 
 
-/*
+
 process runFASTQC {
 
     input:
@@ -129,7 +129,7 @@ process markAdaptors {
         -METRICS "${baseName}.unmapped.umi.marked_metrics.tsv"
     """
 }
-
+/*
 process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
