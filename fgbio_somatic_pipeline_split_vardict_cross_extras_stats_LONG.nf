@@ -264,7 +264,7 @@ process reheaderPREUMIVCF {
 
 process sortVCFSPREUMI {
 
-    label medium_1h
+    label 'medium_6h'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCFPREUMI
