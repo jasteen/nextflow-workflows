@@ -118,7 +118,7 @@ process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.aligned.*") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
+        set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
 
     publishDir path: './output/bams', mode: 'copy'
 
@@ -137,11 +137,11 @@ process alignBwa {
     java -Dpicard.useLegacyParser=false -Xmx${(task.memory.toGiga() / 6).toInteger() }g -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.aligned.bam" -R "$ref" -ADD_MATE_CIGAR true \
-        -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' -CREATE_INDEX true\
+        -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
         -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
     """
 }
- /*
+
 process indexPreUmiBam {
     input:
         set baseName, file(bam) from ch_mappedNoUMI
@@ -161,13 +161,13 @@ process indexPreUmiBam {
     samtools index $bam ${baseName}.aligned.bam.bai
     """
 }
-*/
+
 ch_tumorPREUMI  = Channel.create()
 ch_normalPREUMI = Channel.create()
 
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
-//ch_indexedMappedNoUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
-ch_mappedNoUMI.flatten().choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+ch_indexedMappedNoUMI.choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+//ch_mappedNoUMI.flatten().choice(ch_tumorPREUMI, ch_normalPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
 
 
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
@@ -659,7 +659,7 @@ process apply_vep {
 }
 
 //ch_forMetrics = ch_forMetrics1.concat(ch_forMetrics2)
-ch_forMetrics1.flatten().concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
+ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
