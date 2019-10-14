@@ -84,8 +84,8 @@ process createUnmappedUMIBam {
     
     module      'fgbio'
     module      'java'
-    memory      memory_mod(task.memory, task.attempt)
-    time        time_mod(task.time, task.attempt)
+    memory      { memory_mod(task.memory, task.attempt)}
+    time        { time_mod(task.time, task.attempt)}
     
     script:
     """
