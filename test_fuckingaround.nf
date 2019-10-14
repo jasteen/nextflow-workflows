@@ -90,7 +90,7 @@ process createUnmappedUMIBam {
     script:
         
     """
-    echo 'java -Xmx${task.memory.toGiga()}gb -Djava.io.tmpdir=$tmp_dir \
+    echo 'java -Xmx${task.memory.toGiga() - 2}gb -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true' > temp.please.txt
     """
