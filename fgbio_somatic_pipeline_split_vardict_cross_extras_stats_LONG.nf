@@ -356,7 +356,7 @@ process groupreadsByUmi {
     label 'medium_6h'
 
     input:
-        set baseName, file(bam), file(index) from ch_pipedBams
+        set baseName, file(bam) from ch_pipedBams
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
