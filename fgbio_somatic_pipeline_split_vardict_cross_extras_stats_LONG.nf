@@ -143,19 +143,17 @@ process alignBwa {
 }
 
 process indexPreUmiBam {
+    
+    label 'small_1'
+
     input:
         set baseName, file(bam) from ch_mappedNoUMI
     output:
         set baseName, file(bam), file("${baseName}.aligned.bam.bai") into ch_indexedMappedNoUMI
     publishDir path: './output/bams', mode: 'copy'
-
  
     module      'samtools'
-    cpus        globalCores
-    memory      globalMemoryM
-    time        '15m'
     
-
     script:
     """
     samtools index $bam ${baseName}.aligned.bam.bai
