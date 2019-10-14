@@ -231,9 +231,6 @@ process makeVCFPREUMI {
     
     //publishDir path: './output/vcf/somatic', mode: 'copy'
     
-    cpus        1
-    memory      globalMemoryM
-  
     script:
     """  
     module purge
