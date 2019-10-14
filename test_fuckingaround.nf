@@ -54,7 +54,7 @@ globalTimeL       = '24h'
 
 
 // Creating channel from input directory
-Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}.view()
+Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
 
 
 
