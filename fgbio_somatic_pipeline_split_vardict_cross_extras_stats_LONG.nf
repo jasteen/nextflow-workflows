@@ -42,21 +42,11 @@ rModule            = 'R/3.5.1'
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 condaModule        = 'miniconda3/4.1.11-python3.5' 
 
-// Global Resource Configuration Options
-globalCores       = 1
-bwaCores	      = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '15m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
-
-
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
 
 process runFASTQC {
+    label 'small_2'
 
     input:
         set baseName, file(R1), file(R2), file(I2) from ch_forFastqc
@@ -65,21 +55,19 @@ process runFASTQC {
     
     publishDir path: './output/metrics/fastqc', mode: 'copy'
 
-    cpus        2
     module      'fastqc'
-    memory      globalMemoryM
-    time        '2h'
-    
+        
     script:
     
     """
-    fastqc -t 2 -q $R1 $R2 $I2
+    fastqc -t ${task.cpus} -q $R1 $R2 $I2
     """
 
 }
 
 process createUnmappedUMIBam {
-    
+    label 'medium_6h'
+
     publishDir path: './output/intermediate', mode: 'copy'
     
     input:
@@ -89,21 +77,20 @@ process createUnmappedUMIBam {
 
     //publishDir path: './output/intermediate', mode: 'copy'
     
-    cpus        1
     module      'fgbio'
     module      'java'
-    memory      globalMemoryM
-    time        '6h'
     
     script:
     """
-    java -Xmx30g -Djava.io.tmpdir=$tmp_dir \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
 
 process markAdaptors {
+
+    label 'medium_6h'
 
     publishDir path: './output/metrics/adaptor_marking', mode: 'copy', pattern: '*.tsv'
 
@@ -113,15 +100,11 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams, ch_adaptorQC
 
-    cpus        1
     module      'java'
-    memory      globalMemoryM
-    time        '3h'
     
-
     script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkIlluminaAdapters \
         -INPUT $bam \
         -OUTPUT "${baseName}.unmapped.umi.marked.bam" \
         -METRICS "${baseName}.unmapped.umi.marked_metrics.tsv"
@@ -129,37 +112,36 @@ process markAdaptors {
 }
 
 process alignBwa {
+    
+    label 'bwa'
+    
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
     output:
-        set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_mappedNoUMI, ch_forMetrics1
+        set baseName, file("${baseName}.aligned.*") into ch_pipedBams.flatten(), ch_mappedNoUMI, ch_forMetrics1
 
     publishDir path: './output/bams', mode: 'copy'
 
     module      bwaModule
     module	    'samtools'
     module      'picard'
-    cpus        bwaCores
-    memory      globalMemoryM
-    time        '12h'
     
-
     script:
     """
     set -o pipefail
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
+    java -Dpicard.useLegacyParser=false -Xmx${ (task.memory.toGiga() / 6).toInteger() }g -jar $picardJar SamToFastq \
         -I "$bam" \
         -FASTQ '/dev/stdout' -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 \
         -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" | \
     bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
+    java -Dpicard.useLegacyParser=false -Xmx${(task.memory.toGiga() / 6).toInteger() }g -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.aligned.bam" -R "$ref" -ADD_MATE_CIGAR true \
-        -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
+        -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' -CREATE_INDEX true\
         -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
     """
 }
-
+ /*
 process indexPreUmiBam {
     input:
         set baseName, file(bam) from ch_mappedNoUMI
@@ -179,7 +161,7 @@ process indexPreUmiBam {
     samtools index $bam ${baseName}.aligned.bam.bai
     """
 }
-
+*/
 ch_tumorPREUMI  = Channel.create()
 ch_normalPREUMI = Channel.create()
 
@@ -198,18 +180,14 @@ ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "s
 ch_vardictPREUMI= ch_tumorNormalPairsPREUMI.combine(ch_bedSegments2)
 
 process runVardictPREUMI {
+    
+    label 'vardict'
+
     input:
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
     output:
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
 
-    
- 
-    cpus        6
-    memory      globalMemoryM
-    time        '2h'
-    
-    
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -222,19 +200,15 @@ process runVardictPREUMI {
 ch_collatedSegmentsPREUMI = ch_rawVardictSegmentsPREUMI.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
 
 process catSegmentsPREUMI {
+    
+    label 'small_1' 
     echo true
+    
     input: 
         set sample, tbam, nbam, file(tsv) from ch_collatedSegmentsPREUMI
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
 
-    
-  
-    cpus        1
-    memory      globalMemoryM
-    time        '20m'
-    
-    
     script:
     
     myfiles = tsv.collect().join(' ')
@@ -242,10 +216,12 @@ process catSegmentsPREUMI {
     """
     cat ${myfiles} > ${sample}.collated.vardict.tsv
     """
-
 }
 
 process makeVCFPREUMI {
+    
+    label medium_6h
+
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardictPREUMI
     output:
@@ -255,9 +231,7 @@ process makeVCFPREUMI {
     
     cpus        1
     memory      globalMemoryM
-    time        '1h'
-    
-
+  
     script:
     """  
     module purge
@@ -269,6 +243,9 @@ process makeVCFPREUMI {
 }
 
 process reheaderPREUMIVCF {
+    
+    label 'small_1'
+
     input:
         set sample, file(vcf) from ch_outputVCFPREUMI
     output:
@@ -276,9 +253,6 @@ process reheaderPREUMIVCF {
 
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
-    cpus        1
-    memory      globalMemoryM
-    time        '15m'
     module      'bcftools/1.8'
 
     script:
@@ -291,6 +265,8 @@ process reheaderPREUMIVCF {
 
 process sortVCFSPREUMI {
 
+    label medium_1h
+
     input:
         set baseName, file(vcf) from ch_reheaderVCFPREUMI
     output:
@@ -298,9 +274,6 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/vcf/noUMI', mode: 'copy'                                    
     
-                                                 
-    memory      globalMemoryM 
-    time        '1h'
     module      'bcftools/1.8'
 
     script:
@@ -310,6 +283,9 @@ process sortVCFSPREUMI {
 }
 
 process indexVCFSPREUMI {
+    
+    label 'medium_1h'
+
     input:
         set baseName, file(vcf) from ch_sortedVCFPREUMI
     output:
@@ -317,12 +293,8 @@ process indexVCFSPREUMI {
 
     publishDir path: './output/vcf/noUMI', mode: 'copy'                                    
     
-    
     module      'bcftools/1.8'                                         
-    memory      globalMemoryM 
-    time        '1h'
     
-
     script:
     """
     bcftools index -f --tbi ${vcf} -o ${baseName}.NoUMI.reheader.sorted.vcf.gz.tbi
@@ -330,7 +302,9 @@ process indexVCFSPREUMI {
 }
 
 process vt_decompose_normalisePREUMI {
-        
+    
+    label 'medium_6h'
+
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCFPREUMI
     output:
@@ -342,7 +316,7 @@ process vt_decompose_normalisePREUMI {
     memory      globalMemoryM
     time        '1h'
     
-
+    script:
     """
     vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.NoUMI.reheader.sorted.vt.vcf.gz" -
     """
@@ -350,17 +324,15 @@ process vt_decompose_normalisePREUMI {
 
 process apply_vepPREUMI {
 
+    label 'vep'
+
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCFPREUMI
     output:
         set baseName, file("${baseName}.NoUMI.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
 
     publishDir path: './output/vcf/noUMI', mode: 'copy'
-
-    cpus        12
-    memory      globalMemoryL
-    time        '1h'
-    
+   
     module      'vep/90'
 
     """
@@ -385,6 +357,9 @@ process apply_vepPREUMI {
 }
 
 process groupreadsByUmi {
+    
+    label 'medium_6h'
+
     input:
         set baseName, file(bam) from ch_pipedBams
     output:
@@ -392,34 +367,27 @@ process groupreadsByUmi {
     
     publishDir path: './output/metrics/UMI/family_sizes', mode: 'copy', pattern: "*.tsv"
 
-    cpus        globalCores
-    memory      globalMemoryM
-    time        '1h'
-    
-    
     script:
     """
-    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar GroupReadsByUmi \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar GroupReadsByUmi \
          -i ${bam} -f "${baseName}.piped.grouped.histogram.tsv" -o "${baseName}.piped.grouped.bam" -s Adjacency -e 1 
     """
 
 }
 
 process generateConsensusReads {
+    
+    label 'medium_6h'
+
     input:
         set baseName, file(hist), file(bam) from ch_umiGroupedBams
     output:
         set baseName, file("${baseName}.consensus.unmapped.bam") into ch_unmappedConsensusBams
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
-    cpus        globalCores
-    memory      globalMemoryM
-    time        '2h'
-    
-
     script:
     """
-    java -Xmx6g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CallMolecularConsensusReads \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CallMolecularConsensusReads \
         --input $bam --output ${baseName}.consensus.unmapped.bam \
         --error-rate-post-umi 30 --min-reads 1
     """
@@ -451,8 +419,10 @@ process generateConsensusReads {
 //
 //}
 
-
 process mapConsensusReads {
+    
+    label 'bwa'
+
     input:
         set baseName, file(bam) from ch_unmappedConsensusBams
     output:
@@ -460,41 +430,34 @@ process mapConsensusReads {
     publishDir path: './output/bams', mode: 'copy'
 
     module 	    bwaModule
-    cpus        bwaCores 
-    memory      globalMemoryM
-    time        '1h'
     
-
     script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
+    java -Dpicard.useLegacyParser=false -Xmx${ (task.memory.toGiga() / 6).toInteger() }g -jar $picardJar SamToFastq \
         -I "$bam" \
         -FASTQ /dev/stdout \
         -INTERLEAVE true -TMP_DIR $tmp_dir | \
     bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
+    java -Dpicard.useLegacyParser=false -Xmx${ (task.memory.toGiga() / 6).toInteger() }g -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM /dev/stdin -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.consensus.aligned.bam" -R $ref -ADD_MATE_CIGAR true \
         -SO coordinate -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
         -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
     """
-
 }
 
 process indexBam {
+    
+    label 'small_1'
+
     input:
         set baseName, file(bam) from ch_mappedConsensusBams
     output:
         set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
     publishDir path: './output/bams', mode: 'copy'
-
  
     module      'samtools'
-    cpus        globalCores
-    memory      globalMemoryM
-    time        '1h'
-    
-
+ 
     script:
     """
     samtools index $bam ${baseName}.consensus.aligned.bam.bai
@@ -523,17 +486,14 @@ ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "se
 ch_vardictInput = ch_tumorNormalPairs.combine(ch_bedSegments)
 
 process runVardict {
+    
+    label 'vardict'
+
     input:
         set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictInput
     output:
         set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
-
  
-    cpus        6
-    memory      globalMemoryM
-    time        '2h'
-    
-    
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -547,18 +507,15 @@ process runVardict {
 ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
 
 process catSegments {
+    
+    label 'small_1'
     echo true
+
     input: 
         set sample, tbam, nbam, file(tsv) from ch_collatedSegments
     output: 
         set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
-    
-    cpus        1
-    memory      globalMemoryM
-    time        '30m'
-    
-    
     script:  
     myfiles = tsv.collect().join(' ')
     """
@@ -568,6 +525,9 @@ process catSegments {
 }
 
 process makeVCF {
+    
+    label 'medium_6h'
+
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardict
     output:
@@ -575,11 +535,6 @@ process makeVCF {
     
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
     
-    cpus        1
-    memory      globalMemoryM
-    time        '2h'
-    
-
     script:
  
     """  
@@ -591,17 +546,16 @@ process makeVCF {
 }
 
 process reheaderUMIVCF {
+    
+    label 'small_1'
+
     input:
         set sample, file(vcf) from ch_outputVCF
     output:
         set sample, file("*.vcf.gz") into ch_reheaderVCF
 
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
-    
-    cpus        1
-    memory      globalMemoryM
-    time        '1h'
-    
+
     module      'bcftools/1.8'
 
     script:
@@ -614,6 +568,8 @@ process reheaderUMIVCF {
 
 process sortVCFS {
 
+    label 'medium_6h'
+    
     input:
         set baseName, file(vcf) from ch_reheaderVCF
     output:
@@ -622,18 +578,17 @@ process sortVCFS {
     publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
     module     'bcftools/1.8'                       
-    memory      globalMemoryM 
-    time        '2h'
     
-
     script:
- 
     """
     bcftools sort -o "${baseName}.UMI.reheader.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
 process indexVCFS {
+
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
@@ -642,9 +597,6 @@ process indexVCFS {
     publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
     module     'bcftools/1.8'
-    memory      globalMemoryM 
-    time        '30m'
-    
 
     script:
   
@@ -655,6 +607,8 @@ process indexVCFS {
 
 process vt_decompose_normalise {
         
+    label 'medium_6h'
+
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCF
     output:
@@ -663,17 +617,16 @@ process vt_decompose_normalise {
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
     module      'vt'
-    memory      globalMemoryM
-    time        '30m'
     
     script:
-
     """
     vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.UMI.reheader.sorted.vt.vcf.gz" -
     """
 }
 
 process apply_vep {
+    
+    label 'vep'
 
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCF
@@ -683,10 +636,6 @@ process apply_vep {
     publishDir path: './output/vcf/UMI', mode: 'copy', pattern: "*.vcf"
     publishDir path: './output/metrics/vep_stats', mode: 'copy', pattern: "*.html"
 
-
-    cpus        12
-    memory      globalMemoryL
-    time        '2h'
     module      'vep/90'
 
     script:
@@ -717,6 +666,8 @@ ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics
 
 process collectHSMetrics {
 
+    label 'medium_6h'
+
     input:
         set sample, file(bam) from ch_forHSMetrics
     output:
@@ -724,16 +675,12 @@ process collectHSMetrics {
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
     
-    cpus        1
-    memory      globalMemoryM
-    time        '1h'
-    
     script:
 
     """
     module purge
     module load R/3.5.1
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectHsMetrics \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectHsMetrics \
         -I ${bam} \
         -O "${bam.baseName}.HSmetrics.txt" \
         -R ${ref} \
@@ -745,6 +692,8 @@ process collectHSMetrics {
 
 process collectMultipleMetrics {
 
+    label 'medium_6h'
+
     input:
         set sample, file(bam) from ch_forMultipleMetrics
     output:
@@ -752,16 +701,12 @@ process collectMultipleMetrics {
     
     publishDir path: './output/metrics/multiple', mode: 'copy'
     
-    cpus        1
-    memory      globalMemoryM
-    time        '1h'
- 
     script:
 
     """
     module purge
     module load R/3.5.1
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectMultipleMetrics \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectMultipleMetrics \
         -I $bam \
         -O ${bam.baseName}.multiple_metrics \
         -R $ref
@@ -769,6 +714,8 @@ process collectMultipleMetrics {
 }
 
 process multiQC {
+
+    label 'medium_6h'
 
     input:
         file('coverage/*') from ch_metrics2.collect()
@@ -780,9 +727,6 @@ process multiQC {
 
     publishDir path: './output/metrics/report', mode: 'copy'
 
-    cpus        1
-    memory      globalMemoryM
-    time        '1h'
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
 
