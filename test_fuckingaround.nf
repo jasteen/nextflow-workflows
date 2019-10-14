@@ -43,23 +43,14 @@ fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT
 condaModule        = 'miniconda3/4.1.11-python3.5' 
 
 // Global Resource Configuration Options
-globalCores       = 1
-bwaCores	      = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '15m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
-
+def memory_mod(task_object) { (task_object.attempt == 1) ? task_object.memory : (task_object.memory + (task_object.attempt * (task_object.memory / 2))) }
+def time_mod(task_object) { (task_object.attempt == 1) ? task_object.time : (task_object.time + (task_object.attempt * (task_object.time / 2))) }
 
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
-
-
-
+/*
 process runFASTQC {
-
+    
     input:
         set baseName, file(R1), file(R2), file(I2) from ch_forFastqc
     output:
@@ -67,23 +58,23 @@ process runFASTQC {
     
     publishDir path: './output/metrics/fastqc', mode: 'copy'
 
-    cpus        2
     module      'fastqc'
-    memory      globalMemoryM
-    time        '2h'
-    
+    memory      memory_mod(task)
+    time        time_mod(task)
+
     script:
     
     """
-    fastqc -t 2 -q $R1 $R2 $I2
+    fastqc -t ${task.cpus} -q $R1 $R2 $I2
     """
 
 }
+*/
 
 process createUnmappedUMIBam {
     
     publishDir path: './output/intermediate', mode: 'copy'
-    
+    echo true
     input:
         set baseName, file(I2), file(R1), file(R2) from ch_inputFiles
     output:
@@ -91,20 +82,19 @@ process createUnmappedUMIBam {
 
     //publishDir path: './output/intermediate', mode: 'copy'
     
-    cpus        1
     module      'fgbio'
     module      'java'
-    memory      globalMemoryM
-    time        '6h'
+    memory      memory_mod(task)
+    time        time_mod(task)
     
     script:
     """
-    java -Xmx30g -Djava.io.tmpdir=$tmp_dir \
+    echo java -Xmx${task.memory} -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 $I2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T +M \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
-
+/*
 process markAdaptors {
 
     publishDir path: './output/metrics/adaptor_marking', mode: 'copy', pattern: '*.tsv'
@@ -115,11 +105,9 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.umi.marked.bam"),
                       file("${baseName}.unmapped.umi.marked_metrics.tsv") into ch_markedUMIbams, ch_adaptorQC
 
-    cpus        1
     module      'java'
-    memory      globalMemoryM
-    time        '3h'
-    
+    memory      memory_mod(task)
+    time        time_mod(task)
 
     script:
     """
@@ -129,7 +117,7 @@ process markAdaptors {
         -METRICS "${baseName}.unmapped.umi.marked_metrics.tsv"
     """
 }
-/*
+
 process alignBwa {
     input:
         set baseName, file(bam), file(metrics) from ch_markedUMIbams
