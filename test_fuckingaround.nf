@@ -43,8 +43,8 @@ fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT
 condaModule        = 'miniconda3/4.1.11-python3.5' 
 
 // Global Resource Configuration Options
-def memory_mod(task_object) { (task_object.attempt == 1) ? task_object.memory : (task_object.memory + (task_object.attempt * (task_object.memory / 2))) }
-def time_mod(task_object) { (task_object.attempt == 1) ? task_object.time : (task_object.time + (task_object.attempt * (task_object.time / 2))) }
+def memory_mod(task_mem, task_att) { (task_att == 1) ? task_mem : (task_mem + (task_att * (task_mem / 2))) }
+def time_mod(task_time, task_att) { (task_att == 1) ? task_time : (task_time + (task_att * (task_time / 2))) }
 
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2,I2}.fastq.gz", size: 3, flat: true).into{ch_inputFiles;ch_forFastqc}
@@ -84,8 +84,8 @@ process createUnmappedUMIBam {
     
     module      'fgbio'
     module      'java'
-    memory      memory_mod(task)
-    time        time_mod(task)
+    memory      memory_mod(task.memory, task.attempt)
+    time        time_mod(task.time, task.attempt)
     
     script:
     """
