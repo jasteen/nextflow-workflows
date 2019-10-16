@@ -18,21 +18,18 @@ refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 knownIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
 dbSNP            = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
+ceu_mergeGvcf    = file("reference/CEU_mergeGvcf.vcf")
+fin_mergeGvcf    = file("reference/FIN_mergeGvcf.vcf")
+gbr_mergeGvcf    = file("reference/GBR_mergeGvcf.vcf")
 
-/*
-
-mills_grch37: reference/Mills_and_1000G_gold_standard.indels.b37.vcf
-one_k_g_grch37_indels: reference/1000G_phase1.indels.b37.vcf
-one_k_g_snps: reference/1000G_omni2.5.b37.vcf
-one_k_g_highconf_snps: reference/1000G_phase1.snps.high_confidence.b37.vcf
-one_k_g_indels: reference/1000G_phase1.indels.b37.vcf
-hapmap: reference/hapmap_3.3.b37.vcf
-interval_grch37: reference/Broad.human.exome.b37.interval_list
-dbsnp_grch37: reference/dbsnp_138.b37.vcf
-CEU_mergeGvcf: reference/CEU_mergeGvcf.vcf
-FIN_mergeGvcf: reference/FIN_mergeGvcf.vcf
-GBR_mergeGvcf: reference/GBR_mergeGvcf.vcf
-*/
+mills_grch37 = file("Mills_and_1000G_gold_standard.indels.b37.vcf")
+one_k_g_grch37_indels = file("1000G_phase1.indels.b37.vcf")
+one_k_g_snps = file("1000G_omni2.5.b37.vcf")
+one_k_g_highconf_snps = file("1000G_phase1.snps.high_confidence.b37.vcf")
+one_k_g_indels = file("1000G_phase1.indels.b37.vcf")
+hapmap = file("hapmap_3.3.b37.vcf")
+interval_grch37 = file("Broad.human.exome.b37.interval_list")
+dbsnp_grch37 = file("dbsnp_138.b37.vcf")
 
 // Tools
 picardJar          = '~/picard.jar'
@@ -40,32 +37,19 @@ gatkJar            = '/usr/local/gatk/3.7/bin/GenomeAnalysisTK.jar'
 bwaModule          = 'bwa/0.7.17-gcc5'
 samtoolsModule     = 'samtools/1.9'
 gatkModule         = 'gatk/3.7'
+bcftoolsModule     = 'bcftools/1.8'
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
-// Global Resource Configuration Options
-globalExecutor    = 'slurm'
-globalStageInMode = 'symlink'
-globalCores       = 1
-bwaCores	      = 12
-vardictCores      = 4
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
-globalQueueS      = 'short'
-globalQueueL      = 'comp'
 
-// Creating channel from input directory
-//create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
+//initial channel generation from fastq folder
 ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat: true)
-
 
 process createUnmappedBam {
     
-    publishDir path: './output/intermediate', mode: 'copy'
+    label 
+
+    //publishDir path: './output/intermediate', mode: 'copy'
     
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
@@ -74,19 +58,12 @@ process createUnmappedBam {
 
     publishDir path: './output/intermediate', mode: 'copy'
     
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
     module      'fgbio'
     module      'java'
-    memory      globalMemoryM
-    time        '3h'
-    queue       globalQueueL
-
+    
     script:
     """
-    java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
         -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.bam" --read-structures +T +T \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
@@ -101,25 +78,17 @@ process markAdaptors {
     output:
         set baseName, file("${baseName}.unmapped.marked.bam"),
                       file("${baseName}.unmapped.marked_metrics.tsv") into ch_markedBams
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
+   
     module      'java'
-    memory      globalMemoryM
-    time        '3h'
-    queue       globalQueueL
-
+    
     script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx30g -jar $picardJar MarkIlluminaAdapters \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkIlluminaAdapters \
         -INPUT $bam \
         -OUTPUT "${baseName}.unmapped.marked.bam" \
         -METRICS "${baseName}.unmapped.marked_metrics.tsv"
     """
 }
-
 
 process alignBwa {
     input:
@@ -129,26 +98,18 @@ process alignBwa {
 
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
+    module	    samtoolsModule
     module      bwaModule
-    module	    'samtools'
-    module      'picard'
-    cpus        bwaCores
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
 
     script:
     """
     set -o pipefail
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar SamToFastq \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar SamToFastq \
         -I "$bam" \
         -FASTQ '/dev/stdout' -CLIPPING_ATTRIBUTE XT -CLIPPING_ACTION 2 \
         -INTERLEAVE true -NON_PF true -TMP_DIR "$tmp_dir" | \
     bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar $picardJar MergeBamAlignment \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MergeBamAlignment \
         -ALIGNED_BAM '/dev/stdin' -UNMAPPED_BAM "$bam" \
         -OUTPUT "${baseName}.mapped.bam" -R "$ref" -ADD_MATE_CIGAR true \
         -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
@@ -165,19 +126,12 @@ process markDuplicatesPicard {
 
     publishDir path: './output/metrics/markduplicates', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
     // TODO: CLEAR_DT=false option in GATK pipeline but not supported by 
     //       this version of picard.
     //       ADD_PG_TAG_TO_READS=false also not supported.
+    script:
     """
-    java -Dpicard.useLegacyParser=false -Xmx32G -jar $picardJar MarkDuplicates \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkDuplicates \
         -INPUT $bam \
         -OUTPUT ${baseName}.mapped.marked.bam \
         -METRICS_FILE ${baseName}.markduplicates.metrics \
@@ -193,16 +147,9 @@ process sortBam {
     output:
         set baseName, file("${baseName}.mapped.marked.sorted.bam") into ch_sortedBamFiles
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
-
+    script:
     """
-    java -Djava.io.tmpdir=$tmp_dir -Dpicard.useLegacyParser=false -Xmx4g -jar $picardJar SortSam \
+    java -Djava.io.tmpdir=$tmp_dir -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar SortSam \
         -INPUT $markedBam \
         -OUTPUT ${baseName}.mapped.marked.sorted.bam \
         -SORT_ORDER coordinate \
@@ -219,14 +166,7 @@ process indexBam {
         set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics, ch_forperBase
     publishDir path: './output/intermediate', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    module      'samtools'
-    cpus        globalCores
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
+    module      samtoolsModule
 
     script:
     """
@@ -253,41 +193,29 @@ process generatePerbaseMetrics {
     
     publishDir path: './callnocall', mode: 'copy'                                    
     
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    memory      globalMemoryL 
-    time        globalTimeL
-    queue       globalQueueL 
-    module      'samtools'
-    cpus        '8'
-    module      'bcftools'
+    
+    module      samtoolsModule
+    module      bcftoolsModule
+    
+    script:
 
     """
     bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${exome_bed} -f ${ref} -b ${list} -o mpileup_out.vcf.gz
-
     """
 }
 
 //stupid un-needed GATK section
-
-
 process generateBqsrModel {
     input:
         set baseName, file(sortedBam), file(bamIndex) from ch_forGATK
     output:
         set baseName, file(sortedBam), file(bamIndex), file("${baseName}.recalreport") into ch_recalReportsBams
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      gatkModule
-    cpus        1
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
 
+    script:
     """
-    java -Xmx4g -jar $gatkJar -T BaseRecalibrator \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T BaseRecalibrator \
         -R $ref \
         -I $sortedBam \
         -o ${baseName}.recalreport \
@@ -298,24 +226,16 @@ process generateBqsrModel {
     """
 }
 
-
 process applyBqsrModel {
     input:
         set baseName, file(sortedBam), file(bamIndex), file(recalReport) from ch_recalReportsBams
     output:
         set baseName, file("${baseName}.mapped.marked.sorted.recal.bam") into ch_recalibratedBams
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      gatkModule
-    cpus        1
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
 
     """
-    java -Xmx4g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR ${recalReport} \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T PrintReads -R ${ref} -I ${sortedBam} --BQSR ${recalReport} \
                    -o ${baseName}.mapped.marked.sorted.recal.bam
     """
 }
@@ -329,28 +249,172 @@ process call_variants{
     
     publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      gatkModule
-    cpus        8
-    memory      globalMemoryS
-    time        globalTimeL
-    queue       globalQueueL
 
-
-
+    script:
     """
-    java -Xmx4g -jar $gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T HaplotypeCaller -R ${ref} --min_base_quality_score 20 \
                     --emitRefConfidence GVCF \
                     --num_cpu_threads_per_data_thread 8 \
                     -I ${bam} -L ${padded_int} -o "${baseName}.mapped.marked.sorted.recal.g.vcf"
     """
+}
 
+process mergeGVCFS {
+    label
+    input:
+        set baseName, file(vcf) from ch_gVcfs
+    output:
+        set baseName, file("combined.g.vcf") into ch_combinedGVCF
+
+    module gatkModule
+
+    script:
+    myfiles = vcf.collect().join('-V ')
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
+                    --disable_auto_index_creation_and_locking_when_reading_rods \
+                    -V $myfiles -o "combined.g.vcf"
+    """
+}
+
+process genotypeGVCF {
+    
+    label
+    
+    input:
+        file(vcf) from ch_combinedGVCF
+    output:
+        file("genotyped.vcf") into ch_genotypedGVCFsnp,ch_genotypedGVCFindel, ch_forCombining
+    
+    module gatkModule
+
+    script:
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T GenotypeGVCFs -R ${ref} \
+                    --disable_auto_index_creation_and_locking_when_reading_rods \
+                    --variant $vcf --out "genotyped.vcf" \
+                    --variant $ceu_mergeGvcf --variant $gbr_mergeGvcf --variant $fin_mergeGvcf
+    """
+}
+
+process snpRecalibrate {
+
+    label
+    
+    input:
+        file(vcf) from ch_genotypedGVCFsnp
+    output:
+        set file(vcf), file("output.recal_snp"), file("output.tranches_snp"), file("output.plots_snp") into ch_applysnpRecal
+
+        recal_snp_out, tranches_snp_out, snp_plots_r_out = outputs
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator \
+                    --disable_auto_index_creation_and_locking_when_reading_rods \
+                    -R $ref --num_threads ${task.cpus} \
+                    -resource:hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap \
+                    -resource:omni,known=false,training=true,truth=true,prior=12.0 $one_k_g_snps \
+                    -resource:1000G,known=false,training=true,truth=false,prior=10.0 $one_k_g_highconf_snps \
+                    -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -an DP -an InbreedingCoeff \
+                    -input $vcf --recal_file "output.recal_snp" --tranches_file $output.tranches_snp \
+                    -rscriptFile "output.plots_snp" -mode SNP
+    """
+}
+
+process indelRecalibrate {
+    
+    label
+    
+    input:
+    file(vcf) from ch_genotypedGVCFindel
+    output:
+    set file(vcf), file("output.recal_indel"), file("output.tranches_indel"), file("output.plots_indel") into ch_applyindelRecal
+    
+    script:
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator --disable_auto_index_creation_and_locking_when_reading_rods\
+                    -R $ref --num_threads ${task.cpus} \
+                    -resource:mills,known=false,training=true,truth=true,prior=12.0 $mills_grch37 \
+                    -resource:1000G,known=false,training=true,truth=true,prior=10.0 $one_k_g_indels \
+                    --maxGaussians 4 -an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum -an InbreedingCoeff \
+                    -input $vcf -recalFile "output.recal_indel" \
+                    -tranchesFile "output.tranches_indel" -rscriptFile "output.plots_indel" \
+                     -mode INDEL
+    """
 }
 
 
-ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
+
+process applySNPrecal{
+    
+    label
+    
+    input:
+        file(vcf), file(recal), file(tranch), file(plots) from ch_applysnpRecal
+    output:
+        file("snp_recal.vcf") into ch_snpRecal
+    
+    script:
+    """   
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T ApplyRecalibration \
+                    --disable_auto_index_creation_and_locking_when_reading_rods \
+                    -R $ref --ts_filter_level 99.5 --excludeFiltered --num_threads ${task.cpus} \
+                    -input $vcf -recalFile $recal -tranchesFile $tranches \
+                    -mode SNP -o "snp_recal.vcf"
+    """
+}
+
+process applyINDELrecal{
+    
+    label
+
+    input:
+        file(vcf), file(recal), file(tranch), file(plots) from ch_applyindelRecal
+    output:
+        file("indel_recal.vcf") into ch_indeRecal    
+    
+    script:
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T ApplyRecalibration --disable_auto_index_creation_and_locking_when_reading_rods \
+                    -R $ref --ts_filter_level 99.0 --excludeFiltered --num_threads ${task.cpus} \
+                    -input $vcf -recalFile $recal -tranchesFile $tranches \
+                    -mode INDEL -o "indel_recal.vcf"
+
+    """
+
+process combineAllRecal {
+    
+    label
+
+    input:
+        file(snp_recal) from ch_applysnpRecal
+        file(indel_recal) from ch_applyindelRecal
+    output:
+        file("recalibrated.bam") into ch_finalGATKvcf
+
+    script:
+    """
+    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineVariants \
+                    -R $ref --disable_auto_index_creation_and_locking_when_reading_rods \
+                    --num_threads ${task.cpus} --genotypemergeoption UNSORTED --variant $snp_recal \
+                    --variant $indel_recal -o "recalibrated.bam"
+    """
+
+
+process chunkBEDfile {
+    label 'short_1'
+    output: 
+    file("*.bed") into ch_bedSegments
+
+    module 'bedtools/2.27.1-gcc5'
+
+    script:
+    """
+    bedtools split -i "$padded_bed" -n 12
+    """
+}
+
+//ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
 ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
 
@@ -361,14 +425,6 @@ process vardict {
     output:
         set baseName, file("${baseName}.${segment}.vardict.tsv") into ch_vardictSegments
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        vardictCores
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
@@ -376,8 +432,9 @@ process vardict {
         -b "$bam" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
         > "${baseName}.${segment}.vardict.tsv"
     """
-
 }
+
+
 
 ch_collatedSegments = ch_vardictSegments.map{ sample, segment -> [sample, segment]}.groupTuple(by: [0])
 
@@ -389,21 +446,11 @@ process catSegments {
     output: 
         set baseName, file("${baseName}.collated.vardict.tsv") into ch_vardictCollated
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    
     script:
-    
     myfiles = tsv.collect().join(' ')
-
     """
     cat ${myfiles} > ${baseName}.collated.vardict.tsv
     """
-
 }
 
 process makeVCF {
@@ -414,13 +461,6 @@ process makeVCF {
     
     publishDir path: './output/variants/vardict', mode: 'copy'
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
     script:
     """  
     module purge
@@ -429,7 +469,6 @@ process makeVCF {
     /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
     """
 }
-
 
 process collectHSMetrics {
 
@@ -440,19 +479,11 @@ process collectHSMetrics {
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-
     script:
-
     """
     module purge
     module load R/3.5.1
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectHsMetrics \
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectHsMetrics \
         -I ${bam} \
         -O "${sample}.HSmetrics.txt" \
         -R ${ref} \
@@ -462,3 +493,6 @@ process collectHSMetrics {
         --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
     """
 }
+
+
+process haplotype
