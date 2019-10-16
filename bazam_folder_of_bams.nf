@@ -2,7 +2,7 @@
 
 bazamJar = '/home/jste0021/scripts/bazam/build/libs/bazam.jar'
 
-Channel.fromPath("./*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}.into{ch_bams}
+Channel.fromPath("./*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}.set{ch_bams}
 
 process runBazam {
 
@@ -17,7 +17,7 @@ process runBazam {
 
   script:
   """
-  java -jar $bazamJar -Xmx${task.memory.toGiga() - 2}g -n ${task.cpus} -bam ${bam} -r1 ${sample}_R1.fastq.gz -r2 ${sample}_R2.fastq.gz
+  java -Xmx${task.memory.toGiga() - 2}g -jar $bazamJar -n ${task.cpus} -bam ${bam} -r1 ${sample}_R1.fastq.gz -r2 ${sample}_R2.fastq.gz
   """
 }
 
