@@ -47,7 +47,7 @@ ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat:
 
 process createUnmappedBam {
     
-    label 
+    label '3h_6g' 
 
     //publishDir path: './output/intermediate', mode: 'copy'
     
@@ -71,7 +71,9 @@ process createUnmappedBam {
 
 process markAdaptors {
 
-    publishDir path: './output/intermediate', mode: 'copy'
+    label '3h_6g' 
+
+    //publishDir path: './output/intermediate', mode: 'copy'
 
     input:
         set baseName, file(bam) from ch_unmappedBams
@@ -79,8 +81,6 @@ process markAdaptors {
         set baseName, file("${baseName}.unmapped.marked.bam"),
                       file("${baseName}.unmapped.marked_metrics.tsv") into ch_markedBams
    
-    module      'java'
-    
     script:
     """
     java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkIlluminaAdapters \
@@ -91,12 +91,15 @@ process markAdaptors {
 }
 
 process alignBwa {
+    
+    label 'bwa'
+
     input:
         set baseName, file(bam), file(metrics) from ch_markedBams
     output:
         set baseName, file("${baseName}.mapped.bam") into ch_mappedBams
 
-    publishDir path: './output/intermediate', mode: 'copy'
+    //publishDir path: './output/bams', mode: 'copy'
 
     module	    samtoolsModule
     module      bwaModule
@@ -118,6 +121,9 @@ process alignBwa {
 }
 
 process markDuplicatesPicard {
+    
+    label '3h_6g'
+
     input:
         set baseName, bam from ch_mappedBams 
     output:
@@ -126,9 +132,6 @@ process markDuplicatesPicard {
 
     publishDir path: './output/metrics/markduplicates', mode: 'copy'
 
-    // TODO: CLEAR_DT=false option in GATK pipeline but not supported by 
-    //       this version of picard.
-    //       ADD_PG_TAG_TO_READS=false also not supported.
     script:
     """
     java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkDuplicates \
@@ -142,6 +145,9 @@ process markDuplicatesPicard {
 }
 
 process sortBam {
+
+    label '3h_6g'
+
     input:
         set baseName, file(markedBam) from ch_markedBamFiles
     output:
@@ -160,11 +166,15 @@ process sortBam {
 }
 
 process indexBam {
+
+    label '3h_6g'
+
     input:
         set baseName, file(bam) from ch_sortedBamFiles
     output:
         set baseName, file(bam), file("${baseName}.mapped.marked.sorted.bam.bai") into ch_forVARDICT, ch_forGATK, ch_forHSMetrics, ch_forMultipleMetrics, ch_forperBase
-    publishDir path: './output/intermediate', mode: 'copy'
+    
+    publishDir path: './output/bams', mode: 'copy'
 
     module      samtoolsModule
 
@@ -185,6 +195,9 @@ ch_bams
     .set {ch_all_bams}
 
 process generatePerbaseMetrics {
+    
+    label 'medium_6h'
+
     input:
         file list from ch_bamList_f
         file '*' from ch_all_bams               
@@ -192,7 +205,6 @@ process generatePerbaseMetrics {
         file("mpileup_out.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './callnocall', mode: 'copy'                                    
-    
     
     module      samtoolsModule
     module      bcftoolsModule
@@ -206,6 +218,9 @@ process generatePerbaseMetrics {
 
 //stupid un-needed GATK section
 process generateBqsrModel {
+
+    label 'gatk_unknown'
+
     input:
         set baseName, file(sortedBam), file(bamIndex) from ch_forGATK
     output:
@@ -227,6 +242,9 @@ process generateBqsrModel {
 }
 
 process applyBqsrModel {
+
+    label 'gatk_unknown'
+
     input:
         set baseName, file(sortedBam), file(bamIndex), file(recalReport) from ch_recalReportsBams
     output:
@@ -241,6 +259,8 @@ process applyBqsrModel {
 }
 
 process call_variants{
+
+    label 'gatk_unknown'
 
     input:
         set baseName, file(bam) from ch_recalibratedBams
@@ -261,7 +281,9 @@ process call_variants{
 }
 
 process mergeGVCFS {
-    label
+    
+    label 'gatk_unknown'
+
     input:
         set baseName, file(vcf) from ch_gVcfs
     output:
@@ -280,7 +302,7 @@ process mergeGVCFS {
 
 process genotypeGVCF {
     
-    label
+    label 'gatk_unknown'
     
     input:
         file(vcf) from ch_combinedGVCF
@@ -300,14 +322,16 @@ process genotypeGVCF {
 
 process snpRecalibrate {
 
-    label
+    label 'gatk_unknown'
     
     input:
         file(vcf) from ch_genotypedGVCFsnp
     output:
         set file(vcf), file("output.recal_snp"), file("output.tranches_snp"), file("output.plots_snp") into ch_applysnpRecal
 
-        recal_snp_out, tranches_snp_out, snp_plots_r_out = outputs
+    module      gatkModule
+
+    script:
     """
     java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
@@ -323,13 +347,15 @@ process snpRecalibrate {
 
 process indelRecalibrate {
     
-    label
+    label 'gatk_unknown'
     
     input:
     file(vcf) from ch_genotypedGVCFindel
     output:
     set file(vcf), file("output.recal_indel"), file("output.tranches_indel"), file("output.plots_indel") into ch_applyindelRecal
     
+    module      gatkModule
+
     script:
     """
     java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator --disable_auto_index_creation_and_locking_when_reading_rods\
@@ -343,11 +369,9 @@ process indelRecalibrate {
     """
 }
 
-
-
 process applySNPrecal{
-    
-    label
+
+    label 'gatk_unknown'
     
     input:
         file(vcf), file(recal), file(tranch), file(plots) from ch_applysnpRecal
@@ -366,7 +390,7 @@ process applySNPrecal{
 
 process applyINDELrecal{
     
-    label
+    label 'gatk_unknown'
 
     input:
         file(vcf), file(recal), file(tranch), file(plots) from ch_applyindelRecal
@@ -381,10 +405,11 @@ process applyINDELrecal{
                     -mode INDEL -o "indel_recal.vcf"
 
     """
+}
 
 process combineAllRecal {
     
-    label
+    label 'gatk_unknown'
 
     input:
         file(snp_recal) from ch_applysnpRecal
@@ -399,10 +424,12 @@ process combineAllRecal {
                     --num_threads ${task.cpus} --genotypemergeoption UNSORTED --variant $snp_recal \
                     --variant $indel_recal -o "recalibrated.bam"
     """
-
+}
 
 process chunkBEDfile {
-    label 'short_1'
+    
+    label "small_1"
+
     output: 
     file("*.bed") into ch_bedSegments
 
@@ -420,6 +447,8 @@ ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
 
 process vardict {
     
+    label 'medium_6h'
+
     input:
         set baseName, file(bam), file(bai), file(segment) from ch_vardict
     output:
@@ -434,11 +463,11 @@ process vardict {
     """
 }
 
-
-
 ch_collatedSegments = ch_vardictSegments.map{ sample, segment -> [sample, segment]}.groupTuple(by: [0])
 
 process catSegments {
+    
+    label 'small_short'
     echo true
 
     input: 
@@ -454,6 +483,9 @@ process catSegments {
 }
 
 process makeVCF {
+    
+    label "big_6h"
+
     input:
         set sample, file(tsv) from ch_vardictCollated
     output:
@@ -471,6 +503,8 @@ process makeVCF {
 }
 
 process collectHSMetrics {
+
+    label 'medium_6h'
 
     input:
         set sample, file(bam), file(bai) from ch_forHSMetrics
@@ -493,6 +527,3 @@ process collectHSMetrics {
         --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
     """
 }
-
-
-process haplotype
