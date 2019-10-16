@@ -15,8 +15,11 @@ process runBazam {
   output:
     set sample, file("${sample}_R1.fastq.gz"), file("${sample}_R2.fastq.gz")
 
+  module 'samtools'
+  
   script:
   """
+  samtools index $bam
   java -Xmx${task.memory.toGiga() - 2}g -jar $bazamJar -n ${task.cpus} -bam ${bam} -r1 ${sample}_R1.fastq.gz -r2 ${sample}_R2.fastq.gz
   """
 }
