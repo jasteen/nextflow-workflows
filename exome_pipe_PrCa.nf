@@ -299,7 +299,7 @@ process mergeGVCFS {
                     -V $myfiles -o "combined.g.vcf"
     """
 }
-
+/*
 process genotypeGVCF {
     
     label 'gatk_unknown'
@@ -426,6 +426,7 @@ process combineAllRecal {
                     --variant $indel_recal -o "recalibrated.bam"
     """
 }
+*/
 
 process chunkBEDfile {
     
