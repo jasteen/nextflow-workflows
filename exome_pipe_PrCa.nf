@@ -8,7 +8,7 @@ padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/inte
 panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
 padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
-gatk_filesPath = file()
+
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
