@@ -365,7 +365,7 @@ process indelRecalibrate {
                     --maxGaussians 4 -an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum -an InbreedingCoeff \
                     -input $vcf -recalFile "output.recal_indel" \
                     -tranchesFile "output.tranches_indel" -rscriptFile "output.plots_indel" \
-                     -mode INDEL
+                    -mode INDEL
     """
 }
 
@@ -374,7 +374,7 @@ process applySNPrecal{
     label 'gatk_unknown'
     
     input:
-        file(vcf), file(recal), file(tranch), file(plots) from ch_applysnpRecal
+        set file(vcf), file(recal), file(tranch), file(plots) from ch_applysnpRecal
     output:
         file("snp_recal.vcf") into ch_snpRecal
     
@@ -393,7 +393,7 @@ process applyINDELrecal{
     label 'gatk_unknown'
 
     input:
-        file(vcf), file(recal), file(tranch), file(plots) from ch_applyindelRecal
+        set file(vcf), file(recal), file(tranch), file(plots) from ch_applyindelRecal
     output:
         file("indel_recal.vcf") into ch_indeRecal    
     
