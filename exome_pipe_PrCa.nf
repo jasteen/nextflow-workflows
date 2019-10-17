@@ -47,7 +47,7 @@ ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}.fastq.gz", flat:
 
 process createUnmappedBam {
     
-    label '3h_6g' 
+    label 'small3h_6g' 
 
     //publishDir path: './output/intermediate', mode: 'copy'
     
@@ -71,7 +71,7 @@ process createUnmappedBam {
 
 process markAdaptors {
 
-    label '3h_6g' 
+    label 'small3h_6g' 
 
     //publishDir path: './output/intermediate', mode: 'copy'
 
@@ -122,7 +122,7 @@ process alignBwa {
 
 process markDuplicatesPicard {
     
-    label '3h_6g'
+    label 'small3h_6g'
 
     input:
         set baseName, bam from ch_mappedBams 
@@ -146,7 +146,7 @@ process markDuplicatesPicard {
 
 process sortBam {
 
-    label '3h_6g'
+    label 'small3h_6g'
 
     input:
         set baseName, file(markedBam) from ch_markedBamFiles
@@ -167,7 +167,7 @@ process sortBam {
 
 process indexBam {
 
-    label '3h_6g'
+    label 'small3h_6g'
 
     input:
         set baseName, file(bam) from ch_sortedBamFiles
