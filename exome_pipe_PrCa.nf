@@ -8,7 +8,7 @@ padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/inte
 panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
 padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
-
+gatk_filesPath = file()
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -22,14 +22,14 @@ ceu_mergeGvcf    = file("reference/CEU_mergeGvcf.vcf")
 fin_mergeGvcf    = file("reference/FIN_mergeGvcf.vcf")
 gbr_mergeGvcf    = file("reference/GBR_mergeGvcf.vcf")
 
-mills_grch37 = file("Mills_and_1000G_gold_standard.indels.b37.vcf")
-one_k_g_grch37_indels = file("1000G_phase1.indels.b37.vcf")
-one_k_g_snps = file("1000G_omni2.5.b37.vcf")
-one_k_g_highconf_snps = file("1000G_phase1.snps.high_confidence.b37.vcf")
-one_k_g_indels = file("1000G_phase1.indels.b37.vcf")
-hapmap = file("hapmap_3.3.b37.vcf")
-interval_grch37 = file("Broad.human.exome.b37.interval_list")
-dbsnp_grch37 = file("dbsnp_138.b37.vcf")
+mills_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
+one_k_g_grch37_indels = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+one_k_g_snps          = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_omni2.5.b37.vcf")
+one_k_g_highconf_snps = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.snps.high_confidence.b37.vcf")
+one_k_g_indels        = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+hapmap                = file("/projects/vh83/reference/genomes/b37/accessory_files/hapmap_3.3.b37.vcf")
+interval_grch37       = file("/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list")
+dbsnp_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
 
 // Tools
 picardJar          = '~/picard.jar'
@@ -258,7 +258,7 @@ process applyBqsrModel {
     """
 }
 
-process call_variants{
+process call_variants {
 
     label 'gatk_unknown'
 
@@ -307,7 +307,7 @@ process genotypeGVCF {
     input:
         file(vcf) from ch_combinedGVCF
     output:
-        file("genotyped.vcf") into ch_genotypedGVCFsnp,ch_genotypedGVCFindel, ch_forCombining
+        file("genotyped.vcf") into ch_genotypedGVCFsnp,ch_genotypedGVCFindel,ch_forCombining
     
     module gatkModule
 
@@ -416,6 +416,7 @@ process combineAllRecal {
         file(indel_recal) from ch_applyindelRecal
     output:
         file("recalibrated.bam") into ch_finalGATKvcf
+    publishDir path: './output/GATK', mode: 'copy'
 
     script:
     """
