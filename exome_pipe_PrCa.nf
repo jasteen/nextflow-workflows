@@ -283,7 +283,7 @@ process call_variants {
 process mergeGVCFS {
     
     label 'gatk_unknown'
-
+    echo 'true'
     input:
         set baseName, file(vcf) from ch_gVcfs
     output:
@@ -294,12 +294,14 @@ process mergeGVCFS {
     script:
     myfiles = vcf.collect().join('-V ')
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
-                    --disable_auto_index_creation_and_locking_when_reading_rods \
-                    -V $myfiles -o "combined.g.vcf"
+    
+    echo "$myfiles"
+
     """
+    //java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
+    //                    --disable_auto_index_creation_and_locking_when_reading_rods \
 }
-/*
+
 process genotypeGVCF {
     
     label 'gatk_unknown'
@@ -426,14 +428,13 @@ process combineAllRecal {
                     --variant $indel_recal -o "recalibrated.bam"
     """
 }
-*/
 
 process chunkBEDfile {
     
     label "small_1"
 
     output: 
-    file("*.bed") into ch_bedSegments
+    file("*.bed") into ch_bedSegments mode flatten
 
     module 'bedtools/2.27.1-gcc5'
 
@@ -445,8 +446,8 @@ process chunkBEDfile {
 
 //ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
-
+ch_vardict= ch_forVARDICT.combine(ch_bedSegments).view()
+/*
 process vardict {
     
     label 'medium_6h'
@@ -503,7 +504,7 @@ process makeVCF {
     /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
     """
 }
-
+*/
 process collectHSMetrics {
 
     label 'medium_6h'
