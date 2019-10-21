@@ -571,7 +571,7 @@ process sortVCFS {
     output:
         set baseName, file("${baseName}.UMI.reheader.sorted.vcf.gz") into ch_sortedVCF
 
-    publishDir path: './output/vcf/UMI', mode: 'copy'                                    
+    //publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
     module     'bcftools/1.8'                       
     
