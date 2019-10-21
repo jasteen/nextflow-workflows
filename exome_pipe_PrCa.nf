@@ -296,6 +296,7 @@ process mergeGVCFS {
     """
     java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
                   --disable_auto_index_creation_and_locking_when_reading_rods \
+                  -V $myfiles -o "combined.g.vcf"
     """
 }
 /*
