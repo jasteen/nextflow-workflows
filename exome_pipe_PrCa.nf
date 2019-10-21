@@ -212,7 +212,7 @@ process generatePerbaseMetrics {
     script:
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${exome_bed} -f ${ref} -b ${list} -o mpileup_out.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${panel_bed} -f ${ref} -b ${list} -o mpileup_out.vcf.gz
     """
 }
 
