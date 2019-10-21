@@ -265,7 +265,7 @@ process call_variants {
     input:
         set baseName, file(bam) from ch_recalibratedBams
     output:
-        set baseName, file("${baseName}.mapped.marked.sorted.recal.g.vcf") into ch_gVcfs
+        file("${baseName}.mapped.marked.sorted.recal.g.vcf") into ch_gVcfs
     
     publishDir path: './output/variants/GATK/gvcf', mode: 'copy'
 
