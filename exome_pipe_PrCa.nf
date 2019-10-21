@@ -298,7 +298,7 @@ process mergeGVCFS {
                   --disable_auto_index_creation_and_locking_when_reading_rods \
     """
 }
-
+/*
 process genotypeGVCF {
     
     label 'gatk_unknown'
@@ -425,6 +425,7 @@ process combineAllRecal {
                     --variant $indel_recal -o "recalibrated.bam"
     """
 }
+*/
 
 process chunkBEDfile {
     
@@ -443,8 +444,8 @@ process chunkBEDfile {
 
 //ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
 
-ch_vardict= ch_forVARDICT.combine(ch_bedSegments).view()
-/*
+ch_vardict= ch_forVARDICT.combine(ch_bedSegments)
+
 process vardict {
     
     label 'medium_6h'
@@ -501,7 +502,7 @@ process makeVCF {
     /home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_valid.pl -N "$sample" -f 0.01 > "${sample}.vardict.vcf"
     """
 }
-*/
+
 process collectHSMetrics {
 
     label 'medium_6h'
