@@ -285,9 +285,9 @@ process mergeGVCFS {
     label 'gatk_unknown'
     echo 'true'
     input:
-        set baseName, file(vcf) from ch_gVcfs.collect()
+        file(vcf) from ch_gVcfs.collect()
     output:
-        set baseName, file("combined.g.vcf") into ch_combinedGVCF
+        file("combined.g.vcf") into ch_combinedGVCF
 
     module gatkModule
 
