@@ -285,23 +285,21 @@ process mergeGVCFS {
     label 'gatk_unknown'
     echo 'true'
     input:
-        set baseName, file(vcf) from ch_gVcfs
+        set baseName, file(vcf) from ch_gVcfs.collect()
     output:
         set baseName, file("combined.g.vcf") into ch_combinedGVCF
 
     module gatkModule
 
     script:
-    myfiles = vcf.collect().join('-V ')
-   
-    echo "${myfiles}"
-/*
+
+    myfiles = vcf.join('-V ')
+    
     """
     java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
                   --disable_auto_index_creation_and_locking_when_reading_rods \
                   -V $myfiles -o "combined.g.vcf"
     """
-*/
 }
 /*
 process genotypeGVCF {
