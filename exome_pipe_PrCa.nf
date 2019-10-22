@@ -193,7 +193,7 @@ ch_bamList.map { it -> it[1].name }
 ch_bams
     .collect()
     .set {ch_all_bams}
-
+/*
 process generatePerbaseMetrics {
     
     label 'medium_6h'
@@ -215,6 +215,7 @@ process generatePerbaseMetrics {
     bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${panel_bed} -f ${ref} -b ${list} -o mpileup_out.vcf.gz
     """
 }
+*/
 
 //stupid un-needed GATK section
 process generateBqsrModel {
