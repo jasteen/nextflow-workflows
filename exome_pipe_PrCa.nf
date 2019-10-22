@@ -297,12 +297,12 @@ process mergeGVCFS {
     myfiles = vcf.join(' -V ')
     
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T CombineGVCFs -R ${ref} \
                   --disable_auto_index_creation_and_locking_when_reading_rods \
                   -V $myfiles -o "combined.g.vcf"
     """
 }
-/*
+
 process genotypeGVCF {
     
     label 'gatk_unknown'
@@ -316,7 +316,7 @@ process genotypeGVCF {
 
     script:
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T GenotypeGVCFs -R ${ref} \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T GenotypeGVCFs -R ${ref} \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
                     --variant $vcf --out "genotyped.vcf" \
                     --variant $ceu_mergeGvcf --variant $gbr_mergeGvcf --variant $fin_mergeGvcf
@@ -336,7 +336,7 @@ process snpRecalibrate {
 
     script:
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T VariantRecalibrator \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
                     -R $ref --num_threads ${task.cpus} \
                     -resource:hapmap,known=false,training=true,truth=true,prior=15.0 $hapmap \
@@ -361,7 +361,7 @@ process indelRecalibrate {
 
     script:
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T VariantRecalibrator --disable_auto_index_creation_and_locking_when_reading_rods\
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar  -T VariantRecalibrator --disable_auto_index_creation_and_locking_when_reading_rods\
                     -R $ref --num_threads ${task.cpus} \
                     -resource:mills,known=false,training=true,truth=true,prior=12.0 $mills_grch37 \
                     -resource:1000G,known=false,training=true,truth=true,prior=10.0 $one_k_g_indels \
@@ -383,7 +383,7 @@ process applySNPrecal{
     
     script:
     """   
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T ApplyRecalibration \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T ApplyRecalibration \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
                     -R $ref --ts_filter_level 99.5 --excludeFiltered --num_threads ${task.cpus} \
                     -input $vcf -recalFile $recal -tranchesFile $tranches \
@@ -402,7 +402,7 @@ process applyINDELrecal{
     
     script:
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T ApplyRecalibration --disable_auto_index_creation_and_locking_when_reading_rods \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T ApplyRecalibration --disable_auto_index_creation_and_locking_when_reading_rods \
                     -R $ref --ts_filter_level 99.0 --excludeFiltered --num_threads ${task.cpus} \
                     -input $vcf -recalFile $recal -tranchesFile $tranches \
                     -mode INDEL -o "indel_recal.vcf"
@@ -423,13 +423,12 @@ process combineAllRecal {
 
     script:
     """
-    java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineVariants \
+    java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T CombineVariants \
                     -R $ref --disable_auto_index_creation_and_locking_when_reading_rods \
                     --num_threads ${task.cpus} --genotypemergeoption UNSORTED --variant $snp_recal \
                     --variant $indel_recal -o "recalibrated.bam"
     """
 }
-*/
 
 process chunkBEDfile {
     
