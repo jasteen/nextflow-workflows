@@ -303,6 +303,7 @@ process mergeGVCFS {
     """
 }
 
+/*
 process genotypeGVCF {
     
     label 'gatk_unknown'
@@ -319,7 +320,7 @@ process genotypeGVCF {
     java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T GenotypeGVCFs -R ${ref} \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
                     --variant $vcf --out "genotyped.vcf" \
-                    --variant $ceu_mergeGvcf --variant $gbr_mergeGvcf --variant $fin_mergeGvcf
+                    --variant ${ceu_mergeGvcf} --variant ${gbr_mergeGvcf} --variant ${fin_mergeGvcf}
     """
 }
 
@@ -429,7 +430,7 @@ process combineAllRecal {
                     --variant $indel_recal -o "recalibrated.bam"
     """
 }
-
+*/
 process chunkBEDfile {
     
     label "small_1"
