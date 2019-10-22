@@ -293,7 +293,7 @@ process mergeGVCFS {
 
     script:
 
-    myfiles = vcf.join('-V ')
+    myfiles = vcf.join(' -V ')
     
     """
     java -jar $gatkJar -Xmx${task.memory.toGiga() - 2}g -T CombineGVCFs -R ${ref} \
