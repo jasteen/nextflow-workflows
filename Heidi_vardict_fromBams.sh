@@ -8,7 +8,7 @@
 #SBATCH --partition=comp
 
 # Account for the job
-#SBATCH --account=vh83
+#SBATCH --account=uc23
 #SBATCH --qos=normal
 # Maximum number of tasks/CPU cores used by the job:
 #SBATCH --ntasks=1
@@ -38,7 +38,7 @@
 
 ref="/scratch/vh83/projects/cell-free/human_g1k_v37.fasta.gz"
 bed="/scratch/vh83/projects/cell-free/cellfree.bed"
-export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
+export PATH=/projects/uc23/software/VarDict-1.5.8/bin/:$PATH
 
 ####
 
@@ -49,7 +49,7 @@ VarDict -G ${ref} -f 0.00001 -N "130243-T|130243-G" \
 module purge
 module load R/3.5.1
 cat 130243.TvG.somatic.vardict.tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
-/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130243-T|130243-G" -f 0.01 > "${sample}.somatic.vardict.vcf"
+/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130243-T|130243-G" -f 0.00001 > "${sample}.somatic.vardict.vcf"
 
 #####
 
@@ -60,7 +60,7 @@ VarDict -G ${ref} -f 0.00001 -N "130309-T|130309-G" \
 module purge
 module load R/3.5.1
 cat 130309.TvG.somatic.vardict.tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
-/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130309-T|130309-G" -f 0.01 > "${sample}.somatic.vardict.vcf"
+/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130309-T|130309-G" -f 0.00001 > "${sample}.somatic.vardict.vcf"
 
 ####
 
@@ -71,7 +71,7 @@ VarDict -G ${ref} -f 0.00001 -N "130313-T|130313-G" \
 module purge
 module load R/3.5.1
 cat 130313.TvG.somatic.vardict.tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
-/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130313-T|130313-G" -f 0.01 > "${sample}.somatic.vardict.vcf"
+/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130313-T|130313-G" -f 0.00001 > "${sample}.somatic.vardict.vcf"
 
 ######
 
@@ -82,7 +82,7 @@ VarDict -G ${ref} -f 0.00001 -N "130313-TP|130313-G" \
 module purge
 module load R/3.5.1
 cat 130313.TPvG.somatic.vardict.tsv | /home/jste0021/scripts/VarDict-1.5.8/bin/testsomatic.R | \
-/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130313-TP|130313-G" -f 0.01 > "${sample}.somatic.vardict.vcf"
+/home/jste0021/scripts/VarDict-1.5.8/bin/var2vcf_paired.pl -N "130313-TP|130313-G" -f 0.00001 > "${sample}.somatic.vardict.vcf"
 
 ######
 
