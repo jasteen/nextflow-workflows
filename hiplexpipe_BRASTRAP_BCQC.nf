@@ -152,7 +152,7 @@ process indexVCFS {
 }
 
 //duplicate ch_indexedVCF
-ch_indexedpreVCF
+ch_indexedVCF
     .into{ch_premergelist;ch_premerge_files}
 //set one version to a list of filenames of the VCF
 ch_premergelist.map { it -> it[0].name }
