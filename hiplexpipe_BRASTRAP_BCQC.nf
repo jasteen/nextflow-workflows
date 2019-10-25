@@ -10,6 +10,7 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 vardictBed       = file("/projects/vh83/reference/brastrap_specific/validation_panels/validation_panel2/4genesPlus2.8col.bed")
 intervalFile     = file("/projects/vh83/reference/brastrap_specific/validation_panels/validation_panel2/4genesPlus2_b37.bed")
 restrictedBed    = file("/projects/vh83/reference/brastrap_specific/validation_panels/validation_panel2/4genesPlus2_b37.bed")
+genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
