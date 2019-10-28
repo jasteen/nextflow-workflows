@@ -1,0 +1,1 @@
+This is a collection of nextflow pipelines that we run in the Southey lab to process various genomic data sets.  feel free to copy/steal any parts that make sense for your projects.  this is a constant work in progress, and designed almost entirely to work on our inhouse HPC cluster, so some work will be required to get it to work on any other compute.

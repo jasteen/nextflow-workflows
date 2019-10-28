@@ -46,6 +46,8 @@ ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
 
 process align_bwa {
 
+    label 'bwa_small'
+
     input:
         set baseName, file(fastqs) from ch_inputFiles
     output:
@@ -69,6 +71,8 @@ ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_ma
 
 process run_vardict {
 
+    label 'vardict'
+
     input:
         set baseName, file(bam), file(bai) from ch_mappedBam1               
     output: 
@@ -84,6 +88,9 @@ process run_vardict {
 }
 
 process makeVCF {
+    
+    label 'small_1'
+
     input:
         set baseName, file(tsv) from ch_vardictTSV
     output:
@@ -102,6 +109,9 @@ process makeVCF {
 }
 
 process reheaderVCF {
+
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_vardictVCFs
     
@@ -121,6 +131,8 @@ process reheaderVCF {
 
 process sortVCFS {
 
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_reheaderVCF
     output:
@@ -137,6 +149,9 @@ process sortVCFS {
 }
 
 process indexVCFS {
+
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
@@ -167,6 +182,7 @@ ch_premerge_files
 //feed both to the merge so that the indexes are available to bcftools
 process mergeVCFS {
     
+    label 'small_1'
     echo true
     
     publishDir './variants_merged/', mode: 'copy'
@@ -188,6 +204,8 @@ process mergeVCFS {
 }
 
 process vt_decompose_normalise {
+
+    label 'small_1'
         
     input:
         file(vcf) from ch_mergedfinalVCF
@@ -205,6 +223,8 @@ process vt_decompose_normalise {
 }
 
 process apply_vep {
+
+    label 'medium_6h'
 
     input:
         file(vcf) from ch_vtDecomposeVCF
@@ -242,6 +262,9 @@ process apply_vep {
 //stats
 
 process InstersectBed {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam2
     output:
@@ -255,6 +278,9 @@ process InstersectBed {
 }
 
 process CoverageBed {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
     output:
@@ -270,6 +296,9 @@ process CoverageBed {
 }
 
 process ReadsMapped {
+   
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
     output:
@@ -286,6 +315,9 @@ process ReadsMapped {
 }
 
 process ReadsTotal {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
     output:
@@ -300,6 +332,9 @@ process ReadsTotal {
 }
     
 process TargetMapped {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam) from ch_intersectBam
     output:
@@ -318,6 +353,9 @@ ch_final2 = ch_final.join(ch_onTarget)
 ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
     output:
@@ -341,6 +379,8 @@ process collateData {
 ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
+
+    label 'medium_1h'
 
     input:
         file(stats) from ch_out2
