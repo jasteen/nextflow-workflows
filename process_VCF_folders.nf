@@ -1,3 +1,44 @@
+#!/usr/bin/env nextflow
+
+// Required Inputs
+refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
+inputDirectory = file('./fastqs')
+panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
+padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
+panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
+padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
+tmp_dir        = file('/scratch/vh83/tmp/')
+
+// Getting Reference Files
+refBase          = "$refFolder/human_g1k_v37_decoy"
+ref              = file("${refBase}.fasta")
+refDict          = file("${refBase}.dict")
+refFai           = file("${refBase}.fasta.fai")
+millsIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
+knownIndels      = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+dbSNP            = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
+ceu_mergeGvcf    = file("reference/CEU_mergeGvcf.vcf")
+fin_mergeGvcf    = file("reference/FIN_mergeGvcf.vcf")
+gbr_mergeGvcf    = file("reference/GBR_mergeGvcf.vcf")
+
+mills_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
+one_k_g_grch37_indels = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+one_k_g_snps          = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_omni2.5.b37.vcf")
+one_k_g_highconf_snps = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.snps.high_confidence.b37.vcf")
+one_k_g_indels        = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
+hapmap                = file("/projects/vh83/reference/genomes/b37/accessory_files/hapmap_3.3.b37.vcf")
+interval_grch37       = file("/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list")
+dbsnp_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
+
+// Tools
+picardJar          = '~/picard.jar'
+gatkJar            = '/usr/local/gatk/3.7/bin/GenomeAnalysisTK.jar'
+bwaModule          = 'bwa/0.7.17-gcc5'
+samtoolsModule     = 'samtools/1.9'
+gatkModule         = 'gatk/3.7'
+bcftoolsModule     = 'bcftools/1.8'
+rModule            = 'R/3.5.1'          
+fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
 
 ch_gVcfs = Channel.fromPath("./variants/GATK/*.vcf")
