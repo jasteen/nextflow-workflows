@@ -2,8 +2,9 @@
 
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('./fastqs')
-inputDirectory2 = file('./fastqs_partial')
+inputDirectory = file('./fastqs_1-10_part1')
+inputDirectory2 = file('./fastqs_1-10_part2')
+inputDirectory3 = file('./fastqs_full')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 //project specific bed files
@@ -63,48 +64,42 @@ ch_joined = ch_inputFiles.join(ch_inputFiles_partialPanel)
 
 process catFastqs {
 
+    label 'small_1'
     input:
         set baseName, file(fastq1), file(fastq2), file(fastq3), file(fastq4) from ch_joined
     output:
         set baseName, file("${baseName}.merged_R1.fastq.gz"), file("${baseName}.merged_R2.fastq.gz") into ch_mergedFastqs
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    module      bwaModule
-    module      samtoolsModule
-    cpus        bwaCores
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    
+//    publishDir path: './fastqs' mode: copy 
+
     """
-    cat $fastq1 $fastq3 > ${baseName}.merged_R1.fastq.gz
-    cat $fastq2 $fastq4 > ${baseName}.merged_R2.fastq.gz
+    cat $fastq1 $fastq3 > ${baseName}.merged_R1_001.fastq.gz
+    cat $fastq2 $fastq4 > ${baseName}.merged_R2_001.fastq.gz
     """
 }
 
+ch_FullinputFiles = Channel.fromFilePairs("${inputDirectory3}/*_R{1,2}_001.fastq.gz", flat: true)
+
+ch_AllFastqs = Channel.mix(ch_mergedFastqs, ch_FullinputFiles)
+
 process align_bwa {
 
+    label 'bwa_small'
+
     input:
-        set baseName, file(fastq1), file(fastq2) from ch_mergedFastqs
+        set baseName, file(fastq1), file(fastq2) from ch_FullinputFiles
     output:
         set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into ch_mappedBams
 
     publishDir path: './bam_out', mode: 'copy'
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      bwaModule
     module      samtoolsModule
-    cpus        bwaCores
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-
+    
     """
     bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastq1} ${fastq2}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
-        | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
+        | samtools sort -@ ${task.cpus} -o "${baseName}.hq.sorted.bam"
     samtools index "${baseName}.hq.sorted.bam" "${baseName}.hq.sorted.bam.bai"
     """
 }
@@ -113,20 +108,13 @@ ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_ma
 
 process run_vardict {
 
+    label 'vardict_small'
+
     input:
         set baseName, file(bam), file(bai) from ch_mappedBam1               
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardictTSV           
     
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    cache       'lenient'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL 
-
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
     VarDict -G ${ref} -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} > "${baseName}.tsv"
@@ -134,21 +122,14 @@ process run_vardict {
 }
 
 process makeVCF {
+    
+    label 'vardict_small'
+
     input:
         set baseName, file(tsv) from ch_vardictTSV
     output:
         set baseName, file("${baseName}.vardict.vcf") into ch_vardictVCFs
     
-    publishDir path: './variants_raw_out', mode: 'copy'
-    
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-
     script:
 
     """
@@ -161,22 +142,16 @@ process makeVCF {
 }
 
 process reheaderVCF {
+    
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_vardictVCFs
     
     output:
         set baseName, file("${baseName}.reheader.vcf.gz") into ch_reheaderVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    cache       'lenient'
     module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    module      bwaModule
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL
 
     script:
     """
@@ -188,21 +163,14 @@ process reheaderVCF {
 
 process sortVCFS {
 
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_reheaderVCF
     output:
         set baseName, file("${baseName}.sorted.vcf.gz") into ch_sortedVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    cache       'lenient'
     module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    module      bwaModule
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL
 
     script:
     """
@@ -211,21 +179,15 @@ process sortVCFS {
 }
 
 process indexVCFS {
+
+    label 'small_1'
+
     input:
         set baseName, file(vcf) from ch_sortedVCF
     output:
         set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    cache       'lenient'
     module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    module      bwaModule
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL
 
     script:
     """
@@ -246,8 +208,9 @@ ch_files
 
 //feed both to the merge so that the indexes are available to bcftools
 process mergeVCFS {
-    echo true
-    publishDir './variants_merged/', mode: 'copy'
+
+    label 'small_1'
+//    publishDir './variants_merged/', mode: 'copy'
     input:
     file list from ch_list_f
     file '*' from ch_all_files
@@ -255,15 +218,8 @@ process mergeVCFS {
     output:
     file "merged.vardict.vcf.gz" into ch_mergedVCF
 
-    cache       'lenient'
     module     'bcftools/1.8'
-    executor    globalExecutor                                                    
-    stageInMode globalStageInMode                                                 
-    memory      globalMemoryM 
-    time        globalTimeM
-    queue       globalQueueL
 
-    
     script: 
     
     """
@@ -271,25 +227,16 @@ process mergeVCFS {
     """
 }
 
-
 process vt_decompose_normalise {
-        
+    
+    label 'small_1'
+
     input:
         file(vcf) from ch_mergedVCF
     output:
         file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
 
-    publishDir path: './variants_merged', mode: 'copy'
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
     module      'vt'
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-
-
 
     """
     vt decompose -s $vcf | vt normalize -r $ref -o merged.vt.vcf.gz -
@@ -298,6 +245,8 @@ process vt_decompose_normalise {
 
 process apply_vep {
 
+    label 'vep'
+
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
@@ -305,13 +254,6 @@ process apply_vep {
 
     publishDir path: './variants_merged', mode: 'copy'
 
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        vepCores
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
     module      'vep/90'
 
     """
@@ -340,22 +282,15 @@ process apply_vep {
 Stats Generation Section
 */
 
-process InstersectBed {
+process IntersectBed {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam2
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
-    publishDir path: './metrics/raw', mode: 'copy'
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-
     script:
     """
     module load bedtools/2.27.1-gcc5
@@ -364,21 +299,14 @@ process InstersectBed {
 }
 
 process CoverageBed {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
     output:
         set sample, file("${sample}.bedtools_hist_all.txt"), file("${sample}.bedtools_amplicon.txt") into ch_bedtools
     
-    publishDir path: './metrics/raw', mode: 'copy'
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
-
     script:
     """
     module load bedtools/2.27.1-gcc5
@@ -390,22 +318,16 @@ process CoverageBed {
 }
 
 process ReadsMapped {
+    
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
-    publishDir path: './metrics/raw', mode: 'copy'
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
     module      'samtools/1.9'
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
-    
+
     script:
     """
     samtools view -c -F4 ${bam} > "${sample}.mapped_to_genome.txt"
@@ -413,22 +335,16 @@ process ReadsMapped {
 }
 
 process ReadsTotal {
+
+    label 'medium_1h'
+
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
     output:
         set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
 
-    publishDir path: './metrics/raw', mode: 'copy'
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
     module      'samtools/1.9'
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
-    
+   
     script:
     """
     samtools view -c ${bam} > "${sample}.total_raw_reads.txt"
@@ -436,21 +352,15 @@ process ReadsTotal {
 }
     
 process TargetMapped {
+    
+    label 'medium_1h'
+
     input:
         set sample, file(bam) from ch_intersectBam
     output:
         set sample, file("${sample}.mapped_to_target.txt") into ch_onTarget
 
-    publishDir path: './metrics/raw', mode: 'copy'
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
     module      'samtools/1.9'
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
 
     script:
     """
@@ -463,20 +373,13 @@ ch_final2 = ch_final.join(ch_onTarget)
 ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
+    
+    label 'medium_1h'
+
     input:
         set sample, file(bedtools), file(bedtools2), file(onGenome), file(onTarget), file(onTotal) from ch_final3
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
-
-    publishDir path: './metrics/raw', mode: 'copy'
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
 
     script:
     """
@@ -496,21 +399,14 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
 
+    label 'small_1'
+
     input:
         file(stats) from ch_out2
     output:
         file("project_summary.txt") into ch_out3
     
     publishDir path: './metrics/', mode: 'copy'
-
-    cache       'lenient'
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-    errorStrategy 'ignore'
 
     script:
     """
