@@ -87,7 +87,7 @@ process align_bwa {
     label 'bwa_small'
 
     input:
-        set baseName, file(fastq1), file(fastq2) from ch_FullinputFiles
+        set baseName, file(fastq1), file(fastq2) from ch_AllFastqs
     output:
         set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into ch_mappedBams
 
