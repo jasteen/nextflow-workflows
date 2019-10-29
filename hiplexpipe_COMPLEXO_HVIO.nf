@@ -80,7 +80,7 @@ process catFastqs {
 
 ch_FullinputFiles = Channel.fromFilePairs("${inputDirectory3}/*_R{1,2}_001.fastq.gz", flat: true)
 
-ch_AllFastqs = Channel.mix(ch_mergedFastqs, ch_FullinputFiles)
+ch_AllFastqs = ch_mergedFastqs.mix(ch_FullinputFiles)
 
 process align_bwa {
 
