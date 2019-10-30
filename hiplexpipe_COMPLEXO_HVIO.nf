@@ -68,7 +68,7 @@ process catFastqs {
     input:
         set baseName, file(fastq1), file(fastq2), file(fastq3), file(fastq4) from ch_joined
     output:
-        set baseName, file("${baseName}.merged_R1.fastq.gz"), file("${baseName}.merged_R2.fastq.gz") into ch_mergedFastqs
+        set baseName, file("${baseName}.merged_R1_001.fastq.gz"), file("${baseName}.merged_R2_001.fastq.gz") into ch_mergedFastqs
 
 //    publishDir path: './fastqs' mode: copy 
 
