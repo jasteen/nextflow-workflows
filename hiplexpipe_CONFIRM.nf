@@ -64,7 +64,7 @@ process align_bwa {
     """
     bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
-        | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
+        | samtools sort -@ ${task.cpus} -o "${baseName}.hq.sorted.bam"
     samtools index "${baseName}.hq.sorted.bam" "${baseName}.hq.sorted.bam.bai"
     """
 }
@@ -434,9 +434,7 @@ process apply_vep {
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
                       --vcf --force_overwrite --flag_pick --no_stats \
-                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,\
-                      Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,\
-                      Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
+                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
                       --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
                       --custom $vep_revel,RVL,vcf,exact,0,REVEL_SCORE \
                       --plugin MaxEntScan,$vep_maxentscan \
