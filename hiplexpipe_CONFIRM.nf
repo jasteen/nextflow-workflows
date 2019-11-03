@@ -171,9 +171,9 @@ process indexpileupVCFS {
 
 //duplicate ch_indexedVCF
 ch_indexedmpileupVCF
-    .into{ch_mpileuplist;ch_mpileup_files}
+    .into{ch_mpileup_list;ch_mpileup_files}
 //set one version to a list of filenames of the VCF
-ch_mpileuplist.map { it -> it[0].name }
+ch_mpileup_list.map { it -> it[0].name }
        .collectFile(name: 'list.txt', newLine: true)
        .set {ch_mpileup_list_f}
 //set the second to all the files
@@ -307,9 +307,8 @@ process indexVCFS {
 //duplicate ch_indexedVCF
 ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
-ch_files.map {it -> it[1].name}
+ch_list.map {it -> it[1].name}
     .collectFile(name: 'list2.txt', newLine: true)
-    .splitText( by: 100 )
     .set {ch_list_f}
 //set the second to all the files
 ch_files
@@ -329,14 +328,14 @@ process mergeVCFS {
     file('*.gz*') from ch_all_files
     
     output:
-    file "merged.vardict.${list}.vcf.gz" into ch_premergedVCF
+    file "merged.vardict.vcf.gz" into ch_premergedVCF
 
     module     'bcftools/1.8'
     
     script: 
     
     """
-    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l ${list}
+    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.vcf.gz" -l list2.txt
     """
 }
 
