@@ -97,7 +97,6 @@ ch_forperBase.into{ch_bamList;ch_bams}
 
 ch_bamList.map { it -> it[1].name }
        .collectFile(name: 'list.txt', newLine: true)
-       .splitText( by: 200, file: "temp")
        .set {ch_bamList_f}
 
 //set the second to all the files
@@ -116,7 +115,7 @@ process generatePerbaseMetrics {
         file list from ch_bamList_f
         file '*' from ch_all_bams               
     output: 
-        file("mpileup_${list}.vcf.gz") into ch_mpileupOUT           
+        file("mpileup.vcf.gz") into ch_mpileupOUT           
     
     publishDir path: './bamclipper', mode: 'copy'                                    
     
@@ -125,7 +124,7 @@ process generatePerbaseMetrics {
     module      'bcftools/1.8'
 
     """
-    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b ${list} -o mpileup_${list}.vcf.gz
+    bcftools mpileup --threads ${task.cpus} -Oz -d 250 -B -R ${restrictedBed} -a "FORMAT/DP" -f ${ref} -b list.txt -o mpileup.vcf.gz
 
     """
 //| bcftools call --threads ${task.cpus} -Oz -m -o mpileup_out.vcf.gz 
@@ -169,7 +168,7 @@ process indexpileupVCFS {
     """
 }
 
-//duplicate ch_indexedVCF
+/*
 ch_indexedmpileupVCF
     .into{ch_mpileup_list;ch_mpileup_files}
 //set one version to a list of filenames of the VCF
@@ -204,6 +203,7 @@ process mergepileipVCFS {
     bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
+*/
 
 process run_vardict {
 
