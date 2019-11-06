@@ -109,7 +109,7 @@ ch_bams
 
 process generatePerbaseMetrics {
 
-    label 'small_1'
+    label 'medium_6h'
 
     input:
         file list from ch_bamList_f
