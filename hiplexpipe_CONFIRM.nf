@@ -324,8 +324,8 @@ process mergeVCFS {
     echo true
     publishDir './variants_merged/', mode: 'copy'
     input:
-    file(list) from ch_list_f
-    file('*.gz*') from ch_all_files
+    file list from ch_list_f
+    file '*' from ch_all_files
     
     output:
     file "merged.vardict.vcf.gz" into ch_premergedVCF
