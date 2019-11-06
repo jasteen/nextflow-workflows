@@ -75,7 +75,7 @@ process genotypeGVCF {
     input:
         file(vcf) from ch_combinedGVCF
     output:
-        file("genotyped.vcf") into ch_genotypedGVCFsnp, ch_genotypedGVCFindel, ch_forCombining
+        file 'genotyped.vcf' into ch_genotypedGVCFsnp, ch_genotypedGVCFindel, ch_forCombining
     
     module gatkModule
 
