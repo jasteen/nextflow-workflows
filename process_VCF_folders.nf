@@ -210,7 +210,7 @@ process apply_vep_GATK {
     output:
         file("gatk.merged.vt.vep.vcf") into ch_annotateGATK
 
-    publishDir path: './output/vcf/', mode: 'copy', pattern: "*.vcf"
+    publishDir path: './processed/gatk', mode: 'copy', pattern: "*.vcf"
     
     module      'vep/90'
 
@@ -345,7 +345,7 @@ process apply_vep {
     output:
         file("vardict.merged.vt.vep.vcf") into ch_vepVCF
 
-    publishDir path: './output/vcf/', mode: 'copy', pattern: "*.vcf"
+    publishDir path: './processed/vardict', mode: 'copy', pattern: "*.vcf"
     
 
     module      'vep/90'
