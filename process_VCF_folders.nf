@@ -185,7 +185,7 @@ process combineAllRecal {
     
     input:
         file(snp_recal) from ch_snpRecal
-        file(indel_recal) from ch_yindelRecal
+        file(indel_recal) from ch_indelRecal
     output:
         file("recalibrated.vcf") into ch_finalGATKvcf
     //publishDir path: './output/GATK', mode: 'copy'
