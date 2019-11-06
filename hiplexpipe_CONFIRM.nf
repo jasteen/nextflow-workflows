@@ -291,7 +291,7 @@ process mergeVCFS {
     file '*' from ch_all_files
     
     output:
-    file "merged.vardict.vcf.gz" into ch_mergedVCF
+    file "merged.vardict.vcf.gz" into ch_mergedfinalVCF
 
     module     'bcftools/1.8'
     
