@@ -117,7 +117,7 @@ process generatePerbaseMetrics {
     output: 
         file("mpileup.vcf.gz") into ch_mpileupOUT           
     
-    publishDir path: './bamclipper', mode: 'copy'                                    
+    //publishDir path: './bamclipper', mode: 'copy'                                    
     
     
     module      'samtools/1.9'
@@ -137,7 +137,7 @@ process sortpileupVCFS {
     input:
         file(vcf) from ch_mpileupOUT
     output:
-        file("${vcf}.sorted.vcf.gz") into ch_mpileupsortedVCF
+        file("mpileup.sorted.vcf.gz") into ch_mpileupsortedVCF
 
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -145,7 +145,7 @@ process sortpileupVCFS {
 
     script:
     """
-    bcftools sort -o "${vcf}.sorted.vcf.gz" -O z ${vcf}
+    bcftools sort -o "mpileup.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
