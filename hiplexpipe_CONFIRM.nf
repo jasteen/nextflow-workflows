@@ -168,42 +168,6 @@ process indexpileupVCFS {
     """
 }
 
-/*
-ch_indexedmpileupVCF
-    .into{ch_mpileup_list;ch_mpileup_files}
-//set one version to a list of filenames of the VCF
-ch_mpileup_list.map { it -> it[0].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .set {ch_mpileup_list_f}
-//set the second to all the files
-ch_mpileup_files
-    .collect()
-    .set {ch_mpileup_all_files}
-
-//feed both to the merge so that the indexes are available to bcftools
-
-process mergepileipVCFS {
-
-    label 'small_1'
-
-    echo true
-    publishDir './variants_merged/', mode: 'copy'
-    input:
-    file list from ch_mpileup_list_f
-    file '*' from ch_mpileup_all_files
-    
-    output:
-    file "merged.mpileup.vcf.gz" into ch_mergedVCF
-
-    module     'bcftools/1.8'
-    
-    script: 
-    
-    """
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
-    """
-}
-*/
 
 process run_vardict {
 
@@ -264,7 +228,6 @@ process reheaderVCF {
     """
 
 }
-
 
 process sortVCFS {
 
@@ -328,7 +291,7 @@ process mergeVCFS {
     file '*' from ch_all_files
     
     output:
-    file "merged.vardict.vcf.gz" into ch_premergedVCF
+    file "merged.vardict.vcf.gz" into ch_mergedVCF
 
     module     'bcftools/1.8'
     
@@ -339,60 +302,6 @@ process mergeVCFS {
     """
 }
 
-
-process indexpremergedVCFS {
-
-    label 'small_1'
-
-    input:
-        file(vcf) from ch_premergedVCF
-    output:
-        set file(vcf), file("*.tbi") into ch_indexedpreVCF
-
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    module     'bcftools/1.8'
-
-    script:
-    """
-    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
-    """
-}
-
-//duplicate ch_indexedVCF
-ch_indexedpreVCF
-    .into{ch_premergelist;ch_premerge_files}
-//set one version to a list of filenames of the VCF
-ch_premergelist.map { it -> it[0].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .set {ch_premerge_list_f}
-//set the second to all the files
-ch_premerge_files
-    .collect()
-    .set {ch_premerge_all_files}
-
-//feed both to the merge so that the indexes are available to bcftools
-process mergepreVCFS {
-
-    label 'small_1'
-
-    echo true
-    publishDir './variants_merged/', mode: 'copy'
-    input:
-    file list from ch_premerge_list_f
-    file '*' from ch_premerge_all_files
-    
-    output:
-    file "merged.mpileup.vcf.gz" into ch_mergedfinalVCF
-
-    module     'bcftools/1.8'
-    
-    script: 
-    """
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
-    """
-}
-
 process vt_decompose_normalise {
 
     label 'small_1'
@@ -400,7 +309,7 @@ process vt_decompose_normalise {
     input:
         file(vcf) from ch_mergedfinalVCF
     output:
-        file("merged.vt.vcf.gz") into ch_vtDecomposeVCF
+        file("merged.vardict.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
@@ -408,7 +317,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o merged.vt.vcf.gz -
+    vt decompose -s $vcf | vt normalize -r $ref -o merged.vardict.vt.vcf.gz -
     """
 }
 
@@ -419,7 +328,7 @@ process apply_vep {
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
-        file("merged.vt.vep.vcf.gz") into ch_vepVCF
+        file("merged.vardict.vt.vep.vcf.gz") into ch_vepVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
@@ -443,7 +352,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o merged.vt.vep.vcf.gz
+                      -o merged.vardict.vt.vep.vcf.gz
     """
 }
 
