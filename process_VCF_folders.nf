@@ -269,7 +269,7 @@ process indexVCFS {
     input:
         set sample, file(vcf) from ch_reheaderVCF
     output:
-        set sample, file(vcf), file("${sample}.vardict.sorted.vcf.gz.tbi") into ch_indexedVCF
+        set file(vcf), file("${sample}.vardict.sorted.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './output/vcf/UMI', mode: 'copy'                                    
     
