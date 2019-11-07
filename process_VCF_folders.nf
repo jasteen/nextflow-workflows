@@ -248,7 +248,7 @@ process reheaderUMIVCF {
     input:
         set sample, file(vcf) from ch_vardictVCFS
     output:
-        set sample, file("*.vcf.gz") into ch_reheaderVCF
+        set sample, file("${sample}.vardict.sorted.vcf.gz") into ch_reheaderVCF
 
     //publishDir path: './output/UMI/intermediate', mode: 'copy'
 
@@ -276,7 +276,6 @@ process indexVCFS {
     module     'bcftools/1.8'
 
     script:
-  
     """
     bcftools index -f --tbi ${vcf} -o "${sample}.vardict.sorted.vcf.gz.tbi"
     """
