@@ -386,7 +386,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o "${sample}.UMI.reheader.sorted.vt.vep.vcf"
+                      -o "vardict.merged.vt.vep.vcf"
     """
 }
 
