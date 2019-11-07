@@ -21,6 +21,11 @@ ceu_mergeGvcf    = file("reference/CEU_mergeGvcf.vcf")
 fin_mergeGvcf    = file("reference/FIN_mergeGvcf.vcf")
 gbr_mergeGvcf    = file("reference/GBR_mergeGvcf.vcf")
 
+
+header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
+af_thr           = 0.1
+rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
+
 mills_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 one_k_g_grch37_indels = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_phase1.indels.b37.vcf")
 one_k_g_snps          = file("/projects/vh83/reference/genomes/b37/accessory_files/1000G_omni2.5.b37.vcf")
@@ -29,6 +34,19 @@ one_k_g_indels        = file("/projects/vh83/reference/genomes/b37/accessory_fil
 hapmap                = file("/projects/vh83/reference/genomes/b37/accessory_files/hapmap_3.3.b37.vcf")
 interval_grch37       = file("/projects/vh83/reference/genomes/b37/accessory_files/Broad.human.exome.b37.interval_list")
 dbsnp_grch37          = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
+
+dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
+other_vep       = file("/usr/local/vep/90/ensembl-vep/cache")
+vep_brcaex      = file("/projects/vh83/reference/annotation_databases/BRCA-Exchange/BRCA-exchange_accessed-180118/BRCA-exchange_accessed-180118.sort.vcf.gz")
+vep_gnomad      = file("/projects/vh83/reference/annotation_databases/gnomAD/gnomad.exomes.r2.0.2.sites/gnomad.exomes.r2.0.2.sites.vcf.gz")
+vep_revel       = file("/projects/vh83/reference/annotation_databases/REVEL/REVEL-030616/revel_all_chromosomes.vcf.gz")
+vep_maxentscan  = file("/projects/vh83/reference/annotation_databases/MaxEntScan/MaxEntScan_accessed-240118")
+vep_exac        = file("/projects/vh83/reference/annotation_databases/ExAC/ExAC_nonTCGA.r0.3.1/ExAC_nonTCGA.r0.3.1.sites.vep.vcf.gz")
+vep_dbnsfp      = file("/projects/vh83/reference/annotation_databases/dbNSFP/dbNSFPv2.9.3-VEP/dbNSFP-2.9.3.gz")
+vep_dbscsnv     = file("/projects/vh83/reference/annotation_databases/dbscSNV/dbscSNV1.0-VEP/dbscSNV.txt.gz")
+vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-v1.3/1000G_phase3.tsv.gz")
+
+
 
 // Tools
 picardJar          = '~/picard.jar'
@@ -41,7 +59,7 @@ rModule            = 'R/3.5.1'
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
 
-ch_gVcfs = Channel.fromPath("./variants/GATK/*.vcf")
+ch_gVcfs = Channel.fromPath("./variants/GATK/gvcf/*.vcf")
 ch_vardictVCFS = Channel.fromPath("./variants/vardict/*.vcf").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 //GATK section
