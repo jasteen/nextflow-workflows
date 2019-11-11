@@ -126,7 +126,7 @@ process snpRecalibrate {
                     -resource:omni,known=false,training=true,truth=true,prior=12.0 $one_k_g_snps \
                     -resource:1000G,known=false,training=true,truth=false,prior=10.0 $one_k_g_highconf_snps \
                     -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -an DP -an InbreedingCoeff \
-                    -input $vcf --recal_file "output.recal_snp" --tranches_file $output.tranches_snp \
+                    -input $vcf --recal_file "output.recal_snp" --tranches_file "output.tranches_snp" \
                     -rscriptFile "output.plots_snp" -mode SNP
     """
 }
