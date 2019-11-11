@@ -171,7 +171,7 @@ process applySNPrecal{
     java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T ApplyRecalibration \
                     --disable_auto_index_creation_and_locking_when_reading_rods \
                     -R $ref --ts_filter_level 99.5 --excludeFiltered --num_threads ${task.cpus} \
-                    -input $vcf -recalFile $recal -tranchesFile $tranches \
+                    -input $vcf -recalFile $recal -tranchesFile $tranch \
                     -mode SNP -o "snp_recal.vcf"
     """
 }
@@ -191,7 +191,7 @@ process applyINDELrecal{
     """
     java -Xmx${task.memory.toGiga() - 2}g -jar $gatkJar -T ApplyRecalibration --disable_auto_index_creation_and_locking_when_reading_rods \
                     -R $ref --ts_filter_level 99.0 --excludeFiltered --num_threads ${task.cpus} \
-                    -input $vcf -recalFile $recal -tranchesFile $tranches \
+                    -input $vcf -recalFile $recal -tranchesFile $tranch \
                     -mode INDEL -o "indel_recal.vcf"
 
     """
