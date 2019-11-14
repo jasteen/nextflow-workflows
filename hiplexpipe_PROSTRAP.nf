@@ -379,7 +379,7 @@ process AmpliconMetircs {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    bedtools coverage -f 5E-1 -a $restrictedBed -b $bam | sed "s/\$/\t$sample/" > amplicon.out 
+    bedtools coverage -f 5E-1 -a $restrictedBed -b $bam | sed "s/\$/\t$sample/" > ${sample}.amplicon.out 
     """
 }
 
