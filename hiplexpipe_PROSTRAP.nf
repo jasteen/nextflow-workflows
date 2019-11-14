@@ -69,7 +69,7 @@ process align_bwa {
     """
 }
 
-ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_forBamClipper}
+ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6;ch_forBamClipper}
 
 process run_bamClipper {
 
@@ -365,6 +365,42 @@ process apply_vep {
 /*
 Stats Generation Section
 */
+
+process AmpliconMetircs {
+
+    label 'medium_1h'
+
+    input:
+        set sample, file(bam), file(bai) from ch_mappedBam6
+    output:
+        file("amplicon.out") into ch_AmpliconMetrics
+    
+
+    script:
+    """
+    module load bedtools/2.27.1-gcc5
+    bedtools coverage -f 5E-1 -a $restrictedBed -b $bam | sed "s/\$/\t$sample/" > amplicon.out 
+    """
+}
+
+process catAmplicons {
+
+    label 'medium_1h'
+
+    publishDir path: './metrics/', mode: 'copy'
+
+    input:
+        file(amplicon) from ch_AmpliconMetrics.collect()
+    output:
+        file("amplicon.stats.tsv")
+
+    script:
+
+    """
+    cat $amplicon > "amplicon.stats.tsv
+    """
+}
+
 
 process InstersectBed {
 
