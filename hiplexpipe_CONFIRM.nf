@@ -285,20 +285,25 @@ process mergeVCFS {
     label 'small_1'
 
     echo true
+
     publishDir './variants_merged/', mode: 'copy'
+
     input:
     file list from ch_list_f
     file '*' from ch_all_files
     
     output:
-    file "merged.vardict.vcf.gz" into ch_mergedfinalVCF
+    file "final_merge.vardict.vcf.gz" into ch_mergedfinalVCF
 
     module     'bcftools/1.8'
     
     script: 
     
     """
-    bcftools merge -R ${restrictedBed} -O z -o "merged.vardict.vcf.gz" -l list2.txt
+    split -l 500 list2.txt temp_shorter_list_
+    for i in temp_shorter_*; do bcftools merge -m none -l $i -O z -o $i.merged.vcf.gz; bcftools index $i.merged.vcf.gz; done
+    ls *merged.vcf.gz > list3.txt
+    bcftools merge -R ${restrictedBed} -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
