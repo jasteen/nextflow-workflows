@@ -383,6 +383,8 @@ process AmpliconMetircs {
     """
 }
 
+ch_AmpliconMetrics.collect().set{ch_catAmp}
+
 process catAmplicons {
 
     label 'medium_1h'
@@ -390,14 +392,14 @@ process catAmplicons {
     publishDir path: './metrics/', mode: 'copy'
 
     input:
-        file(amplicon) from ch_AmpliconMetrics.collect()
+        file(amplicon) from ch_catAmp
     output:
         file("amplicon.stats.tsv")
 
     script:
 
     """
-    cat $amplicon > "amplicon.stats.tsv
+    cat ${amplicon} > "amplicon.stats.tsv"
     """
 }
 
