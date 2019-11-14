@@ -268,15 +268,17 @@ process AmpliconMetircs {
     input:
         set sample, file(bam), file(bai) from ch_mappedBam6
     output:
-        file("amplicon.out") into ch_AmpliconMetrics
+        file("${sample}.amplicon.out") into ch_AmpliconMetrics
     
 
     script:
     """
     module load bedtools/2.27.1-gcc5
-    bedtools coverage -f 5E-1 -a $restrictedBed -b $bam | sed "s/\$/\t$sample/" > amplicon.out 
+    bedtools coverage -f 5E-1 -a $restrictedBed -b $bam | sed "s/\$/\t$sample/" > ${sample}.amplicon.out 
     """
 }
+
+ch_AmpliconMetrics.collect().set{ch_catAmp}
 
 process catAmplicons {
 
@@ -285,14 +287,14 @@ process catAmplicons {
     publishDir path: './metrics/', mode: 'copy'
 
     input:
-        file(amplicon) from ch_AmpliconMetrics.collect()
+        file(amplicon) from ch_catAmp
     output:
         file("amplicon.stats.tsv")
 
     script:
 
     """
-    cat $amplicon > "amplicon.stats.tsv
+    cat ${amplicon} > "amplicon.stats.tsv"
     """
 }
 
