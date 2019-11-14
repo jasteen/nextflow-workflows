@@ -373,7 +373,7 @@ process AmpliconMetircs {
     input:
         set sample, file(bam), file(bai) from ch_mappedBam6
     output:
-        file("amplicon.out") into ch_AmpliconMetrics
+        file("${sample}.amplicon.out") into ch_AmpliconMetrics
     
 
     script:
