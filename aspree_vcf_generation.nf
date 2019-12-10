@@ -4,12 +4,12 @@ refFolder      = file("/mspm-data/processing/reference")
 
 //project specific bed files
 
-vardictBed       = file("/mspm-data/processing/bed_files/aspree_brastrap_overlap.8col.bed") // 8 column BED file suitable for vardict
-intervalFile     = file("/mspm-data/processing/WG_IAD49736_v2.20131226.designed_b37.bed") //standard bed file of intervals covered
+vardictBed       = file("/mspm-data/processing/bed_files/aspree_brastrap_overlap.8col_hg19.bed") // 8 column BED file suitable for vardict
+intervalFile     = file("/mspm-data/processing/bed_files/aspree_brastrap_overlap_hg19.bed") //standard bed file of intervals covered
 
 
 // Getting Reference Files
-refBase          = "$refFolder/human_g1k_v37_decoy"
+refBase          = "$refFolder/ucsc.hg19"
 ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
