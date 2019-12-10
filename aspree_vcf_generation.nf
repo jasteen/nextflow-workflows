@@ -27,7 +27,7 @@ process run_vardict {
     label 'small_1'
 
     input:
-        set baseName, file(bam), file(bai) from ch_mappedBam1               
+        set baseName, file(bam), file(bai) from ch_bamIN               
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardictTSV           
     
