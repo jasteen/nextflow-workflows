@@ -84,7 +84,7 @@ process indexVCFS {
     script:
   
     """
-    bcftools index -f --tbi ${vcf} -o ${sample}.UMI.reheader.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${sample}.sorted.vcf.gz.tbi
     """
 }
 
