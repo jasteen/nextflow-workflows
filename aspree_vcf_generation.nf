@@ -60,7 +60,7 @@ process reheaderUMIVCF {
     label 'small_1'
 
     input:
-        set sample, file(vcf) from ch_vardictVCFS
+        set sample, file(vcf) from ch_vardictVCFs
     output:
         set sample, file("*.vcf.gz") into ch_reheaderVCF
 
