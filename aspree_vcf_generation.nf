@@ -15,7 +15,7 @@ refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 
 // random reference stuff
-header           = file("/mspm-data/processing/random_files/vcf_contig_header_lines.txt")
+header           = file("/mspm-data/processing/random_files/vcf_contig_header_lines_hg19.txt")
 af_thr           = 0.1
 rheader          = file("/mspm-data/processing/random_files/Rheader.txt")
 
