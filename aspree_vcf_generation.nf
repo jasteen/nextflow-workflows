@@ -15,9 +15,9 @@ refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 
 // random reference stuff
-header           = file("~/processing/random_files/vcf_contig_header_lines.txt")
+header           = file("/mspm-data/processing/random_files/vcf_contig_header_lines.txt")
 af_thr           = 0.1
-rheader          = file("~/processing/random_files/Rheader.txt")
+rheader          = file("/mspm-data/processing/random_files/Rheader.txt")
 
 
 ch_bamIN = Channel.fromFilePairs("/home/jste0021/mt-sinai/**/*.{bam,bam.bai}", flat: true).take(10)
