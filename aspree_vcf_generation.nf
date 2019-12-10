@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-refFolder      = file("/home/jste0021/reference")
+refFolder      = file("/mspm-data/processing/reference")
 
 //project specific bed files
 
