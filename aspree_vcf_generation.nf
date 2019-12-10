@@ -20,7 +20,7 @@ af_thr           = 0.1
 rheader          = file("~/processing/random_files/Rheader.txt")
 
 
-ch_bamIN = Channel.fromFilePairs("~/mt-sinai/**/*.{bam,bam.bai}", flat: true).take(10)
+ch_bamIN = Channel.fromFilePairs("/home/jste0021/mt-sinai/**/*.{bam,bam.bai}", flat: true).take(10)
 
 process run_vardict {
 
