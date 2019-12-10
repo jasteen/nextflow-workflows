@@ -1,11 +1,11 @@
 #!/usr/bin/env nextflow
 
-refFolder      = file("~/reference")
+refFolder      = file("/home/jste0021/reference")
 
 //project specific bed files
 
-vardictBed       = file("~/processing/bed_files/aspree_brastrap_overlap.8col.bed") // 8 column BED file suitable for vardict
-intervalFile     = file("~/processing/bed_files/WG_IAD49736_v2.20131226.designed_b37.bed") //standard bed file of intervals covered
+vardictBed       = file("/mspm-data/processing/bed_files/aspree_brastrap_overlap.8col.bed") // 8 column BED file suitable for vardict
+intervalFile     = file("/mspm-data/processing/WG_IAD49736_v2.20131226.designed_b37.bed") //standard bed file of intervals covered
 
 
 // Getting Reference Files
