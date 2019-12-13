@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 // Required Inputs
-refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
+refFolder      = file("/projects/vh83/reference/genomes/hg19/")
 inputDirectory = file('./fastqs')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
@@ -13,7 +13,7 @@ restrictedBed    = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_co
 primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
 
 // Getting Reference Files
-refBase          = "$refFolder/human_g1k_v37_decoy"
+refBase          = "$refFolder/ucsc.hg19"
 ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
