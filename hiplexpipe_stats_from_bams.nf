@@ -50,7 +50,7 @@ process IntersectBed {
 
 process CoverageBed {
 
-    label 'medium_1h'
+    label 'small_short'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
@@ -69,7 +69,7 @@ process CoverageBed {
 
 process ReadsMapped {
     
-    label 'medium_1h'
+    label 'small_short'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
@@ -86,7 +86,7 @@ process ReadsMapped {
 
 process ReadsTotal {
 
-    label 'medium_1h'
+    label 'small_short'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
@@ -103,7 +103,7 @@ process ReadsTotal {
     
 process TargetMapped {
     
-    label 'medium_1h'
+    label 'small_short'
 
     input:
         set sample, file(bam) from ch_intersectBam
@@ -124,7 +124,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
     
-    label 'medium_1h'
+    label 'small_short'
 
     input:
         set sample, file(bedtools), file(bedtools2), file(onGenome), file(onTarget), file(onTotal) from ch_final3
@@ -149,7 +149,7 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
 
-    label 'small_1'
+    label 'small_short'
 
     input:
         file(stats) from ch_out2
