@@ -164,5 +164,3 @@ process catStats {
     """
 
 }
-
-*/
