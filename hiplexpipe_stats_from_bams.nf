@@ -24,10 +24,10 @@ samtoolsModule = 'samtools/1.9'
 bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 // Creating channel from input directory
-ch_inputFiles1 = Channel.fromFilePairs("./bams/genesis/*.sort.hq.{bam,bam.bai}")
-ch_inputFiles2 = Channel.fromFilePairs("./bams/HVIO/*.hq.sorted.{bam,bam.bai}")
-ch_inputFiles3 = Channel.fromFilePairs("./bams/ABCFS/*.sort.hq.{bam,bam.bai}")
-ch_inputFiles4 = Channel.fromFilePairs("./bams/ABCFS/halo/*.sorted.locatit.{bam,bam.bai}")
+ch_inputFiles1 = Channel.fromFilePairs("./bams/genesis/*.sort.hq.{bam,bam.bai}", flat: true)
+ch_inputFiles2 = Channel.fromFilePairs("./bams/HVIO/*.hq.sorted.{bam,bam.bai}", flat: true)
+ch_inputFiles3 = Channel.fromFilePairs("./bams/ABCFS/*.sort.hq.{bam,bam.bai}", flat: true)
+ch_inputFiles4 = Channel.fromFilePairs("./bams/ABCFS/halo/*.sorted.locatit.{bam,bam.bai}", flat: true)
 
 ch_inputFiles5 = ch_inputFiles1.join(ch_inputFiles2)
 ch_inputFiles6 = ch_inputFiles5.join(ch_inputFiles3)
