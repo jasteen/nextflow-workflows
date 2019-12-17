@@ -29,11 +29,8 @@ ch_inputFiles2 = Channel.fromFilePairs("./bams/HVIO/*.hq.sorted.{bam,bam.bai}", 
 ch_inputFiles3 = Channel.fromFilePairs("./bams/ABCFS/*.sort.hq.{bam,bam.bai}", flat: true).subscribe{ println it }
 ch_inputFiles4 = Channel.fromFilePairs("./bams/ABCFS/halo/*.sorted.locatit.{bam,bam.bai}", flat: true).subscribe{ println it }
 
-/*
-ch_inputFiles5 = ch_inputFiles1.join(ch_inputFiles2)
-ch_inputFiles6 = ch_inputFiles5.join(ch_inputFiles3)
-ch_inputFiles7 = ch_inputFiles6.join(ch_inputFiles4)
-ch_inputFiles7.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
+ch_finalInput = ch_inputFiles1.mix(ch_inputFiles2,ch_inputFiles3,ch_inputFiles4)
+ch_finalInput.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
 
 process IntersectBed {
 
