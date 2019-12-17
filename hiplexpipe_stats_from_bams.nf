@@ -16,7 +16,7 @@ ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
-
+genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 // Tools
 picardJar      = '~/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
