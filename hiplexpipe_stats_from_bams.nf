@@ -33,7 +33,7 @@ ch_inputFiles5 = ch_inputFiles1.join(ch_inputFiles2)
 ch_inputFiles6 = ch_inputFiles5.join(ch_inputFiles3)
 ch_inputFiles7 = ch_inputFiles6.join(ch_inputFiles4)
 
-ch_inputFiles.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
+ch_inputFiles7.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5}
 
 /*
 Stats Generation Section
