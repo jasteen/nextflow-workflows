@@ -1,4 +1,4 @@
-input_path = "/scratch/uc23/hfettke/cfDNA_BAMs/batch2"
+input_path = "/scratch/uc23/jste0021/batch3"
 bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
 
 
@@ -7,36 +7,19 @@ reference=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.f
 genome_file=file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 
 // Global Resource Configuration Options
-globalExecutor    = 'slurm'
-globalStageInMode = 'symlink'
-globalCores       = 1
-bwaCores          = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '6h'
-globalQueueS      = 'short'
-globalQueueL      = 'comp'
-
 Channel
     .fromPath("${input_path}/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .into { ch_1; ch_2; ch_3 }
 
 process InstersectBed {
+    label 'medium_1h'
     input:
         set sample, file(bam) from ch_1
     output:
         set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
     
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
+
 
     script:
     """
@@ -46,18 +29,11 @@ process InstersectBed {
 }
 
 process CoverageBed {
+    label 'medium_1h'
     input:
         set sample, file(bam) from ch_2
     output:
         set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    errorStrategy 'ignore'
 
     script:
     """
@@ -68,19 +44,15 @@ process CoverageBed {
     """
 }
 process ReadsMapped {
+    label 'medium_1h'
     input:
         set sample, file(bam) from ch_3
     output:
         set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
+
     module      'samtools/1.9'
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    errorStrategy 'ignore'
+
     
     script:
     """
@@ -89,20 +61,16 @@ process ReadsMapped {
 }
     
 process TargetMapped {
+    
+    label 'medium_1h'
+    
     input:
         set sample, file(bam) from ch_intersectBam
     output:
         set sample, file("${sample}.mapped_to_target.txt") into ch_onTarget
-
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
+    
     module      'samtools/1.9'
-    time        globalTimeL
-    queue       globalQueueL
-    errorStrategy 'ignore'
-
+    
     script:
     """
     samtools view -c -F4 ${bam} > ${sample}.mapped_to_target.txt
@@ -113,20 +81,13 @@ ch_final = ch_bedtools.join(ch_onGenome)
 ch_final2 = ch_final.join(ch_onTarget)
 
 process collateData {
+    label 'medium_1h'
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final2
     output:
         set sample, file("${sample}_summary_coverage.txt") into ch_out
     
     publishDir path: './output/', mode: 'copy'
-
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
-    errorStrategy 'ignore'
 
     script:
     """
