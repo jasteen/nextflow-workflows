@@ -30,7 +30,7 @@ process align_bwa {
     input:
         set baseName, file(fastqs) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into ch_mappedBams
+        set baseName, file("${baseName}.bowtie.sorted.bam"), file("${baseName}.bowtie.sorted.bam.bai") into ch_mappedBams
 
     publishDir path: './bam_out', mode: 'copy'
 
