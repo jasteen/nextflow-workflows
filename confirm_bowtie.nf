@@ -34,8 +34,8 @@ process align_bwa {
 
     publishDir path: './bam_out', mode: 'copy'
 
-    module      'bowtie/2.2.9'
-    module      'samrools/1.9'
+    module      'bowtie2/2.2.9'
+    module      'samtools/1.9'
 
     """
     bowtie2 -p ${task.cpus} -x $ref --trim5 0 --trim3 60 -1 ${fastqs[0]} -2 ${fastqs[1]} \
