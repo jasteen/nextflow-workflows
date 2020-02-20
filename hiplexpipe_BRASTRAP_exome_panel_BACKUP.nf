@@ -57,15 +57,10 @@ process align_bwa {
 
     publishDir path: './bam_out', mode: 'copy'
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
+    
     module      bwaModule
     module      samtoolsModule
-    cpus        bwaCores
-    memory      globalMemoryM
-    time        globalTimeM
-    queue       globalQueueL
-
+    
     """
     bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
