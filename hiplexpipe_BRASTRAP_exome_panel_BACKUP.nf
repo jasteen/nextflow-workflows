@@ -64,7 +64,7 @@ process align_bwa {
     """
     bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
-        | samtools sort -@ $bwaCores -o "${baseName}.hq.sorted.bam"
+        | samtools sort -@ ${task.cpus} -o "${baseName}.hq.sorted.bam"
     samtools index "${baseName}.hq.sorted.bam" "${baseName}.hq.sorted.bam.bai"
     """
 }
