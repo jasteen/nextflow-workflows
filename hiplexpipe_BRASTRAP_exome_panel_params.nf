@@ -318,7 +318,6 @@ ch_indexedVCF.into{ch_list;ch_files}
 //set one version to a list of filenames of the VCF
 ch_list.map {it -> it[1].name}
     .collectFile(name: 'list2.txt', newLine: true)
-    .splitText( by: 100 )
     .set {ch_list_f}
 //set the second to all the files
 ch_files
@@ -343,9 +342,11 @@ process mergeVCFS {
     module     'bcftools/1.8'
 
     script: 
-    
     """
-    bcftools merge -R ${params.restrictedBed} -O z -o "merged.vardict.${list}.vcf.gz" -l ${list}
+    split -l 500 list2.txt temp_shorter_list_
+    for i in temp_shorter_*; do bcftools merge -m none -l \$i -O z -o \$i.merged.vcf.gz; bcftools index \$i.merged.vcf.gz; done
+    ls *merged.vcf.gz > list3.txt
+    bcftools merge -R ${restrictedBed} -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
