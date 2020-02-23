@@ -333,7 +333,7 @@ process apply_vep {
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
-        file("merged.vardict.vt.vep.vcf.gz") into ch_vepVCF
+        file("merged.vardict.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
@@ -357,7 +357,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o merged.vardict.vt.vep.vcf.gz
+                      -o merged.vardict.vt.vep.vcf
     """
 }
 
