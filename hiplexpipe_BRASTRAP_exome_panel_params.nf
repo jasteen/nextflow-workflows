@@ -7,10 +7,10 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 
 //project specific bed files
 
-params.vardictBed       = ""
-params.intervalFile     = ""
-params.restrictedBed    = ""
-params.primer_bedpe_file= ""
+params.vardictBed        = ""
+params.intervalFile      = ""
+params.restrictedBed     = ""
+params.primer_bedpe_file = ""
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -41,6 +41,13 @@ picardJar      = '~/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
 bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
+
+
+log.info """\
+ HIPLEXPIPE
+ ===================================
+ bed_files : ${params.vardictBed}
+ """
 
 // Creating channel from input directory
 ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
