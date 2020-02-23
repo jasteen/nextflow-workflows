@@ -7,10 +7,10 @@ tmp_dir        = file('/scratch/vh83/tmp/')
 
 //project specific bed files
 
-//params.vardictBed       = file("/projects/vh83/reference/brastrap_specific/vardict/BRASTRAP_721717_8column.bed")
-//params.intervalFile     = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_621717_100.final.roverfile_g37.numsort.sorted.bed")
-//params.restrictedBed    = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed")
-//params.primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
+params.vardictBed       = ""
+params.intervalFile     = ""
+params.restrictedBed    = ""
+params.primer_bedpe_file= ""
 
 // Getting Reference Files
 refBase          = "$refFolder/human_g1k_v37_decoy"
@@ -44,6 +44,7 @@ bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 // Creating channel from input directory
 ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
+
 
 
 process align_bwa {
@@ -334,8 +335,6 @@ process mergeVCFS {
 
     module     'bcftools/1.8'
 
-
-    
     script: 
     
     """
