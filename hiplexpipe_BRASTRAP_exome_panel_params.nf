@@ -337,7 +337,7 @@ process mergeVCFS {
     file('*.gz*') from ch_all_files
     
     output:
-    file "merged.vardict.${list}.vcf.gz" into ch_premergedVCF
+    file "final_merge.vardict.vcf.gz" into ch_premergedVCF
 
     module     'bcftools/1.8'
 
@@ -347,62 +347,6 @@ process mergeVCFS {
     for i in temp_shorter_*; do bcftools merge -m none -l \$i -O z -o \$i.merged.vcf.gz; bcftools index \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
     bcftools merge -R ${params.restrictedBed} -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
-    """
-}
-
-
-process indexpremergedVCFS {
-
-    label 'small_1'
-
-    input:
-        file(vcf) from ch_premergedVCF
-    output:
-        set file(vcf), file("*.tbi") into ch_indexedpreVCF
-
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
-    
-    module     'bcftools/1.8'       
-    module      bwaModule
-
-    script:
-    """
-    bcftools index -f --tbi ${vcf} -o ${vcf}.tbi
-    """
-}
-
-//duplicate ch_indexedVCF
-ch_indexedpreVCF
-    .into{ch_premergelist;ch_premerge_files}
-//set one version to a list of filenames of the VCF
-ch_premergelist.map { it -> it[0].name }
-       .collectFile(name: 'list.txt', newLine: true)
-       .set {ch_premerge_list_f}
-//set the second to all the files
-ch_premerge_files
-    .collect()
-    .set {ch_premerge_all_files}
-
-//feed both to the merge so that the indexes are available to bcftools
-process mergepreVCFS {
-
-    label 'small_1'
-
-    echo true
-    publishDir './variants_merged/', mode: 'copy'
-    input:
-    file list from ch_premerge_list_f
-    file '*' from ch_premerge_all_files
-    
-    output:
-    file "merged.mpileup.vcf.gz" into ch_mergedfinalVCF
-
-    module     'bcftools/1.8'
-   
-    script: 
-    
-    """
-    bcftools merge -O z -o "merged.mpileup.vcf.gz" -l list.txt
     """
 }
 
