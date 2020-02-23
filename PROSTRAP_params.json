@@ -1,0 +1,6 @@
+{
+"vardictBed": "/projects/vh83/reference/prostrap/vardict/PROSTRAP_8Col.bed",
+"intervalFile": "/projects/vh83/reference/prostrap/prostrap_final_b37_sorted.bed",
+"restrictedBed": "/projects/vh83/reference/prostrap/prostrap_final_b37_sorted.bed",
+"primer_bedpe_file": "/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt"
+}
