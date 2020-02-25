@@ -108,6 +108,7 @@ process run_vardict {
     script:
     """
     export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
+    module load samtools
     vardict -G ${ref} -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
     """
 }
@@ -128,7 +129,7 @@ process makeVCF {
     """
     module purge
     module load R/3.5.1
-    cat ${tsv} | /home/jste0021/git_controlled/VarDict/teststrandbias.R | \
+    cat ${tsv} | /home/jste0021/scripts/git_controlled/VarDict/teststrandbias.R | \
         /home/jste0021/scripts/git_controlled/VarDict/var2vcf_valid.pl -N "${baseName}" \
         -f 0.1 -E > "${baseName}.vardict.vcf"
     """
