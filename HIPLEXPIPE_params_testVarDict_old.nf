@@ -103,6 +103,9 @@ process run_vardict {
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
+    module 'samtools'
+
+    script:
     """
     export PATH=/home/jste0021/scripts/git_controlled/VarDict:$PATH
     vardict -G ${ref} -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
