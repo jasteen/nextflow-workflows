@@ -85,7 +85,7 @@ process createUnmappedUMIBam {
     """
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
         -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.umi.bam" \
-        --read-structure=8M143T 8M143T \
+        --read-structures 8M143T 8M143T \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
