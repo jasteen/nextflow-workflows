@@ -3,8 +3,8 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./fastqs')
-panel_int      = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.bed.interval_list')
-padded_int     = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.padded.bed.interval_list')
+panel_int      = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.bed_4col.interval_list')
+padded_int     = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.padded.bed_4col.interval_list')
 panel_bed      = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.bed')
 padded_bed     = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.padded.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
