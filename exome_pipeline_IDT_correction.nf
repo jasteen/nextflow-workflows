@@ -7,6 +7,8 @@ panel_int      = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exom
 padded_int     = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.padded.bed.interval_list')
 panel_bed      = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.bed')
 padded_bed     = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/xgen-exome-research-panel-v2-targets-hg1902a5791532796e2eaa53ff00001c1b3c.padded.bed')
+umiSeqs        = file('/projects/vh83/reference/IDT_exome_panel/xgenV2/IDT_prism_UMI.tsv')
+
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Getting Reference Files
@@ -19,6 +21,9 @@ dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
 af_thr           = 0.1
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
+
+
+
 
 //VEP
 //Annotation resources
@@ -371,7 +376,7 @@ process correctUmi {
     script:
     """
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CorrectUmis \
-         -i $bam -o "${baseName}.piped.corrected.bam" -M "${baseName}.UMI.correction.txt" --max-mismatches 3 --min-distance 1
+         -i $bam -o "${baseName}.piped.corrected.bam" -M "${baseName}.UMI.correction.txt" -U $umiSeqs --max-mismatches 3 --min-distance 1
     """
 
 }
