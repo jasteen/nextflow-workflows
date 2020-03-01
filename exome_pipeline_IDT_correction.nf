@@ -370,7 +370,7 @@ process correctUmi {
 
     script:
     """
-    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CorrectUMIs \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CorrectUmis \
          -i $bam -o "${baseName}.piped.corrected.bam" -M "${baseName}.UMI.correction.txt" --max-mismatches 3 --min-distance 1
     """
 
