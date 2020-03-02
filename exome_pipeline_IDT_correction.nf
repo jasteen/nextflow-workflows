@@ -369,7 +369,7 @@ process correctUmi {
         set baseName, file(bam) from ch_pipedBams
 
     output:
-        set baseName, file(output), file(metircs) into ch_umiCorrectedBams
+        set baseName, file("${baseName}.piped.corrected.bam"), file("${baseName}.UMI.correction.txt") into ch_umiCorrectedBams
 
     publishDir path: './output/metrics/UMI/correction_stats', mode: 'copy', pattern: "*.txt"
 
