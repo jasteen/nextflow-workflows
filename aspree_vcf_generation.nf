@@ -81,6 +81,8 @@ process indexVCFS {
     output:
         set file(vcf), file("${sample}.vardict.sorted.vcf.gz.tbi") into ch_indexedVCF
 
+    publishDir './variants_raw/', mode: 'copy'
+
     script:
   
     """
