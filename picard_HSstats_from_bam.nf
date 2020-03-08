@@ -1,7 +1,12 @@
 input_path =file("./bams")
-panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Covered_UCSChg19.interval_list ')
-padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_UCSChg19.interval_list')
+//panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Covered_UCSChg19.interval_list ')
+//padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_UCSChg19.interval_list')
 
+
+panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
+padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
+panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
+padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
 //Variables
 
 refFolder      = file("/projects/vh83/reference/genomes/hg19/")
@@ -14,19 +19,6 @@ refFai           = file("${refBase}.fasta.fai")
 
 picardJar          = '~/picard.jar'
 
-// Global Resource Configuration Options
-globalExecutor    = 'slurm'
-globalStageInMode = 'symlink'
-globalCores       = 1
-bwaCores          = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '6h'
-globalQueueS      = 'short'
-globalQueueL      = 'comp'
 
 Channel
     .fromPath("${input_path}/*.bam")
@@ -34,20 +26,13 @@ Channel
     .set { ch_1 }
 
 process collectHSMetrics {
-
+    label 'medium_6h'
     input:
         set sample, file(bam) from ch_1
     output:
         set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics_unused2
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
-    
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryM
-    time        globalTimeL
-    queue       globalQueueL
 
     script:
 
