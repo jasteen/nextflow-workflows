@@ -9,11 +9,21 @@ panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/inte
 padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
 //Variables
 
-refFolder      = file("/projects/vh83/reference/genomes/hg19/")
-refBase          = "$refFolder/ucsc.hg19"
+refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
+refBase          = "$refFolder/human_g1k_v37_decoy"
 ref              = file("${refBase}.fasta")
 refDict          = file("${refBase}.dict")
 refFai           = file("${refBase}.fasta.fai")
+
+
+
+
+
+//refFolder      = file("/projects/vh83/reference/genomes/hg19/")
+//refBase          = "$refFolder/ucsc.hg19"
+//ref              = file("${refBase}.fasta")
+//refDict          = file("${refBase}.dict")
+//refFai           = file("${refBase}.fasta.fai")
 
 
 
