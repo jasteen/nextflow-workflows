@@ -33,7 +33,7 @@ process runQC {
     script:
 
     """
-    apt-geno-qc --analysis-file-path ${chip_library_path} \
+    apt-geno-qc --analysis-files-path ${chip_library_path} \
     --xml-file Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
     --cel-files cel.txt
     --out qc.txt 
