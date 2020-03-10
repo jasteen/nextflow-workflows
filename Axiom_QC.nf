@@ -5,7 +5,7 @@ input_path = file("./cels/")
 
 Channel
     .fromPath("${input_path}/*.cel")
-    .into { ch_celList, ch_cels }
+    .into {ch_celList; ch_cels}
 
 
 ch_celList.map { it -> it[1].name }
