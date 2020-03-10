@@ -8,7 +8,7 @@ Channel
     .into {ch_celList; ch_cels}
 
 
-ch_celList.map { it -> it[1].name }
+ch_celList.map { it -> it.name }
        .collectFile(name: 'cel.txt', newLine: true, seed: "cel_files")
        .set {ch_celList_f}
 
@@ -16,7 +16,7 @@ ch_celList.map { it -> it[1].name }
 
 ch_cels
     .collect()
-    .set {ch_cels}
+    .set {ch_cels_f}
 
 process runQC {
 
@@ -24,7 +24,9 @@ process runQC {
 
     input:
         file list from ch_celList_f
-        file '*' from ch_cels   
+        file '*' from ch_cels_f   
+    output:
+        file("qc.txt") into ch_output
 
     publishDir path: './output', mode: 'copy'
     
