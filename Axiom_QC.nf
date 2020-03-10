@@ -10,21 +10,21 @@ Channel
 
 ch_celList.map { it -> it.name }
        .collectFile(name: 'cel.txt', newLine: true, seed: "cel_files")
-       .set {ch_celList_f}
+       .into {ch_celList_QC; ch_celList_GT}
 
 //set the second to all the files
 
 ch_cels
     .collect()
-    .set {ch_cels_f}
+    .into {ch_cels_QC; ch_cels_GT}
 
 process runQC {
 
     label 'small_short'
 
     input:
-        file list from ch_celList_f
-        file '*' from ch_cels_f   
+        file list from ch_celList_QC
+        file '*' from ch_cels_QC   
     output:
         file("qc.txt") into ch_output
 
@@ -39,4 +39,26 @@ process runQC {
     --out-file qc.txt 
     """
 }
+
+process runQC {
+
+    label 'medium_6h'
+
+    input:
+        file list from ch_celList_GT
+        file '*' from ch_cels_GT   
+    
+    publishDir path: './output', mode: 'copy'
+    
+    script:
+    """
+    apt-probeset-genotype \
+    --analysis-files-path ${chip_library_path} \
+    --xml-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r1.apt-genotype-axiom.AxiomGT1.apt2.xml \
+    --out-dir ./out \
+    --cel-files cel.txt
+    """
+  }
+
+
 
