@@ -20,7 +20,7 @@ ch_cels
 
 process runQC {
 
-    label 'medium_6h'
+    label 'small_short'
 
     input:
         file list from ch_celList_f
@@ -35,7 +35,7 @@ process runQC {
     """
     apt-geno-qc --analysis-files-path ${chip_library_path} \
     --xml-file ${chip_library_path}/Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
-    --cel-files cel.txt
+    --cel-files cel.txt \
     --out qc.txt 
     """
 }
