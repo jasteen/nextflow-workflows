@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-chip_library_path = file("/projects/vh83/reference/axiom/")
+chip_library_path = file("/projects/vh83/reference/axiom")
 input_path = file("./cels/")
 
 Channel
@@ -34,7 +34,7 @@ process runQC {
 
     """
     apt-geno-qc --analysis-files-path ${chip_library_path} \
-    --xml-file Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
+    --xml-file ${chip_library_path}/Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
     --cel-files cel.txt
     --out qc.txt 
     """
