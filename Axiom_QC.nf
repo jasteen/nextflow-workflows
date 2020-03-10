@@ -40,7 +40,7 @@ process runQC {
     """
 }
 
-process runQC {
+process runGT {
 
     label 'medium_6h'
 
