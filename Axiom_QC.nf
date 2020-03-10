@@ -18,7 +18,7 @@ ch_cels
     .collect()
     .set {ch_cels}
 
-process generatePerbaseMetrics {
+process runQC {
 
     label 'medium_6h'
 
