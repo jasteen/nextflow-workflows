@@ -49,7 +49,7 @@ process runGTQC {
     label 'medium_6h'
 
     input:
-        set file(raw_qc), file (pass_qc) from ch_celList_GT
+        set file(raw_qc), file (pass_qc) from ch_output
         file '*' from ch_cels_GT   
     output:
         set file("AxiomGT1.report.txt"), file("apt2-axiom.log") into ch_GTQC_out
