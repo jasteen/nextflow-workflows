@@ -28,7 +28,7 @@ process runQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("qc.txt", file("pass_QC.txt") into ch_output
+        set file("qc.txt"), file("pass_QC.txt") into ch_output
 
     publishDir path: './output/QC', mode: 'copy'
     
