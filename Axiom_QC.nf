@@ -61,7 +61,7 @@ process runGTQC {
     apt-genotype-axiom --analysis-files-path ${chip_library_path} \
   --arg-file  ${chip_library_path}/Axiom_ABC_96orMore_Step1.r1.apt-genotype-axiom.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
-  --cel-files ./pass_qc.txt \
+  --cel-files ./pass_QC.txt \
   --table-output false \
   --out-dir . \
   --log-file ./apt2-axiom.log
