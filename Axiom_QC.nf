@@ -28,7 +28,7 @@ process runQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("qc.txt"), file("pass_QC.txt") into ch_output
+        set file("raw_qc.txt"), file("pass_QC.txt") into ch_output
 
     publishDir path: './output/QC', mode: 'copy'
     
@@ -39,7 +39,7 @@ process runQC {
     --xml-file ${chip_library_path}/Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
     --cel-files cel.txt \
     --out-file raw_qc.txt 
-    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' qc.txt > pass_QC.txt
+    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' raw_qc.txt > pass_QC.txt
     """
 }
 
