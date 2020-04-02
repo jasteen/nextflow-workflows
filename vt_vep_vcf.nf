@@ -18,7 +18,7 @@ vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-
 
 // Global Resource Configuration Options
 
-ch_vcfIN = Channel.fromPath("./vcfs/*.vcf.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
+ch_vcfIN = Channel.fromPath("*.vcf.gz").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 
 process indexVCFS {
