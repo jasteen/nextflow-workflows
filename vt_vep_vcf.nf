@@ -55,7 +55,7 @@ process vt_decompose_normalise {
     module      'vt'
     
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
+    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.vt.vcf.gz" -
     """
 }
 
@@ -91,7 +91,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o "${baseName}.reheader.sorted.vt.vep.vcf"
+                      -o "${baseName}.vt.vep.vcf"
     """
 }
 
