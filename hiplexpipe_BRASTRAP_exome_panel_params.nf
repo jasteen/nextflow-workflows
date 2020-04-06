@@ -227,7 +227,7 @@ process run_vardict {
     
     """
     export PATH=/home/jste0021/scripts/VarDict-1.5.8/bin/:$PATH
-    VarDict -G ${ref} -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
+    VarDict -G ${ref} -p -f 0.1 -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
     """
 }
 
