@@ -6,7 +6,7 @@ bed_target=file("/projects/vh83/reference/hiplex_complexo/complexo_nthl1.bed")
 reference=file("/projects/uc23/reference/genomes/bwa_index/human_g1k_v37_decoy.fasta")
 genome_file=file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
 
-// Global Resource Configuration Options
+
 Channel
     .fromPath("${input_path}/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
