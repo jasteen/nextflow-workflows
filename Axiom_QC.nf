@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-chip_library_path = file("/projects/vh83/reference/axiom_r2")
+chip_library_path = file("/projects/vh83/reference/axiom/r2/")
 input_path = file("./cels/")
 
 Channel
