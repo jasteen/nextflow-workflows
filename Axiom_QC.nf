@@ -91,9 +91,9 @@ process summary_callrates {
   script:
   """
   apt-genotype-axiom \
-  --analysis-files-path $AXIOM_LIB_PATH \
-  --arg-file $AXIOM_LIB_PATH/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
-  --cel-files pass_GT_cel_list.txt \
+  --analysis-files-path ${chip_library_path} \
+  --arg-file ${chip_library_path}/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
+  --cel-files ./pass_GT_cel_list.txt \
   --out-dir ./ \
   --log-file ./apt2-axiom.log
   """
