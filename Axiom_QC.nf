@@ -52,7 +52,7 @@ process runGTQC {
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
         file '*' from ch_cels_GT   
     output:
-        set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQCout
+        set file("AxiomGT1.report.txt"), file("pass_GT_cel_list.txt"), file("pass_GT.txt") into ch_GTQCout
     
     publishDir path: './output/GTQC', mode: 'copy'
     
@@ -61,12 +61,12 @@ process runGTQC {
     apt-genotype-axiom --analysis-files-path ${chip_library_path} \
     --arg-file  ${chip_library_path}/Axiom_ABC_96orMore_Step1.r2.apt-genotype-axiom.AxiomGT1.apt2.xml \
     --dual-channel-normalization true \
-    --cel-files ${pass_dqc} \
+    --cel-files pass_DQC.txt \
     --table-output false \
     --out-dir . \
     --log-file ./apt2-axiom.log
-    awk 'BEGIN{FS=OFS="\t"}{if(\$0 ~ /^#/){next}else if(\$1 ~ /cel_files/){print}else if(\$3 >= 97.0){ print \$1}}' AxiomGT1.report.txt > pass_DQC.txt
-    cut -f1 pass_DQC.txt > pass_DQC_cel_list.txt
+    awk 'BEGIN{FS=OFS="\t"}{if(\$0 ~ /^#/){next}else if(\$1 ~ /cel_files/){print}else if(\$3 >= 97.0){ print \$1}}' AxiomGT1.report.txt > pass_GT.txt
+    cut -f1 pass_GT.txt > pass_GT_cel_list.txt
     """
   }
 
@@ -81,10 +81,10 @@ process summary_callrates {
   label 'medium_6h'
 
     input:
-        set file(report), file (cell_DQC_pass), file(pass_only_report) from ch_GTQCout
+        set file(report), file (cell_DGC_pass), file(pass_only_report) from ch_GTQCout
         file '*' from ch_cels_Summary 
     output:
-        set file(""), file(""), file("") into ch_Summaryout
+        file("*") into ch_Summaryout
     
     publishDir path: './output/summary', mode: 'copy'
 
@@ -93,7 +93,7 @@ process summary_callrates {
   apt-genotype-axiom \
   --analysis-files-path $AXIOM_LIB_PATH \
   --arg-file $AXIOM_LIB_PATH/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
-  --cel-files pass_DQC_cel_list.txt \
+  --cel-files pass_GT_cel_list.txt \
   --out-dir ./ \
   --log-file ./apt2-axiom.log
   """
