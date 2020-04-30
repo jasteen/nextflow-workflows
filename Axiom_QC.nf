@@ -28,7 +28,7 @@ process runDQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_DCQCout
+        set file("raw_dqc.txt"), file("pass_DQC.txt") into ch_DCQCout
 
     publishDir path: './output/DQC', mode: 'copy'
     
@@ -39,7 +39,7 @@ process runDQC {
     --xml-file ${chip_library_path}/Axiom_ABC.r2.apt-geno-qc.AxiomQC1.xml \
     --cel-files cel.txt \
     --out-file raw_dqc.txt 
-    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' raw_qc.txt > pass_DQC.txt
+    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' raw_dqc.txt > pass_DQC.txt
     """
 }
 
@@ -49,7 +49,7 @@ process runGTQC {
     label 'medium_6h'
 
     input:
-        set file(raw_qc), file (pass_dqc) from ch_DCQCout
+        set file(raw_dqc), file (pass_dqc) from ch_DCQCout
         file '*' from ch_cels_GT   
     output:
         set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQCout
