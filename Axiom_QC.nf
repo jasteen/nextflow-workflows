@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-chip_library_path = file("/projects/vh83/reference/axiom")
+chip_library_path = file("/projects/vh83/reference/axiom_r2")
 input_path = file("./cels/")
 
 Channel
@@ -20,7 +20,7 @@ ch_cels
 
 
 //run QC and remove samples with < 0.82 DQC
-process runQC {
+process runDQC {
 
     label 'small_short'
 
@@ -28,18 +28,18 @@ process runQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("raw_qc.txt"), file("pass_QC.txt") into ch_output
+        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_output
 
-    publishDir path: './output/QC', mode: 'copy'
+    publishDir path: './output/DQC', mode: 'copy'
     
     script:
 
     """
     apt-geno-qc --analysis-files-path ${chip_library_path} \
-    --xml-file ${chip_library_path}/Axiom_ABC.r1.apt-geno-qc.AxiomQC1.xml \
+    --xml-file ${chip_library_path}/Axiom_ABC.r2.apt-geno-qc.AxiomQC1.xml \
     --cel-files cel.txt \
-    --out-file raw_qc.txt 
-    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' raw_qc.txt > pass_QC.txt
+    --out-file raw_dqc.txt 
+    awk 'BEGIN{FS=OFS="\t"}{if(NR == 1){print}else if(\$18 >= 0.82){ print \$1}}' raw_qc.txt > pass_DQC.txt
     """
 }
 
@@ -49,42 +49,57 @@ process runGTQC {
     label 'medium_6h'
 
     input:
-        set file(raw_qc), file (pass_qc) from ch_output
+        set file(raw_qc), file (pass_dqc) from ch_output
         file '*' from ch_cels_GT   
     output:
-        set file("AxiomGT1.report.txt"), file("apt2-axiom.log") into ch_GTQC_out
+        set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQC_out
     
     publishDir path: './output/GTQC', mode: 'copy'
     
     script:
     """
     apt-genotype-axiom --analysis-files-path ${chip_library_path} \
-  --arg-file  ${chip_library_path}/Axiom_ABC_96orMore_Step1.r1.apt-genotype-axiom.AxiomGT1.apt2.xml \
-  --dual-channel-normalization true \
-  --cel-files ./pass_QC.txt \
-  --table-output false \
-  --out-dir . \
-  --log-file ./apt2-axiom.log
+    --arg-file  ${chip_library_path}/Axiom_ABC_96orMore_Step1.r2.apt-genotype-axiom.AxiomGT1.apt2.xml \
+    --dual-channel-normalization true \
+    --cel-files ${pass_dqc} \
+    --table-output false \
+    --out-dir . \
+    --log-file ./apt2-axiom.log
+    awk 'BEGIN{FS=OFS="\t"}{if(\$0 ~ /^#/){next}else if(\$1 ~ /cel_files/){print}else if(\$3 >= 97.0){ print \$1}}' AxiomGT1.report.txt > pass_DQC.txt
+    cut -f1 pass_DQC.txt > pass_DQC_cel_list.txt
     """
   }
 
 /*
+$CEL_LIST_INLIERS_2 is the path to a text file with the header “cel_files” and each subsequent 
+row a path to each CEL file, which should all pass the DQC threshold AND the QC call_rate threshold
+from the previous two steps.
+*/
 //generate summary callrates for all probesets
 process summary_callrates {
 
   label 'medium_6h'
 
+    input:
+        set file(report), file (cell_DQC_pass), file(pass_only_report) from ch_output
+        file '*' from ch_cels_Summary 
+    output:
+        set file(""), file(""), file("") into ch_GTQC_out
+    
+    publishDir path: './output/summary', mode: 'copy'
+
   script:
   """
   apt-genotype-axiom \
   --analysis-files-path $AXIOM_LIB_PATH \
-  --arg-file $AXIOM_LIB_PATH/Axiom_PMDA.r6.apt-genotype-axiom.AxiomCN_PS1.apt2.xml \
-  --cel-files $CEL_LIST_INLIERS_2 \
-  --out-dir $OUTDIR/summary \
-  --log-file $OUTDIR/summary/apt2-axiom.log
+  --arg-file $AXIOM_LIB_PATH/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
+  --cel-files pass_DQC_cel_list.txt \
+  --out-dir ./ \
+  --log-file ./apt2-axiom.log
   """
 }
 
+/*
   process CNV {
   script:
   """
