@@ -28,7 +28,7 @@ process runDQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_DCQout
+        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_DCQCout
 
     publishDir path: './output/DQC', mode: 'copy'
     
@@ -49,7 +49,7 @@ process runGTQC {
     label 'medium_6h'
 
     input:
-        set file(raw_qc), file (pass_dqc) from ch_DQCout
+        set file(raw_qc), file (pass_dqc) from ch_DCQCout
         file '*' from ch_cels_GT   
     output:
         set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQCout
