@@ -28,7 +28,7 @@ process runDQC {
         file list from ch_celList_QC
         file '*' from ch_cels_QC   
     output:
-        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_output
+        set file("raw_qc.txt"), file("pass_DQC.txt") into ch_DCQout
 
     publishDir path: './output/DQC', mode: 'copy'
     
@@ -49,10 +49,10 @@ process runGTQC {
     label 'medium_6h'
 
     input:
-        set file(raw_qc), file (pass_dqc) from ch_output
+        set file(raw_qc), file (pass_dqc) from ch_DQCout
         file '*' from ch_cels_GT   
     output:
-        set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQC_out
+        set file("AxiomGT1.report.txt"), file("pass_DQC_cel_list.txt"), file("pass_DQC.txt") into ch_GTQCout
     
     publishDir path: './output/GTQC', mode: 'copy'
     
@@ -81,10 +81,10 @@ process summary_callrates {
   label 'medium_6h'
 
     input:
-        set file(report), file (cell_DQC_pass), file(pass_only_report) from ch_output
+        set file(report), file (cell_DQC_pass), file(pass_only_report) from ch_GTQCout
         file '*' from ch_cels_Summary 
     output:
-        set file(""), file(""), file("") into ch_GTQC_out
+        set file(""), file(""), file("") into ch_Summaryout
     
     publishDir path: './output/summary', mode: 'copy'
 
