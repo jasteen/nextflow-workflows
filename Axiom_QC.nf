@@ -156,6 +156,7 @@ process run_finalGT {
   --allele-summaries true \
   --write-models
   """
+}
 
 /*
 process run_snpQC {
