@@ -133,7 +133,7 @@ process run_finalGT {
   label 'small_short'
 
     input:
-        file(cell_DGC_pass), file '*' from ch_CNVout
+        set file(cell_DGC_pass), file '*' from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
