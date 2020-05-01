@@ -16,7 +16,7 @@ ch_celList.map { it -> it.name }
 
 ch_cels
     .collect()
-    .into {ch_cels_QC;ch_cels_GT;ch_cels_Summary}
+    .into {ch_cels_QC;ch_cels_GTQC;ch_cels_Summary;ch_cels_GT}
 
 
 //run QC and remove samples with < 0.82 DQC
@@ -46,11 +46,11 @@ process runDQC {
 //run first pass genotype QC and remove samples with call rate <0.97
 process runGTQC {
 
-    label 'medium_6h'
+    label 'small_short'
 
     input:
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
-        file '*' from ch_cels_GT   
+        file '*' from ch_cels_GTQC   
     output:
         set file("AxiomGT1.report.txt"), file("pass_GT_cel_list.txt"), file("pass_GT.txt") into ch_GTQCout
     
@@ -78,7 +78,7 @@ from the previous two steps.
 //generate summary callrates for all probesets
 process summary_callrates {
 
-  label 'medium_6h'
+  label 'small_short'
 
     input:
         set file(report), file (cell_DGC_pass), file(pass_only_report) from ch_GTQCout
@@ -105,12 +105,12 @@ process summary_callrates {
 
 process CNV {
 
-  label 'medium_6h'
+  label 'small_short'
 
     input:
-        file '*' from ch_Summaryout
+        set file(cell_DGC_pass), file '*' from ch_Summaryout
     output:
-        file '*' into ch_CNVout
+        set file (cell_DGC_pass), file '*' into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -128,23 +128,36 @@ process CNV {
   """
 }
 
-/*
 process run_finalGT {
+   
+  label 'small_short'
+
+    input:
+        file(cell_DGC_pass), file '*' from ch_CNVout
+        file '*' from ch_cels_GT
+
+    output:
+        file '*' into ch_GTout
+    
+    publishDir path: './output/genotypes', mode: 'copy'
+
+
   script:
   """
   apt-genotype-axiom \
-  --copynumber-probeset-calls-file $OUTDIR/cn/AxiomCNVMix.cnpscalls.txt \
-  --analysis-files-path $AXIOM_LIB_PATH \
-  --arg-file $AXIOM_LIB_PATH/Axiom_PMDA_96orMore_Step2.r6.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
+  --copynumber-probeset-calls-file ./AxiomCNVMix.cnpscalls.txt \
+  --analysis-files-path ${chip_library_path} \
+  --arg-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r2.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
-  --cel-files $CEL_LIST_INLIERS_2 \
-  --out-dir $OUTDIR/genotypes \
-  --batch-folder $OUTDIR/genotypes \
-  --log-file $OUTDIR/genotypes/apt2-axiom.log \
+  --cel-files ./$cell_DGC_pass \
+  --out-dir ./ \
+  --batch-folder ./ \
+  --log-file ./apt2-axiom.log \
   --allele-summaries true \
   --write-models
   """
 
+/*
 process run_snpQC {
   script:
   """
