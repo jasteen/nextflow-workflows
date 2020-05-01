@@ -109,9 +109,8 @@ process CNV {
 
     input:
         file '*' from ch_Summaryout
-        file '*' from ch_cels_Summary 
     output:
-        file '*' into ch_Summaryout
+        file '*' into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
