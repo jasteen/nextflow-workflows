@@ -108,9 +108,9 @@ process CNV {
   label 'small_short'
 
     input:
-        set file(cell_DGC_pass), file '*' from ch_Summaryout
+        set file(cell_DGC_pass), file ('*') from ch_Summaryout
     output:
-        set file (cell_DGC_pass), file '*' into ch_CNVout
+        set file(cell_DGC_pass), file '*' into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
