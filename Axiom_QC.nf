@@ -99,22 +99,37 @@ process summary_callrates {
   """
 }
 
-/*
-  process CNV {
+//need to make sure we capture the right things from the previous step.
+
+
+
+process CNV {
+
+  label 'medium_6h'
+
+    input:
+        file '*' from ch_Summaryout
+        file '*' from ch_cels_Summary 
+    output:
+        file '*' into ch_Summaryout
+    
+    publishDir path: './output/cn', mode: 'copy'
+
   script:
   """
   apt-copynumber-axiom-cnvmix \
-  --analysis-files-path $AXIOM_LIB_PATH \
-  --arg-file $AXIOM_LIB_PATH/Axiom_PMDA.r6.apt-copynumber-axiom-cnvmix.AxiomCNVmix.apt2.xml \
+  --analysis-files-path ${chip_library_path} \
+  --arg-file ${chip_library_path}/Axiom_ABC.r2.apt-copynumber-axiom-cnvmix.AxiomCNVmix.apt2.xml \
   --mapd-max 0.35 \
   --waviness-sd-max 0.1 \
-  --summary-file $OUTDIR/summary/AxiomGT1.summary.a5 \
-  --report-file $OUTDIR/summary/AxiomGT1.report.txt \
-  --out-dir $OUTDIR/cn \
-  --log-file $OUTDIR/cn/apt-copynumber-axiom.log
+  --summary-file ./AxiomGT1.summary.a5 \
+  --report-file ./AxiomGT1.report.txt \
+  --out-dir ./ \
+  --log-file ./apt-copynumber-axiom.log
   """
 }
 
+/*
 process run_finalGT {
   script:
   """
