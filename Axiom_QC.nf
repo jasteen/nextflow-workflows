@@ -81,8 +81,9 @@ process summary_callrates {
   label 'small_short'
 
     input:
-        set file(report), file (cell_DGC_pass), file(pass_only_report) from ch_GTQCout
+        set file(report), file (cel_DGC_pass), file(pass_only_report) from ch_GTQCout
         file '*' from ch_cels_Summary 
+
     output:
         file("*") into ch_Summaryout
     
@@ -108,9 +109,9 @@ process CNV {
   label 'small_short'
 
     input:
-        set file(cell_DGC_pass), file ('*') from ch_Summaryout
+        set file ('*') from ch_Summaryout
     output:
-        set file(cell_DGC_pass), file '*' into ch_CNVout
+        set file '*' into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -133,7 +134,7 @@ process run_finalGT {
   label 'small_short'
 
     input:
-        set file(cell_DGC_pass), file '*' from ch_CNVout
+        file '*' from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
@@ -149,7 +150,7 @@ process run_finalGT {
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r2.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
-  --cel-files ./$cell_DGC_pass \
+  --cel-files ./pass_GT_cel_list.txt \
   --out-dir ./ \
   --batch-folder ./ \
   --log-file ./apt2-axiom.log \
