@@ -109,9 +109,9 @@ process CNV {
   label 'small_short'
 
     input:
-        set file ('*') from ch_Summaryout
+        file ('*') from ch_Summaryout
     output:
-        set file '*' into ch_CNVout
+        file '*' into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
