@@ -78,7 +78,7 @@ from the previous two steps.
 //generate summary callrates for all probesets
 process summary_callrates {
 
-  label 'small_short'
+  label 'medium_6h'
 
     input:
         set file(report), file (cel_DGC_pass), file(pass_only_report) from ch_GTQCout
@@ -106,7 +106,7 @@ process summary_callrates {
 
 process CNV {
 
-  label 'small_short'
+  label 'medium_6h'
 
     input:
         file ('*') from ch_Summaryout
@@ -131,7 +131,7 @@ process CNV {
 
 process run_finalGT {
    
-  label 'small_short'
+  label 'medium_6h'
 
     input:
         file '*' from ch_CNVout
