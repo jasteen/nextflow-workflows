@@ -78,7 +78,7 @@ from the previous two steps.
 //generate summary callrates for all probesets
 process summary_callrates {
 
-  label 'medium_6h'
+  label 'small_3'
 
     input:
         file '*' from ch_GTQCout
@@ -106,7 +106,7 @@ process summary_callrates {
 
 process CNV {
 
-  label 'medium_6h'
+  label 'small_3'
 
     input:
         file ('*') from ch_Summaryout
@@ -131,7 +131,7 @@ process CNV {
 
 process run_finalGT {
    
-  label 'medium_6h'
+  label 'small_3'
 
     input:
         file '*' from ch_CNVout
