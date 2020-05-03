@@ -52,7 +52,7 @@ process runGTQC {
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
         file '*' from ch_cels_GTQC   
     output:
-        set file("AxiomGT1.report.txt"), file("pass_GT_cel_list.txt"), file("pass_GT.txt") into ch_GTQCout
+        file '*' into ch_GTQCout
     
     publishDir path: './output/GTQC', mode: 'copy'
     
@@ -81,7 +81,7 @@ process summary_callrates {
   label 'medium_6h'
 
     input:
-        set file(report), file (cel_DGC_pass), file(pass_only_report) from ch_GTQCout
+        file '*' from ch_GTQCout
         file '*' from ch_cels_Summary 
 
     output:
