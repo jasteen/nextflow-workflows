@@ -6,11 +6,11 @@ input_path = file("./cels/")
 
 Channel
     .fromPath("${input_path}/*.cel")
-    .into {ch_temp1}
+    .set {ch_temp1}
 
 Channel
     .fromPath("${input_path}/*.CEL")
-    .into {ch_temp2}  
+    .set {ch_temp2}  
 
 ch_temp1.join(ch_temp2).into{ch_celList; ch_cels}
 
