@@ -69,4 +69,4 @@ process runGTQC {
     cut -f1 pass_GT.txt > pass_GT_cel_list.txt
     """
   }
-  */
+  
