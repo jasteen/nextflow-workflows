@@ -7,11 +7,14 @@ input_path = file("./cels/")
 Channel
     .fromPath("${input_path}/*.cel")
     .set {ch_temp1}
+    .println {it}
 
 Channel
     .fromPath("${input_path}/*.CEL")
-    .set {ch_temp2}  
+    .set {ch_temp2}
+    .println{it}  
 
+/*
 ch_temp1.join(ch_temp2).into{ch_celList; ch_cels}
 
 
@@ -76,3 +79,4 @@ process runGTQC {
     cut -f1 pass_GT.txt > pass_GT_cel_list.txt
     """
   }
+  */
