@@ -1,22 +1,12 @@
 #!/usr/bin/env nextflow
 
 chip_library_path = file("/projects/vh83/reference/axiom/r2/")
-input_path = file("./cels/")
+input_path = file("./cels")
 
 
 Channel
-    .fromPath("${input_path}/*.cel")
-    .set {ch_temp1}
-    .println {it}
-
-Channel
-    .fromPath("${input_path}/*.CEL")
-    .set {ch_temp2}
-    .println{it}  
-
-/*
-ch_temp1.join(ch_temp2).into{ch_celList; ch_cels}
-
+    .fromPath("${input_path}/*")
+    .into {ch_celList; ch_cels}
 
 ch_celList.map { it -> it.name }
        .collectFile(name: 'cel.txt', newLine: true, seed: "cel_files")
