@@ -53,7 +53,7 @@ process runGTQC {
         file '*' from ch_cels_GTQC   
     output:
         file '*' into ch_GTQCout
-    
+        
     publishDir path: './output/GTQC', mode: 'copy'
     
     script:
@@ -102,14 +102,12 @@ process summary_callrates {
 
 //need to make sure we capture the right things from the previous step.
 
-
-
 process CNV {
 
   label 'small_3'
 
     input:
-        file ('*') from ch_Summaryout
+        set file(axoiom), file ('*') from ch_Summaryout
     output:
         file '*' into ch_CNVout
     
