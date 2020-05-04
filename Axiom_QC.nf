@@ -144,7 +144,7 @@ process run_finalGT {
   script:
   """
   apt-genotype-axiom \
-  --copynumber-probeset-calls-file ./AxiomCNVMix.cnpscalls.txt \
+  --copynumber-probeset-calls-file $workflow.launchDir/cn/AxiomCNVMix.cnpscalls.txt \
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r2.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
