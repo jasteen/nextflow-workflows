@@ -109,7 +109,7 @@ process CNV {
     input:
         set file(axoiom), file(cellist), file ('*') from ch_Summaryout
     output:
-        set file("pass_GT_cel_list.txt"), file('*') into ch_CNVout
+        set file("AxiomGT1.report.txt"),file("pass_GT_cel_list.txt"), file('*') into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -157,32 +157,57 @@ process run_finalGT {
   """
 }
 
-/*
+
 process run_snpQC {
+  
+  label 'small_3'
+
+  input:
+    file('*') from ch_GTout
+        
+
+  output:
+   file '*' into ch_snpQCout
+    
+  publishDir path: './output/SNPolisher', mode: 'copy'
+
   script:
   """
   ps-metrics \
-  --posterior-file $OUTDIR/genotypes/AxiomGT1.snp-posteriors.txt \
-  --multi-posterior-file $OUTDIR/genotypes/AxiomGT1.snp-posteriors.multi.txt \
-  --batch-folder $OUTDIR/genotypes \
-  --summary-file $OUTDIR/genotypes/AxiomGT1.summary.txt \
-  --report-file $OUTDIR/genotypes/AxiomGT1.report.txt \
-  --special-snps $AXIOM_LIB_PATH/Axiom_PMDA.r6.specialSNPs \
+  --posterior-file $workflow.launchDir/genotypes/AxiomGT1.snp-posteriors.txt \
+  --multi-posterior-file $workflow.launchDir/genotypes/AxiomGT1.snp-posteriors.multi.txt \
+  --batch-folder $workflow.launchDir/genotypes \
+  --summary-file $workflow.launchDir/genotypes/AxiomGT1.summary.txt \
+  --report-file $workflow.launchDir/genotypes/AxiomGT1.report.txt \
+  --special-snps ${chip_library_path}/Axiom_ABC.r2.specialSNPs \
   --use-multi-allele true \
   --y-restrict 0.2 \
-  --metrics-file $OUTDIR/SNPolisher/metrics.txt \
-  --multi-metrics-file $OUTDIR/SNPolisher/metrics.multi.txt \
-  --log-file $OUTDIR/SNPolisher/ps_metrics.log
+  --metrics-file ./metrics.txt \
+  --multi-metrics-file ./metrics.multi.txt \
+  --log-file ./ps_metrics.log
   """
 }
 
 process run_snpClassification {
+  
+  label 'small_3'
+
+  input:
+    set file(axiom), file(pass), file('*') from ch_snpQCout
+        
+
+  output:
+    file '*' into ch_snpClassOut
+    
+  publishDir path: './output/SNPolisher', mode: 'copy'
+
+
   script:
   """
    ps-classification \
-  --metrics-file $OUTDIR/SNPolisher/metrics.txt \
-  --multi-metrics-file $OUTDIR/SNPolisher/metrics.multi.txt \
-  --ps2snp-file $AXIOM_LIB_PATH/Axiom_PMDA.r6.ps2snp_map.ps \
+  --metrics-file $workflow.launchDir/SNPolisher/metrics.txt \
+  --multi-metrics-file $workflow.launchDir/SNPolisher/metrics.multi.txt \
+  --ps2snp-file ${chip_library_path}/Axiom_ABC.r2.ps2snp_map.ps  \
   --species-type Human \
   --cr-cutoff 95 \
   --fld-cutoff 3.6 \
@@ -220,8 +245,7 @@ process run_snpClassification {
   --priority-order PolyHighResolution,NoMinorHom,OTV,MonoHighResolution,CallRateBelowThreshold \
   --recommended PolyHighResolution,NoMinorHom,MonoHighResolution,Hemizygous \
   --use-multi-allele true \
-  --output-dir $OUTDIR/SNPolisher \
-  --log-file $OUTDIR/SNPolisher/ps_classification.log
+  --output-dir ./ \
+  --log-file ./
   """
 }
-*/
