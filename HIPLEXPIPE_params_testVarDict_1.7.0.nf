@@ -360,7 +360,7 @@ process apply_vep {
                       -o merged.vardict.vt.vep.vcf
     """
 }
-
+    
 
 /*
 Stats Generation Section
