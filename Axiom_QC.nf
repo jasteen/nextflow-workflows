@@ -85,8 +85,8 @@ process summary_callrates {
         file '*' from ch_cels_Summary 
 
     output:
-        file("*") into ch_Summaryout
-    
+        set file("AxiomGT1.report.txt"), file("*") into ch_Summaryout
+        
     publishDir path: './output/summary', mode: 'copy'
 
   script:
