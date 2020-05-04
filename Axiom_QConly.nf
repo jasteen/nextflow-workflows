@@ -3,9 +3,16 @@
 chip_library_path = file("/projects/vh83/reference/axiom/r2/")
 input_path = file("./cels/")
 
+
 Channel
     .fromPath("${input_path}/*.cel")
-    .into {ch_celList; ch_cels}
+    .into {ch_temp1}
+
+Channel
+    .fromPath("${input_path}/*.CEL")
+    .into {ch_temp2}  
+
+ch_temp1.join(ch_temp2).into{ch_celList; ch_cels}
 
 
 ch_celList.map { it -> it.name }
@@ -16,7 +23,7 @@ ch_celList.map { it -> it.name }
 
 ch_cels
     .collect()
-    .into {ch_cels_QC;ch_cels_GTQC;ch_cels_Summary;ch_cels_GT}
+    .into {ch_cels_QC;ch_cels_GTQC}
 
 
 //run QC and remove samples with < 0.82 DQC
