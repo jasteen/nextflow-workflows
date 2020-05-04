@@ -107,9 +107,9 @@ process CNV {
   label 'small_3'
 
     input:
-        set file(axoiom), file ('*') from ch_Summaryout
+        set file(axoiom), file(cellist), file ('*') from ch_Summaryout
     output:
-        file '*' into ch_CNVout
+        set file("pass_GT_cel_list.txt"), file('*') into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -132,7 +132,7 @@ process run_finalGT {
   label 'small_3'
 
     input:
-        file '*' from ch_CNVout
+        set file(axiom), file('*') from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
