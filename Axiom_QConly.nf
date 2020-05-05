@@ -46,7 +46,7 @@ process runDQC {
 //run first pass genotype QC and remove samples with call rate <0.97
 process runGTQC {
 
-    label 'small_short'
+    label 'small_3'
 
     input:
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
