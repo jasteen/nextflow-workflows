@@ -318,7 +318,7 @@ process vt_decompose_normalise {
 
     publishDir path: './variants_merged', mode: 'copy'
 
-    module      'vt'
+    module      'vt/0.57'
 
     script:
     """
