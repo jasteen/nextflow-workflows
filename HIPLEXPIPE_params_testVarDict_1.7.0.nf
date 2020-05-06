@@ -301,9 +301,9 @@ process mergeVCFS {
     
     """
     split -l 500 list2.txt temp_shorter_list_
-    for i in temp_shorter_*; do bcftools merge -m none -l \$i -O z -o \$i.merged.vcf.gz; bcftools index \$i.merged.vcf.gz; done
+    for i in temp_shorter_*; do bcftools merge -m none -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
-    bcftools merge -R ${params.restrictedBed} -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
+    bcftools merge -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
