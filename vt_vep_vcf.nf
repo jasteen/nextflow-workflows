@@ -55,7 +55,7 @@ process vt_decompose_normalise {
     module      'vt'
     
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.vt.vcf.gz" -
+    vt decompose -s $vcf | vt normalize -n -r $ref -o "${baseName}.vt.vcf.gz" -
     """
 }
 
