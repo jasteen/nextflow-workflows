@@ -136,7 +136,7 @@ process run_finalGT {
         file '*' from ch_cels_GT
 
     output:
-        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall)
+        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall) into ch_GTout
     
     publishDir path: './output/genotypes', mode: 'copy'
 
