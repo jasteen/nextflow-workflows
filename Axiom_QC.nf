@@ -52,7 +52,7 @@ process runGTQC {
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
         file '*' from ch_cels_GTQC   
     output:
-        file '*' into ch_GTQCout
+        set file('AxiomGT1.report.txt'), file('pass_GT_cel_list.txt') into ch_GTQCout
         
     publishDir path: './output/GTQC', mode: 'copy'
     
@@ -81,11 +81,11 @@ process summary_callrates {
   label 'small_3'
 
     input:
-        file '*' from ch_GTQCout
+        set file(report), file(pass_list) from ch_GTQCout
         file '*' from ch_cels_Summary 
 
     output:
-        set file("AxiomGT1.report.txt"), file("pass_GT_cel_list.txt"), file("*") into ch_Summaryout
+        set file(report), file(pass_list), file("AxiomGT1.summary.txt"), file("AxiomGT1.summary.a5") into ch_Summaryout
         
     publishDir path: './output/summary', mode: 'copy'
 
@@ -94,7 +94,7 @@ process summary_callrates {
   apt-genotype-axiom \
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
-  --cel-files ./pass_GT_cel_list.txt \
+  --cel-files $pass_list \
   --out-dir ./ \
   --log-file ./apt2-axiom.log
   """
@@ -107,9 +107,9 @@ process CNV {
   label 'small_3'
 
     input:
-        set file(axoiom), file(cellist), file ('*') from ch_Summaryout
+        set file(report), file(pass_list), file(summary_txt), file(summary_a5) from ch_Summaryout
     output:
-        set file("AxiomGT1.report.txt"),file("pass_GT_cel_list.txt"), file('*') into ch_CNVout
+        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file("AxiomCNVMix.cnpscalls.txt") into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -132,11 +132,11 @@ process run_finalGT {
   label 'small_3'
 
     input:
-        set file(axiom), file('*') from ch_CNVout
+        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall) from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
-        file '*' into ch_GTout
+        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall)
     
     publishDir path: './output/genotypes', mode: 'copy'
 
@@ -144,11 +144,11 @@ process run_finalGT {
   script:
   """
   apt-genotype-axiom \
-  --copynumber-probeset-calls-file $workflow.launchDir/cn/AxiomCNVMix.cnpscalls.txt \
+  --copynumber-probeset-calls-file $cnv_cnpcall \
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r2.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
-  --cel-files ./pass_GT_cel_list.txt \
+  --cel-files $pass_list \
   --out-dir ./ \
   --batch-folder ./ \
   --log-file ./apt2-axiom.log \
