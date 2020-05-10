@@ -94,7 +94,7 @@ process summary_callrates {
   apt-genotype-axiom \
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC.r2.apt-genotype-axiom.AxiomCN_GT1.apt2.xml \
-  --cel-files $pass_list \
+  --cel-files ./$pass_list \
   --out-dir ./ \
   --log-file ./apt2-axiom.log
   """
@@ -120,8 +120,8 @@ process CNV {
   --arg-file ${chip_library_path}/Axiom_ABC.r2.apt-copynumber-axiom-cnvmix.AxiomCNVmix.apt2.xml \
   --mapd-max 0.35 \
   --waviness-sd-max 0.1 \
-  --summary-file ./AxiomGT1.summary.a5 \
-  --report-file ./AxiomGT1.report.txt \
+  --summary-file ./$summary_a5 \
+  --report-file ./$report \
   --out-dir ./ \
   --log-file ./apt-copynumber-axiom.log
   """
@@ -148,7 +148,7 @@ process run_finalGT {
   --analysis-files-path ${chip_library_path} \
   --arg-file ${chip_library_path}/Axiom_ABC_96orMore_Step2.r2.apt-genotype-axiom.mm.SnpSpecificPriors.AxiomGT1.apt2.xml \
   --dual-channel-normalization true \
-  --cel-files $pass_list \
+  --cel-files ./$pass_list \
   --out-dir ./ \
   --batch-folder ./ \
   --log-file ./apt2-axiom.log \
