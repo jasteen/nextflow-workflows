@@ -106,8 +106,8 @@ process makeVCF {
     """
     module purge
     module load R/3.5.1
-    cat ${tsv} | /home/jste0021/scripts/VarDict-1.7.0/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.7.0/bin/var2vcf_valid.pl -P 0 -a -G $ref -N "${baseName}" \
+    cat ${tsv} | /home/jste0021/scripts/temp/VarDict/teststrandbias.R | \
+        /home/jste0021/scripts/temp/VarDict/var2vcf_valid.pl -P 0 -a -G $ref -N "${baseName}" \
         -f 0.1 -E > "${baseName}.vardict.vcf"
     """
 }
@@ -207,7 +207,7 @@ process mergeVCFS {
     split -l 500 list2.txt temp_shorter_list_
     for i in temp_shorter_*; do bcftools merge -m none -l \$i -O z -o \$i.merged.vcf.gz; bcftools index \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
-    bcftools merge -R ${params.restrictedBed} -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
+    bcftools merge -m none -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
