@@ -85,7 +85,7 @@ process summary_callrates {
         file '*' from ch_cels_Summary 
 
     output:
-        set file(report), file(pass_list), file("AxiomGT1.summary.txt"), file("AxiomGT1.summary.a5") into ch_Summaryout
+        set file(report), file(pass_list), file("AxiomGT1.summary.a5") into ch_Summaryout
         
     publishDir path: './output/summary', mode: 'copy'
 
@@ -107,9 +107,9 @@ process CNV {
   label 'small_3'
 
     input:
-        set file(report), file(pass_list), file(summary_txt), file(summary_a5) from ch_Summaryout
+        set file(report), file(pass_list), file(summary_a5) from ch_Summaryout
     output:
-        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file("AxiomCNVMix.cnpscalls.txt") into ch_CNVout
+        set file(report), file(pass_list), file(summary_a5), file("AxiomCNVMix.cnpscalls.txt") into ch_CNVout
     
     publishDir path: './output/cn', mode: 'copy'
 
@@ -132,11 +132,11 @@ process run_finalGT {
   label 'small_3'
 
     input:
-        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall) from ch_CNVout
+        set file(report), file(pass_list), file(summary_a5), file(cnv_cnpcall) from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
-        set file(report), file(pass_list), file(summary_txt), file(summary_a5), file(cnv_cnpcall) into ch_GTout
+        set file(report), file(pass_list), file(summary_a5), file(cnv_cnpcall) into ch_GTout
     
     publishDir path: './output/genotypes', mode: 'copy'
 
@@ -163,7 +163,7 @@ process run_snpQC {
   label 'small_3'
 
   input:
-    file('*') from ch_GTout
+    set file(report), file(pass_list), file(summary_a5), file(cnv_cnpcall) from ch_GTout
         
 
   output:
