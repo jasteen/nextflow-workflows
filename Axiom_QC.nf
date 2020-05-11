@@ -174,11 +174,11 @@ process run_snpQC {
   script:
   """
   ps-metrics \
-  --posterior-file $workflow.launchDir/genotypes/AxiomGT1.snp-posteriors.txt \
-  --multi-posterior-file $workflow.launchDir/genotypes/AxiomGT1.snp-posteriors.multi.txt \
-  --batch-folder $workflow.launchDir/genotypes \
-  --summary-file $workflow.launchDir/genotypes/AxiomGT1.summary.txt \
-  --report-file $workflow.launchDir/genotypes/AxiomGT1.report.txt \
+  --posterior-file $workflow.launchDir/output/genotypes/AxiomGT1.snp-posteriors.txt \
+  --multi-posterior-file $workflow.launchDir/output/genotypes/AxiomGT1.snp-posteriors.multi.txt \
+  --batch-folder $workflow.launchDir/output/genotypes \
+  --summary-file $workflow.launchDir/output/genotypes/AxiomGT1.summary.txt \
+  --report-file $workflow.launchDir/output/genotypes/AxiomGT1.report.txt \
   --special-snps ${chip_library_path}/Axiom_ABC.r2.specialSNPs \
   --use-multi-allele true \
   --y-restrict 0.2 \
@@ -205,8 +205,8 @@ process run_snpClassification {
   script:
   """
    ps-classification \
-  --metrics-file $workflow.launchDir/SNPolisher/metrics.txt \
-  --multi-metrics-file $workflow.launchDir/SNPolisher/metrics.multi.txt \
+  --metrics-file $workflow.launchDir/output/SNPolisher/metrics.txt \
+  --multi-metrics-file $workflow.launchDir/output/SNPolisher/metrics.multi.txt \
   --ps2snp-file ${chip_library_path}/Axiom_ABC.r2.ps2snp_map.ps  \
   --species-type Human \
   --cr-cutoff 95 \
