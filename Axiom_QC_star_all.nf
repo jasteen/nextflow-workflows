@@ -81,7 +81,7 @@ process summary_callrates {
   label 'small_3'
 
     input:
-        file(*) from ch_GTQCout
+        file '*' from ch_GTQCout
         file '*' from ch_cels_Summary 
 
     output:
@@ -107,7 +107,7 @@ process CNV {
   label 'small_3'
 
     input:
-        file(*) from ch_Summaryout
+        file '*' from ch_Summaryout
     output:
         file("*") into ch_CNVout
     
@@ -132,7 +132,7 @@ process run_finalGT {
   label 'small_3'
 
     input:
-        file(*) from ch_CNVout
+        file '*' from ch_CNVout
         file '*' from ch_cels_GT
 
     output:
@@ -163,7 +163,7 @@ process run_snpQC {
   label 'small_3'
 
   input:
-    file(*) from ch_GTout
+    file '*' from ch_GTout
         
 
   output:
