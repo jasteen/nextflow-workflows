@@ -1,6 +1,5 @@
 {
-"vardictBed": "/projects/vh83/reference/brastrap_specific/vardict/BRASTRAP_721717_8column.bed",
-"intervalFile": "/projects/vh83/reference/brastrap_specific/BRA-STRAP_621717_100.final.roverfile_g37.numsort.sorted.bed",
+"vardictBed": "/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed",
+"intervalFile": "/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed",
 "restrictedBed": "/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed",
-"primer_bedpe_file": "/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt"
 }
