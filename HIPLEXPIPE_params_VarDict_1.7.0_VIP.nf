@@ -42,9 +42,26 @@ samtoolsModule = 'samtools/1.9'
 
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam")
-ch_inputFiles.into{ch_forperBase;ch_mappedBam1}
+ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam").map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
 
+
+
+process index_bam{
+    label 'small_1'
+
+    input:
+        set baseName, file(bam) from ch_inputFiles               
+    output: 
+        set baseName, file(bam), file("${baseName}.bam.bai") into ch_mappedBam1           
+    
+    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    
+    """
+    samtools index ${baseName}.bam ${baseName}.bam.bai
+    """
+}
+
+    
 
 process run_vardict {
 
