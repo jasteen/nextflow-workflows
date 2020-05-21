@@ -42,7 +42,7 @@ samtoolsModule = 'samtools/1.9'
 
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromFilePairs("*.{bam,bam.bai}", flat: true).println()
+ch_inputFiles = Channel.fromFilePairs("./$inputDirectory/*.{bam,bam.bai}", flat: true).println()
 
 //ch_inputFiles.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6}
 
