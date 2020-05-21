@@ -52,7 +52,7 @@ process index_bam{
     input:
         set baseName, file(bam) from ch_inputFiles               
     output: 
-        set baseName, file(bam), file("${baseName}.bam.bai") into ch_mappedBam1           
+        set baseName, file(bam), file("${baseName}.bam.bai") into ch_mappedBam           
     
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
@@ -61,7 +61,7 @@ process index_bam{
     """
 }
 
-    
+ch_mappedBam.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6}
 
 process run_vardict {
 
