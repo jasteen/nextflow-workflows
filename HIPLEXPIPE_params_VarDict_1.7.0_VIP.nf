@@ -49,6 +49,8 @@ ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam").map{ file -> tuple(f
 process index_bam{
     label 'small_1'
 
+    module      samtoolsModule
+    
     input:
         set baseName, file(bam) from ch_inputFiles               
     output: 
