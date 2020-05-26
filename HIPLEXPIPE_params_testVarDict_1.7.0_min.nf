@@ -130,7 +130,8 @@ process reheaderVCF {
 
     script:
     """
-    bcftools annotate -h ${header} -O z -o "${baseName}.reheader.vcf.gz" ${vcf}
+    sed s/"ID=AD,Number=R"/"ID=AD,Number=."/ ${vcf} > temp.vcf
+    bcftools annotate -h ${header} -O z -o "${baseName}.reheader.vcf.gz" temp.vcf
     """
 
 }
