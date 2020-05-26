@@ -214,6 +214,58 @@ process mergeVCFS {
     """
 }
 
+process vt_decompose_normalise {
 
+    label 'small_1'
+        
+    input:
+        file(vcf) from ch_mergedfinalVCF
+    output:
+        file("merged.vardict.vt.vcf.gz") into ch_vtDecomposeVCF
+
+    publishDir path: './variants_merged', mode: 'copy'
+
+    module      'vt/0.57'
+
+    script:
+    """
+    vt decompose -s $vcf | vt normalize -n -r $ref -o merged.vardict.vt.vcf.gz -
+    """
+}
+
+process apply_vep {
+
+    label 'vep'
+
+    input:
+        file(vcf) from ch_vtDecomposeVCF
+    output:
+        file("merged.vardict.vt.vep.vcf") into ch_vepVCF
+
+    publishDir path: './variants_merged', mode: 'copy'
+
+    module      'vep/90'
+
+    script:
+    """
+    vep --cache --dir_cache $other_vep \
+                      --assembly GRCh37 --refseq --offline \
+                      --fasta $ref \
+                      --sift b --polyphen b --symbol --numbers --biotype \
+                      --total_length --hgvs --format vcf \
+                      --vcf --force_overwrite --flag_pick --no_stats \
+                      --custom $vep_brcaex,brcaex,vcf,exact,0,Clinical_significance_ENIGMA,Comment_on_clinical_significance_ENIGMA,Date_last_evaluated_ENIGMA,Pathogenicity_expert,HGVS_cDNA,HGVS_Protein,BIC_Nomenclature \
+                      --custom $vep_gnomad,gnomAD,vcf,exact,0,AF_NFE,AN_NFE \
+                      --custom $vep_revel,RVL,vcf,exact,0,REVEL_SCORE \
+                      --plugin MaxEntScan,$vep_maxentscan \
+                      --plugin ExAC,$vep_exac,AC,AN \
+                      --plugin dbNSFP,$vep_dbnsfp,REVEL_score,REVEL_rankscore \
+                      --plugin dbscSNV,$vep_dbscsnv \
+                      --plugin CADD,$vep_cadd \
+                      --fork ${task.cpus} \
+                      -i ${vcf} \
+                      -o merged.vardict.vt.vep.vcf
+    """
+}
 
 
