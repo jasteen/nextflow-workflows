@@ -86,7 +86,7 @@ process run_vardict {
     
     """
     export PATH=/home/jste0021/scripts/git_controlled/vardict_testing/VarDictJava/build/install/VarDict/bin/:$PATH
-    VarDict -G ${ref} -f 0.1 -N "${baseName}" --deldupvar -p --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
+    VarDict -G ${ref} -f 0.1 -N "${baseName}" -p --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
     """
 }
 
@@ -106,7 +106,9 @@ process makeVCF {
     """
     module purge
     module load R/3.5.1
-    cat ${tsv} | /home/jste0021/scripts/temp/VarDict/teststrandbias.R | \
+     
+    perl ~/scripts/fix.pl ${tsv}
+    cat output.txt | /home/jste0021/scripts/temp/VarDict/teststrandbias.R | \
         /home/jste0021/scripts/temp/VarDict/var2vcf_valid.pl -P 0 -a -G $ref -N "${baseName}" \
         -f 0.1 -E > "${baseName}.vardict.vcf"
     """
