@@ -42,7 +42,7 @@ ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
 
 process align_bwa {
 
-    label 'small_short'
+    label 'bwa_small'
 
     input:
         set baseName, file(fastqs) from ch_inputFiles
