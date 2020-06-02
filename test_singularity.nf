@@ -36,13 +36,6 @@ vep_dbnsfp      = file("/projects/vh83/reference/annotation_databases/dbNSFP/dbN
 vep_dbscsnv     = file("/projects/vh83/reference/annotation_databases/dbscSNV/dbscSNV1.0-VEP/dbscSNV.txt.gz")
 vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-v1.3/1000G_phase3.tsv.gz")
 
-// Tools
-picardJar      = '~/picard.jar'
-bwaModule      = 'bwa/0.7.17-gcc5'
-samtoolsModule = 'samtools/1.9'
-bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
-
-
 // Creating channel from input directory
 ch_inputFiles = Channel.fromFilePairs("${inputDirectory}/*_R{1,2}_001.fastq.gz")
 
@@ -58,8 +51,7 @@ process align_bwa {
 
     publishDir path: './bam_out', mode: 'copy'
 
-    module      samtoolsModule
-
+    script:
     """
     bwa mem -M -t ${task.cpus} -R "@RG\\tID:${baseName}\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref ${fastqs[0]} ${fastqs[1]}  \
         | samtools view -u -h -q 1 -f 2 -F 4 -F 8 -F 256 - \
