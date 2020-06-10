@@ -22,7 +22,7 @@ ch_cels
 //run QC and remove samples with < 0.82 DQC
 process runDQC {
 
-    label 'small_short'
+    label 'medium_6h'
 
     input:
         file list from ch_celList_QC
@@ -46,7 +46,7 @@ process runDQC {
 //run first pass genotype QC and remove samples with call rate <0.97
 process runGTQC {
 
-    label 'small_3'
+    label 'medium_6h'
 
     input:
         set file(raw_dqc), file (pass_dqc) from ch_DCQCout
