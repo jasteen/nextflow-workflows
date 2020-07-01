@@ -43,7 +43,7 @@ bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 
 // Creating channel from input directory
-ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}.set{ch_bams}
+ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 process generate_bam_index {
     label 'small_short'
