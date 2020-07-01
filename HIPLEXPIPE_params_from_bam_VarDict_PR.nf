@@ -49,9 +49,9 @@ process generate_bam_index {
     label 'small_short'
 
     input:
-        set baseName, file(bam) from ch_mappedBam1               
+        set baseName, file(bam) from ch_inputFiles             
     output: 
-        set baseName, file(bam), file("${baseName}.bam.bai") into ch_vardictTSV           
+        set baseName, file(bam), file("${baseName}.bam.bai") into ch_mappedBams           
     
     script:
     """
