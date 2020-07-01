@@ -53,6 +53,8 @@ process generate_bam_index {
     output: 
         set baseName, file(bam), file("${baseName}.bam.bai") into ch_mappedBams           
     
+    module samtoolsModule
+
     script:
     """
     samtools index $bam "${baseName}.bam.bai"
