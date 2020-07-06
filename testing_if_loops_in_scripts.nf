@@ -71,9 +71,10 @@ ch_mappedBam1.branch {
     }
     .set { ch_mappedBam_split }
 
+/*
 ch_mappedBam_split.halo.view{"this should be a halo line: $it[0]"}
 ch_mappedBam_split.hiplex.view{"this should be a hiplex line: $it[0]"}
-
+*/
 
 
 process run_vardict_halo {
@@ -81,7 +82,7 @@ process run_vardict_halo {
     label 'vardict_small'
 
     input:
-        set baseName, file(bam), file(bai) from ch_mappedBam1               
+        set baseName, file(bam), file(bai) from ch_mappedBam_split.halo               
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardict_halo_TSV           
     
@@ -99,7 +100,7 @@ process run_vardict_hiplex {
     label 'vardict_small'
 
     input:
-        set baseName, file(bam), file(bai) from ch_mappedBam1               
+        set baseName, file(bam), file(bai) from ch_mappedBam_split.hiplex               
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardict_hiplex_TSV           
     
