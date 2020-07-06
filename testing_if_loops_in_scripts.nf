@@ -112,9 +112,7 @@ process run_vardict_hiplex {
     """
 }
 
-*/
-
 ch_all_TSV = ch_vardict_halo_TSV.join(ch_vardict_hiplex_TSV).view{}
 
-
+*/
 
