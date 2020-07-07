@@ -64,7 +64,7 @@ process generate_bam_index {
 
 ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6}
 
-
+//spilt into the two different techs so it can be run on different vardict settings
 ch_mappedBam1.branch {
         halo: it[0].contains('locatit')
         hiplex: true
@@ -76,7 +76,7 @@ ch_mappedBam_split.halo.view{"this should be a halo line: $it[0]"}
 ch_mappedBam_split.hiplex.view{"this should be a hiplex line: $it[0]"}
 */
 
-
+//halo needs to be run without the amplicon mode enabled.  this is determined by the number of columns in the *.bed file.
 process run_vardict_halo {
 
     label 'vardict_small'
@@ -113,7 +113,7 @@ process run_vardict_hiplex {
     """
 }
 
-ch_all_TSV = ch_vardict_halo_TSV.join(ch_vardict_hiplex_TSV)
+ch_all_TSV = ch_vardict_halo_TSV.mix(ch_vardict_hiplex_TSV)
 
 process makeVCF {
 
@@ -127,7 +127,6 @@ process makeVCF {
     publishDir path: './variants_raw_out', mode: 'copy'
     
     script:
-
     """
     module purge
     module load R/3.5.1
@@ -139,7 +138,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -160,7 +159,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -179,7 +178,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -211,7 +210,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     echo true
 
@@ -227,7 +226,6 @@ process mergeVCFS {
     module     'bcftools/1.8'
     
     script: 
-    
     """
     split -l 500 list2.txt temp_shorter_list_
     for i in temp_shorter_*; do bcftools merge -m none --gvcf ${ref} -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
@@ -238,7 +236,7 @@ process mergeVCFS {
 
 process vt_decompose_normalise {
 
-    label 'small_1'
+    label 'genomics_1'
         
     input:
         file(vcf) from ch_mergedfinalVCF
@@ -326,7 +324,6 @@ process catAmplicons {
         file("amplicon.stats.tsv")
 
     script:
-
     """
     cat ${amplicon} > "amplicon.stats.tsv"
     """
