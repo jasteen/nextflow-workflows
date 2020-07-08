@@ -138,7 +138,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'genomics_1'
+    label 'small_1'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -159,7 +159,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'genomics_1'
+    label 'small_1'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -178,7 +178,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'genomics_1'
+    label 'small_1'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -210,7 +210,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'genomics_1'
+    label 'small_1'
 
     echo true
 
@@ -236,7 +236,7 @@ process mergeVCFS {
 
 process vt_decompose_normalise {
 
-    label 'genomics_1'
+    label 'small_1'
         
     input:
         file(vcf) from ch_mergedfinalVCF
