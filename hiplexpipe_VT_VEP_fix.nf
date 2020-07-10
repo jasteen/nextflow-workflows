@@ -61,7 +61,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -n -m -s $vcf | vt normalize -r $ref -o merged.vardict.vt.vcf.gz -
+    vt decompose -s $vcf | vt normalize -n -m -r $ref -o merged.vardict.vt.vcf.gz -
     """
 }
 
