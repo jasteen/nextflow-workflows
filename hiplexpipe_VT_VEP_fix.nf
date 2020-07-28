@@ -44,7 +44,7 @@ bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 
 // Creating channel from input directory
-ch_VCF = Channel.fromPath('./final_filtered.vt.vcf.gz')
+ch_VCF = Channel.fromPath('./final_filtered_gt_test.vcf.gz')
 
 process vt_decompose_normalise {
 
@@ -53,7 +53,7 @@ process vt_decompose_normalise {
     input:
         file(vcf) from ch_VCF
     output:
-        file("final_filtered.vt_2.vcf.gz") into ch_vtDecomposeVCF
+        file("final_filtered_gt_test.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './', mode: 'copy'
 
@@ -61,7 +61,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -s $vcf | vt normalize -n -r $ref -o final_filtered.vt_2.vcf.gz -
+    vt decompose -s $vcf | vt normalize -n -r $ref -o final_filtered_gt_test.vt.vcf.gz -
     """
 }
 
@@ -72,7 +72,7 @@ process apply_vep {
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
-        file("final_filtered.vt_2.vep.vcf") into ch_vepVCF
+        file("final_filtered_gt_test.vt.vep.vcf.gz") into ch_vepVCF
 
     publishDir path: './', mode: 'copy'
 
@@ -96,7 +96,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o final_filtered.vt_2.vep.vcf
+                      -o final_filtered_gt_test.vt.vep.vcf.gz
     """
 }
 
