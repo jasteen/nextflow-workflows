@@ -61,7 +61,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -s $vcf | vt normalize -n -r $ref -o merged.vardict.vt.vcf.gz -
+    vt decompose -s $vcf | vt normalize -n -r $ref -o final_filtered.vt_2.vcf.gz -
     """
 }
 
@@ -96,7 +96,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o merged.vardict.vt.vep.vcf.gz
+                      -o final_filtered.vt_2.vep.vcf
     """
 }
 
