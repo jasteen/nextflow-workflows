@@ -48,7 +48,7 @@ ch_VCF = Channel.fromPath('./final_filtered.vt.vcf.gz')
 
 process vt_decompose_normalise {
 
-    label 'small_1'
+    label 'genomics_1'
         
     input:
         file(vcf) from ch_VCF
@@ -67,7 +67,7 @@ process vt_decompose_normalise {
 
 process apply_vep {
 
-    label 'vep'
+    label 'genomics_2'
 
     input:
         file(vcf) from ch_vtDecomposeVCF
