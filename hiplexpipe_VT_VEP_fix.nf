@@ -44,7 +44,7 @@ bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 
 
 // Creating channel from input directory
-ch_VCF = Channel.fromPath('./final_merge.vardict.vcf.gz')
+ch_VCF = Channel.fromPath('./final_filtered.vt.vcf.gz')
 
 process vt_decompose_normalise {
 
@@ -53,7 +53,7 @@ process vt_decompose_normalise {
     input:
         file(vcf) from ch_VCF
     output:
-        file("merged.vardict.vt.vcf.gz") into ch_vtDecomposeVCF
+        file("final_filtered.vt_2.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './', mode: 'copy'
 
@@ -72,7 +72,7 @@ process apply_vep {
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
-        file("merged.vardict.vt.vep.vcf.gz") into ch_vepVCF
+        file("final_filtered.vt_2.vep.vcf") into ch_vepVCF
 
     publishDir path: './', mode: 'copy'
 
