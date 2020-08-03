@@ -34,7 +34,7 @@ process run_vardict {
     script:
     """
     export PATH=/mspm-data/processing/VarDict/bin:$PATH
-    VarDict --nosv -k 0 -q 15 -G ${ref} -f ${af_thr} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} > "${baseName}.tsv"
+    VarDict -a 10:0.25 --nosv -k 0 -q 15 -G ${ref} -f ${af_thr} -N "${baseName}" -b ${bam} -c 1 -S 2 -E 3 -g 4 ${vardictBed} > "${baseName}.tsv"
     """
 }
 
