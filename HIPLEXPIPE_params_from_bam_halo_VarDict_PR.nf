@@ -78,7 +78,11 @@ process run_vardict {
     script:
     """
     export PATH=/home/jste0021/scripts/git_controlled/vardict_testing/VarDictJava/build/install/VarDict/bin/:$PATH
-    VarDict -G ${ref} -f 0.1 -N "${baseName}" -p --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
+    if(baseName.contains('locatit')){
+        VarDict -G ${ref} -f 0.1 -N "${baseName}" -p --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.intervalFile} > "${baseName}.tsv"
+    }else{
+        VarDict -G ${ref} -f 0.1 -N "${baseName}" -p --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.vardictBed} > "${baseName}.tsv"
+    }
     """
 }
 
@@ -197,9 +201,9 @@ process mergeVCFS {
     
     """
     split -l 500 list2.txt temp_shorter_list_
-    for i in temp_shorter_*; do bcftools merge -m none --gvcf ${ref} -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
+    for i in temp_shorter_*; do bcftools merge -m all -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
-    bcftools merge -m none --gvcf ${ref} -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
+    bcftools merge -m all -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
