@@ -46,7 +46,7 @@ bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
 ch_inputFiles = Channel.fromPath("${inputDirectory}/*.bam").map{file -> tuple(file.name.take(file.name.lastIndexOf('.')), file)}
 
 process generate_bam_index {
-    label 'small_short'
+    label 'genomics_1'
 
     input:
         set baseName, file(bam) from ch_inputFiles             
@@ -117,7 +117,7 @@ ch_all_TSV = ch_vardict_halo_TSV.mix(ch_vardict_hiplex_TSV)
 
 process makeVCF {
 
-    label 'medium_6h'
+    label 'genomics_1'
 
     input:
         set baseName, file(tsv) from ch_all_TSV
@@ -138,7 +138,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -159,7 +159,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -178,7 +178,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -210,7 +210,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'small_1'
+    label 'medium_6h'
 
     echo true
 
@@ -228,15 +228,15 @@ process mergeVCFS {
     script: 
     """
     split -l 500 list2.txt temp_shorter_list_
-    for i in temp_shorter_*; do bcftools merge -m none --gvcf ${ref} -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
+    for i in temp_shorter_*; do bcftools merge -m all -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
-    bcftools merge -m none --gvcf ${ref} -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
+    bcftools merge -m all -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
     """
 }
 
 process vt_decompose_normalise {
 
-    label 'small_1'
+    label 'genomics_1'
         
     input:
         file(vcf) from ch_mergedfinalVCF
@@ -295,7 +295,7 @@ Stats Generation Section
 
 process AmpliconMetircs {
 
-    label 'medium_1h'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam6
@@ -314,7 +314,7 @@ ch_AmpliconMetrics.collect().set{ch_catAmp}
 
 process catAmplicons {
 
-    label 'medium_1h'
+    label 'genomics_1'
 
     publishDir path: './metrics/', mode: 'copy'
 
@@ -332,7 +332,7 @@ process catAmplicons {
 
 process InstersectBed {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam2
@@ -348,7 +348,7 @@ process InstersectBed {
 
 process CoverageBed {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
@@ -366,7 +366,7 @@ process CoverageBed {
 
 process ReadsMapped {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
@@ -383,7 +383,7 @@ process ReadsMapped {
 
 process ReadsTotal {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
@@ -400,7 +400,7 @@ process ReadsTotal {
     
 process TargetMapped {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam) from ch_intersectBam
@@ -421,7 +421,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
@@ -446,7 +446,7 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         file(stats) from ch_out2
