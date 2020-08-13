@@ -1,9 +1,14 @@
 #!/usr/bin/env nextflow
 
 // Required Inputs
-refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
-inputDirectory = file('./fastqs')
+
 tmp_dir        = file('/scratch/vh83/tmp/')
+
+
+
+
+
+
 
 //project specific bed files
 
@@ -12,11 +17,23 @@ intervalFile     = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_62
 restrictedBed    = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed")
 primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
 
-// Getting Reference Files
-refBase          = "$refFolder/human_g1k_v37_decoy"
-ref              = file("${refBase}.fasta")
-refDict          = file("${refBase}.dict")
-refFai           = file("${refBase}.fasta.fai")
+// grc37 reference stuff
+//refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
+//refBase          = "$refFolder/human_g1k_v37_decoy"
+//ref              = file("${refBase}.fasta")
+//refDict          = file("${refBase}.dict")
+//refFai           = file("${refBase}.fasta.fai")
+
+//HG19 reference for aspree stuff
+refFolder      = file("/projects/vh83/reference/genomes/hg19")
+refBase        = "$refFolder/ucsc.hg19"
+ref            = file("${refBase}.fasta")
+refDict        = file("${refBase}.dict")
+refFai         = file("${refBase}.fasta.fai")
+
+
+
+
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
