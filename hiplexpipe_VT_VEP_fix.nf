@@ -84,7 +84,7 @@ process vt_decompose_normalise {
 
 process apply_vep {
 
-    label 'genomics_2'
+    label 'vep'
 
     input:
         file(vcf) from ch_vtDecomposeVCF
