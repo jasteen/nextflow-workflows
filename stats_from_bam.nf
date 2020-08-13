@@ -1,4 +1,4 @@
-input_path = "/scratch/uc23/hfettke/cfDNA_BAMs_41/extra_bams/postconnor_LOD"
+input_path = "/fs03/uc23/hfettke/postconnor_bams_jason"
 bed_target=file("/scratch/uc23/jste0021/cellfree.bed")
 
 
