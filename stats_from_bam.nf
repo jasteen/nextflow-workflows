@@ -62,7 +62,7 @@ process ReadsMapped {
     
 process TargetMapped {
     
-    label 'genomics_2h'
+    label 'genomics_2'
     
     input:
         set sample, file(bam) from ch_intersectBam
