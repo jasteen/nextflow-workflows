@@ -13,7 +13,7 @@ Channel
     .into { ch_1; ch_2; ch_3 }
 
 process InstersectBed {
-    label 'medium_1h'
+    label 'genomics_2'
     input:
         set sample, file(bam) from ch_1
     output:
@@ -29,7 +29,7 @@ process InstersectBed {
 }
 
 process CoverageBed {
-    label 'medium_1h'
+    label 'genomics_2'
     input:
         set sample, file(bam) from ch_2
     output:
@@ -44,7 +44,7 @@ process CoverageBed {
     """
 }
 process ReadsMapped {
-    label 'medium_1h'
+    label 'genomics_2'
     input:
         set sample, file(bam) from ch_3
     output:
@@ -62,7 +62,7 @@ process ReadsMapped {
     
 process TargetMapped {
     
-    label 'medium_1h'
+    label 'genomics_2h'
     
     input:
         set sample, file(bam) from ch_intersectBam
@@ -81,7 +81,7 @@ ch_final = ch_bedtools.join(ch_onGenome)
 ch_final2 = ch_final.join(ch_onTarget)
 
 process collateData {
-    label 'medium_1h'
+    label 'genomics_2'
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget) from ch_final2
     output:
