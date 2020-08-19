@@ -233,7 +233,7 @@ process mergeVCFS {
     ls *merged.vcf.gz > list3.txt
     bcftools merge -m all -O z -o "merged.vardict.vcf.gz" -l list3.txt
     bcftools index --tbi "merged.vardict.vcf.gz"
-    bcftools filter -R ${params.restrictedBed} 'COUNT(GT!="ref")>COUNT(GT="mis")' merged.vardict.vcf.gz -O z -o merged.vardict.filtered.vcf.gz 
+    bcftools filter -R ${params.restrictedBed} -i 'COUNT(GT!="ref")>COUNT(GT="mis")' merged.vardict.vcf.gz -O z -o merged.vardict.filtered.vcf.gz 
     """
 }
 
