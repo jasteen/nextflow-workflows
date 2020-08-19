@@ -172,7 +172,8 @@ process sortVCFS {
 
     script:
     """
-    bcftools sort -o "${baseName}.sorted.vcf.gz" -O z ${vcf}
+    bcftools view ${vcf} | awk 'BEGIN{FS=OFS="\t"}{if(\$0 ~ /^#/) print;else if(\$4 ~ /[ACTG]/) print}' | bcftools view -O z -o ${baseName}.fixed.vcf.gz
+    bcftools sort -o "${baseName}.sorted.vcf.gz" -O z ${baseName}.fixed.vcf.gz
     """
 }
 
@@ -221,7 +222,7 @@ process mergeVCFS {
     file '*' from ch_all_files
     
     output:
-    file "final_merge.vardict.vcf.gz" into ch_mergedfinalVCF
+    file "merged.vardict.filtered.vcf.gz" into ch_mergedfinalVCF
 
     module     'bcftools/1.8'
     
@@ -230,7 +231,9 @@ process mergeVCFS {
     split -l 500 list2.txt temp_shorter_list_
     for i in temp_shorter_*; do bcftools merge -m all -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
-    bcftools merge -m all -O z -o "final_merge.vardict.vcf.gz" -l list3.txt
+    bcftools merge -m all -O z -o "merged.vardict.vcf.gz" -l list3.txt
+    bcftools index --tbi "merged.vardict.vcf.gz"
+    bcftools filter -R ${params.restrictedBed} 'COUNT(GT!="ref")>COUNT(GT="mis")' merged.vardict.vcf.gz -O z -o merged.vardict.filtered.vcf.gz 
     """
 }
 
@@ -241,7 +244,7 @@ process vt_decompose_normalise {
     input:
         file(vcf) from ch_mergedfinalVCF
     output:
-        file("merged.vardict.vt.vcf.gz") into ch_vtDecomposeVCF
+        file("merged.vardict.filtered.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
@@ -249,7 +252,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -s $vcf | vt normalize -n -r $ref -o merged.vardict.vt.vcf.gz -
+    vt decompose -s $vcf | vt normalize -n -r $ref -o merged.vardict.filtered.vt.vcf.gz -
     """
 }
 
@@ -260,7 +263,7 @@ process apply_vep {
     input:
         file(vcf) from ch_vtDecomposeVCF
     output:
-        file("merged.vardict.vt.vep.vcf") into ch_vepVCF
+        file("merged.vardict.filtered.vt.vcf") into ch_vepVCF
 
     publishDir path: './variants_merged', mode: 'copy'
 
@@ -284,7 +287,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o merged.vardict.vt.vep.vcf
+                      -o merged.vardict.filtered.vt.vcf
     """
 }
     
