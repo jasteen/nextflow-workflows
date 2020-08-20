@@ -22,6 +22,7 @@ if(params.reference == "hg19"){
     refFai           = file("${refBase}.fasta.fai")
 }
 
+
 //Annotation resources
 dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
 other_vep       = file("/usr/local/vep/90/ensembl-vep/cache")
@@ -38,7 +39,7 @@ vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Creating channel from input directory
-ch_VCF = Channel.fromPath(params.input_file).map {file -> tuple(file.baseName, file) 
+ch_VCF = Channel.fromPath(params.input_file).map {file -> tuple(file.baseName, file)} 
 
 process vt_decompose_normalise {
 
@@ -93,10 +94,3 @@ process apply_vep {
                       -o ${baseName}.vt.vep.vcf
     """
 }
-
-
-
-
-
-
-
