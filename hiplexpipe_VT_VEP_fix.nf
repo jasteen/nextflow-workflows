@@ -2,7 +2,7 @@
 
 // Required Inputs
 params.input_file = ""
-
+params.reference == ""
 //set up for multiple regerence possibilities.
 
 if(params.reference == "hg19"){
