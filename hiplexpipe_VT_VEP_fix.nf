@@ -1,45 +1,26 @@
 #!/usr/bin/env nextflow
 
 // Required Inputs
+params.input_file = ""
 
-tmp_dir        = file('/scratch/vh83/tmp/')
+//set up for multiple regerence possibilities.
 
+if(params.reference == "hg19"){
+    //HG19 reference for aspree stuff
+    refFolder      = file("/projects/vh83/reference/genomes/hg19")
+    refBase        = "$refFolder/ucsc.hg19"
+    ref            = file("${refBase}.fasta")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
 
-
-
-
-
-
-//project specific bed files
-
-vardictBed       = file("/projects/vh83/reference/brastrap_specific/vardict/BRASTRAP_721717_8column.bed")
-intervalFile     = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_621717_100.final.roverfile_g37.numsort.sorted.bed")
-restrictedBed    = file("/projects/vh83/reference/brastrap_specific/BRA-STRAP_coding_regions_targeted_sort.bed")
-primer_bedpe_file= file("/projects/vh83/reference/prostrap/final_prostrap_b37_bedpe_bamclipper.txt")
-
-// grc37 reference stuff
-//refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
-//refBase          = "$refFolder/human_g1k_v37_decoy"
-//ref              = file("${refBase}.fasta")
-//refDict          = file("${refBase}.dict")
-//refFai           = file("${refBase}.fasta.fai")
-
-//HG19 reference for aspree stuff
-refFolder      = file("/projects/vh83/reference/genomes/hg19")
-refBase        = "$refFolder/ucsc.hg19"
-ref            = file("${refBase}.fasta")
-refDict        = file("${refBase}.dict")
-refFai         = file("${refBase}.fasta.fai")
-
-
-
-
-millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
-dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
-genome_file      = file("/projects/vh83/reference/genomes/b37/accessory_files/human_g1k_v37_decoy_GenomeFile.txt")
-header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
-af_thr           = 0.1
-rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
+}else{
+    
+    refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
+    refBase          = "$refFolder/human_g1k_v37_decoy"
+    ref              = file("${refBase}.fasta")
+    refDict          = file("${refBase}.dict")
+    refFai           = file("${refBase}.fasta.fai")
+}
 
 //Annotation resources
 dbsnp_b37       = file("/projects/vh83/reference/genomes/b37/accessory_files/dbsnp_138.b37.vcf")
@@ -53,24 +34,20 @@ vep_dbnsfp      = file("/projects/vh83/reference/annotation_databases/dbNSFP/dbN
 vep_dbscsnv     = file("/projects/vh83/reference/annotation_databases/dbscSNV/dbscSNV1.0-VEP/dbscSNV.txt.gz")
 vep_cadd        = file("/projects/vh83/reference/annotation_databases/CADD/CADD-v1.3/1000G_phase3.tsv.gz")
 
-// Tools
-picardJar      = '~/picard.jar'
-bwaModule      = 'bwa/0.7.17-gcc5'
-samtoolsModule = 'samtools/1.9'
-bamclipper_exe = '/projects/vh83/local_software/bamclipper/bamclipper.sh'
-params.input_file = ""
+//extra stuff, may not be needed in this script
+tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Creating channel from input directory
-ch_VCF = Channel.fromPath(params.input_file)
+ch_VCF = Channel.fromPath(params.input_file).map {file -> tuple(file.baseName, file) 
 
 process vt_decompose_normalise {
 
     label 'genomics_1'
         
     input:
-        file(vcf) from ch_VCF
+        set baseName, file(vcf) from ch_VCF
     output:
-        file("output.vt.vcf.gz") into ch_vtDecomposeVCF
+        set baseName, file("${baseName}.vt.vcf.gz") into ch_vtDecomposeVCF
 
     publishDir path: './', mode: 'copy'
 
@@ -78,7 +55,7 @@ process vt_decompose_normalise {
 
     script:
     """
-    vt decompose -s $vcf | vt normalize -n -r $ref -o output.vt.vcf.gz -
+    vt decompose -s $vcf | vt normalize -n -r $ref -o ${baseName}.vt.vcf.gz -
     """
 }
 
@@ -87,9 +64,9 @@ process apply_vep {
     label 'vep'
 
     input:
-        file(vcf) from ch_vtDecomposeVCF
+        set baseName, file(vcf) from ch_vtDecomposeVCF
     output:
-        file("output.vt.vep.vcf.gz") into ch_vepVCF
+        file("${baseName}.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './', mode: 'copy'
 
@@ -113,7 +90,7 @@ process apply_vep {
                       --plugin CADD,$vep_cadd \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o output.vt.vep.vcf.gz
+                      -o ${baseName}.vt.vep.vcf
     """
 }
 
