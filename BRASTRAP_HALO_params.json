@@ -1,5 +1,5 @@
 {
 "vardictBed": "/projects/vh83/reference/brastrap_specific/vardict/BRASTRAP_721717_8column.bed",
-"intervalFile": "/projects/vh83/reference/brastrap_specific/haloplex/04818-1496123318_Regions_b37.bed",
-"restrictedBed": "/projects/vh83/reference/brastrap_specific/haloplex/04818-1496123318_Regions_b37.bed",
+"intervalFile": "/projects/vh83/reference/brastrap_specific/haloplex/04818-1496123318_Regions_b37_sorted.bed",
+"restrictedBed": "/projects/vh83/reference/brastrap_specific/haloplex/04818-1496123318_Regions_b37_sorted.bed",
 }
