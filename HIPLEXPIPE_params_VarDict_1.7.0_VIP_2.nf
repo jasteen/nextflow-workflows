@@ -65,7 +65,7 @@ process run_vardict {
 
 process makeVCF {
 
-    label 'medium_6h'
+    label 'vardict_small'
 
     input:
         set baseName, file(tsv) from ch_vardictTSV
@@ -87,7 +87,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -108,7 +108,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -127,7 +127,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -159,7 +159,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'small_1'
+    label 'medium_6h'
 
     echo true
 
@@ -186,7 +186,7 @@ process mergeVCFS {
 
 process vt_decompose_normalise {
 
-    label 'small_1'
+    label 'medium_6h'
         
     input:
         file(vcf) from ch_mergedfinalVCF
@@ -264,7 +264,7 @@ ch_AmpliconMetrics.collect().set{ch_catAmp}
 
 process catAmplicons {
 
-    label 'medium_1h'
+    label 'genomics_1'
 
     publishDir path: './metrics/', mode: 'copy'
 
@@ -283,7 +283,7 @@ process catAmplicons {
 
 process InstersectBed {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam2
@@ -299,7 +299,7 @@ process InstersectBed {
 
 process CoverageBed {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
@@ -317,7 +317,7 @@ process CoverageBed {
 
 process ReadsMapped {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
@@ -334,7 +334,7 @@ process ReadsMapped {
 
 process ReadsTotal {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
@@ -351,7 +351,7 @@ process ReadsTotal {
     
 process TargetMapped {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bam) from ch_intersectBam
@@ -372,7 +372,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
@@ -397,7 +397,7 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
 
-    label 'small_1'
+    label 'genomics_1'
 
     input:
         file(stats) from ch_out2
