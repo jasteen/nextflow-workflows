@@ -59,7 +59,7 @@ process run_vardict {
     publishDir path: './variants_raw_out', mode: 'copy'                                    
     
     """
-    export PATH=/home/jste0021/scripts/git_controlled/vardict_testing/VarDictJava/build/install/VarDict/bin/:$PATH
+    export PATH=/projects/vh83/local_software/vardict/VarDictJava/build/install/VarDict/bin/:$PATH
     VarDict -G ${ref} -f 0.1 -N "${baseName}" --nosv -p -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.intervalFile} > "${baseName}.tsv"
     """
 }
@@ -80,8 +80,8 @@ process makeVCF {
     """
     module purge
     module load R/3.5.1
-    cat ${tsv} | /home/jste0021/scripts/VarDict-1.7.0/bin/teststrandbias.R | \
-        /home/jste0021/scripts/VarDict-1.7.0/bin/var2vcf_valid.pl -N "${baseName}" \
+    cat ${tsv} | /projects/vh83/local_software/vardict/VarDict-1.7.0/bin/teststrandbias.R | \
+        /projects/vh83/local_software/vardict/VarDict-1.7.0/bin/var2vcf_valid.pl -N "${baseName}" \
         -f 0.1 -E > "${baseName}.vardict.vcf"
     """
 }
