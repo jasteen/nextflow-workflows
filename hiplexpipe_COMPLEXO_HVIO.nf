@@ -70,14 +70,14 @@ process catFastqs {
     output:
         set baseName, file("${baseName}.merged_R1_001.fastq.gz"), file("${baseName}.merged_R2_001.fastq.gz") into ch_mergedFastqs
 
-//    publishDir path: './fastqs' mode: copy 
+    publishDir path: './fastqs' mode: copy 
 
     """
     cat $fastq1 $fastq3 > ${baseName}.merged_R1_001.fastq.gz
     cat $fastq2 $fastq4 > ${baseName}.merged_R2_001.fastq.gz
     """
 }
-
+/*
 ch_FullinputFiles = Channel.fromFilePairs("${inputDirectory3}/*_R{1,2}_001.fastq.gz", flat: true)
 
 ch_AllFastqs = ch_mergedFastqs.mix(ch_FullinputFiles)
@@ -277,11 +277,11 @@ process apply_vep {
     """
 }
 
-
+*/
 /*
 Stats Generation Section
 */
-
+/*
 process IntersectBed {
 
     label 'medium_1h'
@@ -415,4 +415,5 @@ process catStats {
 
 }
 
+*/
 
