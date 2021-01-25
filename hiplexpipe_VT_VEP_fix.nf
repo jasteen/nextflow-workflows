@@ -13,6 +13,13 @@ if(params.reference == "hg19"){
     refDict        = file("${refBase}.dict")
     refFai         = file("${refBase}.fasta.fai")
 
+}else if(params.reference == "hg38"){
+    refFolder      = file("/projects/vh83/reference/genomes/hg38/heng_li_recomended")
+    refBase        = "$refFolder/GCA_000001405.15_GRCh38_no_alt_analysis_set"
+    ref            = file("${refBase}.fna")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
+
 }else{
     
     refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
