@@ -44,7 +44,7 @@ globalTimeL       = '24h'
 
 // Creating channel from input directory
 //create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
-ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fastq.gz", size: 2, flat: true)
+ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fq.gz", size: 2, flat: true)
 
 
 process createUnmappedBam {
