@@ -49,7 +49,7 @@ ch_inputFiles = Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fq.gz", size: 2
 
 process createUnmappedBam {
     
-    label 'genomics_3'
+    label 'genomics_2'
 
     publishDir path: './output/intermediate', mode: 'copy'
     
@@ -68,7 +68,7 @@ process createUnmappedBam {
     script:
     """
     java -Xmx30g -Djava.io.tmpdir=$tmp_dir -XX:+AggressiveOpts -XX:+AggressiveHeap \
-        -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.umi.bam" --read-structures +T +T \
+        -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.bam" --read-structures +T +T \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
