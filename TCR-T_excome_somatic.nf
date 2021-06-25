@@ -255,7 +255,7 @@ process reheaderPREUMIVCF {
     script:
     """
     bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
-        bcftools sort -o ${sample}.varditc.sorted.vcf.gz -O z -
+        bcftools sort -o ${sample}.somatic.vardict.reheader.vcf.gz -O z -
     """
 
 }
@@ -267,7 +267,7 @@ process sortVCFSPREUMI {
     input:
         set baseName, file(vcf) from ch_reheaderVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
+        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
@@ -275,7 +275,7 @@ process sortVCFSPREUMI {
     
     script:
     """
-    bcftools sort -o "${baseName}.reheader.sorted.vcf.gz" -O z ${vcf}
+    bcftools sort -o "${baseName}.somatic.vardict.reheader.sorted.vcf.gz" -O z ${vcf}
     """
 }
 
@@ -286,7 +286,7 @@ process indexVCFSPREUMI {
     input:
         set baseName, file(vcf) from ch_sortedVCFPREUMI
     output:
-        set baseName, file(vcf), file("${baseName}.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
+        set baseName, file(vcf), file("${baseName}.somatic.vardict.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
@@ -295,7 +295,7 @@ process indexVCFSPREUMI {
     
     script:
     """
-    bcftools index -f --tbi ${vcf} -o ${baseName}.reheader.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${baseName}.somatic.vardict.reheader.sorted.vcf.gz.tbi
     """
 }
 
@@ -306,7 +306,7 @@ process vt_decompose_normalisePREUMI {
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
+        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
 
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
@@ -314,7 +314,7 @@ process vt_decompose_normalisePREUMI {
     
 
     """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.reheader.sorted.vt.vcf.gz" -
+    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.somatic.vardict.reheader.sorted.vt.vcf.gz" -
     """
 }
 
@@ -325,7 +325,7 @@ process apply_vepPREUMI {
     input:
         set baseName, file(vcf) from ch_vtDecomposeVCFPREUMI
     output:
-        set baseName, file("${baseName}.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
+        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
 
     publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
 
@@ -341,7 +341,7 @@ process apply_vepPREUMI {
                       --vcf --force_overwrite --flag_pick --no_stats \
                       --fork ${task.cpus} \
                       -i ${vcf} \
-                      -o "${baseName}.reheader.sorted.vt.vep.vcf"
+                      -o "${baseName}.somatic.vardict.reheader.sorted.vt.vep.vcf"
     """
 }
 
