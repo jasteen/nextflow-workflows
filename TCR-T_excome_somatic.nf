@@ -202,7 +202,7 @@ process catSegmentsPREUMI {
     input: 
         set sample, tbam, nbam, file(tsv) from ch_collatedSegmentsPREUMI
     output: 
-        set sample, tbam, nbam, file("${sample}.q") into ch_rawVardictPREUMI
+        set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
 
     
     
