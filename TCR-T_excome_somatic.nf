@@ -202,7 +202,7 @@ process catSegmentsPREUMI {
     input: 
         set sample, tbam, nbam, file(tsv) from ch_collatedSegmentsPREUMI
     output: 
-        set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
+        set sample, tbam, nbam, file("${sample}.q") into ch_rawVardictPREUMI
 
     
     
@@ -232,7 +232,7 @@ process makeVCFPREUMI {
     """  
     module purge
     module load R/3.5.1
-    cat $tsv | ome/jste0021/scripts/VarDict-1.7.0/bin/teststrandbias.R | \
+    cat $tsv | /home/jste0021/scripts/VarDict-1.7.0/bin/teststrandbias.R | \
         /home/jste0021/scripts/VarDict-1.7.0/bin/var2vcf_valid.pl -N "${tbam}|${nbam}"  \
         -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
