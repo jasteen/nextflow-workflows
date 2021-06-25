@@ -271,7 +271,7 @@ process sortVCFSPREUMI {
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
-                                                 
+    module      'bcftools/1.8'                                             
     
     script:
     """
