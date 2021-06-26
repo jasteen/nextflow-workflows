@@ -233,7 +233,7 @@ process makeVCFPREUMI {
     module purge
     module load R/3.5.1
     cat $tsv | /home/jste0021/scripts/VarDict-1.7.0/bin/testsomatic.R | \
-        /home/jste0021/scripts/VarDict-1.7.0/bin/var2vcf_valid.pl -N "${tbam}|${nbam}"  \
+        /home/jste0021/scripts/VarDict-1.7.0/bin/var2vcf_paired.pl -N "${tbam}|${nbam}"  \
         -f 0.01 > "${sample}.somatic.vardict.vcf"
     """
 }
