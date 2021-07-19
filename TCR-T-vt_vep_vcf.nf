@@ -71,7 +71,7 @@ process apply_vep {
     publishDir path: './annotated_variants', mode: 'copy'
 
     
-    cpus        12
+    
     module      'vep/90'
 
     """

@@ -31,16 +31,6 @@ samtoolsModule     = 'samtools/1.9'
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
 
-// Global Resource Configuration Options
-globalCores       = 1
-bwaCores	      = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '32 GB'
-globalMemoryL     = '64 GB'
-globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
-
 
 // Creating channel from input directory
 //create channel flat because we want to join it later, and the tuple makes that more annoying than I want it to be
