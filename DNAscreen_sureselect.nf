@@ -28,6 +28,7 @@ if(params.reference == "hg19"){
     refFai         = file("${refBase}.fasta.fai")
     genome_file    = file("$refFolder/hg38.chrom.sizes")
     header         = file("$refFolder/hg38_vcf_header.txt")
+    vep_cache      = file("/projects/vh83/reference/VEP_CACHE"
 
 
 }else{
@@ -267,12 +268,12 @@ process apply_vep {
 
     publishDir path: './variants_merged', mode: 'copy'
 
-    module      'vep/90'
+    module 'singularity'
 
     script:
     """
-    vep --cache --dir_cache $other_vep \
-                      --assembly hg38 --refseq --offline \
+    vep --cache --dir_cache $vep_cache \
+                      --assembly GRCh38 --refseq --offline \
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
