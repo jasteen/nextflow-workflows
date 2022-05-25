@@ -27,6 +27,8 @@ if(params.reference == "hg19"){
     refDict        = file("${refBase}.dict")
     refFai         = file("${refBase}.fasta.fai")
     genome_file    = file("$refFolder/hg38.chrom.sizes")
+    header         = file("refFolder/hg38_vcf_header.txt")
+
 
 }else{
     
@@ -46,8 +48,6 @@ samtoolsModule = 'samtools/1.9'
 surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1.jar'
 condaModule        = 'miniconda3/4.1.11-python3.5'
 rModule            = 'R/3.5.1'
-
-header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
 af_thr           = 0.1
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
