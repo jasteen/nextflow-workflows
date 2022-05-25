@@ -49,19 +49,15 @@ surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1
 inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz")
 
 process surecallTrimmer {
+    
+    label 'genomics_1'
+
     input:
         set baseName, file(fastqs) from inputFiles
     output:
         set baseName, file("${baseName}_R{1,2}_001.fastq.gz*") into ch_processedInputFiles,ch_forFastqc
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
-    memory      globalMemoryL
-    time        globalTimeL
-    queue       globalQueueL
-
-    """
+        """
     java -Xmx4g -jar ${surecalltrimmerJar} \
        -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -out_loc .  
     """
@@ -70,20 +66,18 @@ process surecallTrimmer {
 
 
 process fastQC {
+    
+    label 'genomics_1'
+
     publishDir path: './fastqc_results', mode: 'copy'
+    
     input:
         set baseName, file(fastq) from ch_forFastqc
     output:
         set baseName, file("${baseName}*.zip"), file("${baseName}*.html") into ch_fastQCOutput
 
-    executor    globalExecutor
-    stageInMode globalStageInMode
-    cpus        1
     module      'fastqc'
-    memory      globalMemoryS
-    time        globalTimeM
-    queue       globalQueueL
-
+    
     """
     fastqc $fastq
     """
