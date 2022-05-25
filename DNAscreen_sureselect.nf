@@ -43,7 +43,12 @@ picardJar      = '/usr/local/picard/2.9.2/bin/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
 surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1.jar'
+condaModule        = 'miniconda3/4.1.11-python3.5'
+rModule            = 'R/3.5.1'
 
+header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
+af_thr           = 0.1
+rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 // Creating channel from input directory
 inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz")
