@@ -64,7 +64,7 @@ process surecallTrimmer {
 
     module 'java/openjdk-1.14.02' 
     """
-    bash agent.sh trim -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -out_loc .  
+    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -out_loc .  
     """
        
 }
