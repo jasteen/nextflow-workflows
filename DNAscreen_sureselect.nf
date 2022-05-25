@@ -42,7 +42,7 @@ if(params.reference == "hg19"){
 
 
 // Tools
-picardJar      = '/usr/local/picard/2.9.2/bin/picard.jar'
+picardJar      = '/usr/local/picard/2.19.0/bin/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
 surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1.jar'
@@ -272,7 +272,7 @@ process apply_vep {
     script:
     """
     vep --cache --dir_cache $other_vep \
-                      --assembly GRCh37 --refseq --offline \
+                      --assembly hg38 --refseq --offline \
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
@@ -476,6 +476,8 @@ process collectHSMetrics {
     """
     module purge
     module load R/3.5.1
+    module picard/2.19.0
+
     java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectHsMetrics \
         -I ${bam} \
         -O "${bam.baseName}.HSmetrics.txt" \
@@ -502,6 +504,7 @@ process collectMultipleMetrics {
     """
     module purge
     module load R/3.5.1
+    module picard/2.19.0
     java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectMultipleMetrics \
         -I $bam \
         -O ${bam.baseName}.multiple_metrics \
