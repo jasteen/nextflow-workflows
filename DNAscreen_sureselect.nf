@@ -60,7 +60,7 @@ process surecallTrimmer {
     input:
         set baseName, file(fastqs) from inputFiles
     output:
-        set baseName, file("${baseName}_R{1,2}_001.fastq.gz*") into ch_processedInputFiles,ch_forFastqc
+        set baseName, file("${baseName}_R{1,2}_001*.fastq.gz") into ch_processedInputFiles,ch_forFastqc
 
     module 'java/openjdk-1.14.02' 
     """
