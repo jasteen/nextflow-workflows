@@ -258,8 +258,7 @@ process mergeVCFS {
 
 
 process apply_vep {
-
-    label 'vep'
+    label 'vep_sing'
 
     input:
         file(vcf) from ch_mergedfinalVCF
