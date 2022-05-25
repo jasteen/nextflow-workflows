@@ -121,7 +121,7 @@ process alignBwa {
     """
 }
 
-process indexPreUmiBam {
+process indexBam {
         
     label 'genomics_3'
     
@@ -142,32 +142,32 @@ process indexPreUmiBam {
 
 }
 
-ch_tumorPREUMI  = Channel.create()
-ch_normalPREUMI = Channel.create()
+ch_tumor  = Channel.create()
+ch_normal = Channel.create()
 
 //split single bam channel into tumor and normal **CURRENTLY RELIES ON "SAMPLE_[FFPE|NORMAL]" naming scheme
 //*****FFPE means normal in this study*********
-ch_indexedMapped.choice(ch_normalPREUMI, ch_tumorPREUMI){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
+ch_indexedMapped.choice(ch_normal, ch_tumor){ a -> a[0] =~ /FFPE/ ? 0 : 1 }
 
 //split SAMPLE from FFPE|NORMAL so channels can be joined by sample
-ch_normalSplitPREUMI = ch_normalPREUMI.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
-ch_tumorSplitPREUMI = ch_tumorPREUMI.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+ch_normalSplit = ch_normal.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
+ch_tumorSplit = ch_tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], baseName.split('_')[1], bam, bai]}
 
 //merge tumor and normal back together by sample number. 
-ch_tumorNormalPairsPREUMI = ch_tumorSplitPREUMI.join(ch_normalSplitPREUMI)
+ch_tumorNormalPairs = ch_tumorSplit.join(ch_normalSplit)
 
 
 ch_bedSegments2 = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
-ch_vardictPREUMI= ch_tumorNormalPairsPREUMI.combine(ch_bedSegments2)
+ch_vardict= ch_tumorNormalPairs.combine(ch_bedSegments2)
 
-process runVardictPREUMI {
+process runVardict {
     
     label 'genomics_3'
     
     input:
-        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardictPREUMI
+        set sample, ttype, file(tbam), file(tbai), ntype, file(nbam), file(nbai), file(segment) from ch_vardict
     output:
-        set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegmentsPREUMI
+        set sample, file(tbam), file(nbam), file("${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv") into ch_rawVardictSegments
 
       
     script:
@@ -181,18 +181,18 @@ process runVardictPREUMI {
 }
 
 
-ch_collatedSegmentsPREUMI = ch_rawVardictSegmentsPREUMI.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
+ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> [sample, tbam.name, nbam.name, segment]}.groupTuple(by: [0,1,2])
 
 
-process catSegmentsPREUMI {
+process catSegments {
     
     label 'genomics_3'
     
     echo true
     input: 
-        set sample, tbam, nbam, file(tsv) from ch_collatedSegmentsPREUMI
+        set sample, tbam, nbam, file(tsv) from ch_collatedSegments
     output: 
-        set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardictPREUMI
+        set sample, tbam, nbam, file("${sample}.collated.vardict.tsv") into ch_rawVardict
 
     
     
@@ -206,14 +206,14 @@ process catSegmentsPREUMI {
 
 }
 
-process makeVCFPREUMI {
+process makeVCF {
     
     label 'genomics_3'
     
     input:
-        set sample, tbam, nbam, file(tsv) from ch_rawVardictPREUMI
+        set sample, tbam, nbam, file(tsv) from ch_rawVardict
     output:
-        set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCFPREUMI
+        set sample, file("${sample}.somatic.vardict.vcf") into ch_outputVCF
     
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
@@ -228,14 +228,14 @@ process makeVCFPREUMI {
     """
 }
 
-process reheaderPREUMIVCF {
+process reheader {
     
     label 'genomics_3'
     
     input:
-        set sample, file(vcf) from ch_outputVCFPREUMI
+        set sample, file(vcf) from ch_outputVCF
     output:
-        set sample, file("*.vcf.gz") into ch_reheaderVCFPREUMI
+        set sample, file("*.vcf.gz") into ch_reheaderVCF
 
     //publishDir path: './output/preUMI/intermediate', mode: 'copy'
     
@@ -245,38 +245,40 @@ process reheaderPREUMIVCF {
     script:
     """
     bcftools annotate -h ~/vh83/reference/genomes/b37/vcf_contig_header_lines.txt -O v ${vcf} | \
-        bcftools sort -o ${sample}.somatic.vardict.reheader.vcf.gz -O z -
+        bcftools sort -o ${sample}.somatic.vardict.reheader.sorted.vcf.gz -O z -
     """
 
 }
 
-process sortVCFSPREUMI {
 
-    label 'genomics_3'
-    
-    input:
-        set baseName, file(vcf) from ch_reheaderVCFPREUMI
+process normaliseVCF{
+
+    label 'genomics_2'
+
+    input: 
+        set sample, file(vcf) from ch_reheaderVCF
     output:
-        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vcf.gz") into ch_sortedVCFPREUMI
+        set sample, file("*.vcf.gz") into ch_normalisedVCF
 
-    publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
-    
-    module      'bcftools/1.8'                                             
-    
+    publishDir
+
+    Module
     script:
     """
-    bcftools sort -o "${baseName}.somatic.vardict.reheader.sorted.vcf.gz" -O z ${vcf}
+    bcftools norm -f $ref -m -both -o "${sample}.somatic.vardict.reheader.sorted.norm.vcf.gz" -O z $vcf
     """
+
 }
 
-process indexVCFSPREUMI {
+
+process indexVCFS {
     
     label 'genomics_3'
     
     input:
-        set baseName, file(vcf) from ch_sortedVCFPREUMI
+        set baseName, file(vcf) from ch_normalisedVCF
     output:
-        set baseName, file(vcf), file("${baseName}.somatic.vardict.reheader.sorted.vcf.gz.tbi") into ch_indexedVCFPREUMI
+        set baseName, file(vcf), file("${baseName}.somatic.vardict.reheader.sorted.norm.vcf.gz.tbi") into ch_indexedVCF
 
     publishDir path: './output/preUMI/intermediate', mode: 'copy'                                    
     
@@ -285,37 +287,20 @@ process indexVCFSPREUMI {
     
     script:
     """
-    bcftools index -f --tbi ${vcf} -o ${baseName}.somatic.vardict.reheader.sorted.vcf.gz.tbi
+    bcftools index -f --tbi ${vcf} -o ${baseName}.somatic.vardict.reheader.sorted.norm.vcf.gz.tbi
     """
 }
 
-process vt_decompose_normalisePREUMI {
-        
-    label 'genomics_3'
-    
-    input:
-        set baseName, file(vcf), file(tbi) from ch_indexedVCFPREUMI
-    output:
-        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vt.vcf.gz") into ch_vtDecomposeVCFPREUMI
 
-    //publishDir path: './output/preUMI/intermediate', mode: 'copy'
 
-    module      'vt'
-    
-
-    """
-    vt decompose -s $vcf | vt normalize -r $ref -o "${baseName}.somatic.vardict.reheader.sorted.vt.vcf.gz" -
-    """
-}
-
-process apply_vepPREUMI {
+process apply_vep {
 
     label 'vep'
     
     input:
-        set baseName, file(vcf) from ch_vtDecomposeVCFPREUMI
+        set baseName, file(vcf), file(index) from ch_indexedVCF
     output:
-        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vt.vep.vcf") into ch_vepVCFPREUMI
+        set baseName, file("${baseName}.somatic.vardict.reheader.sorted.vt.vep.vcf") into ch_vepVCF
 
     publishDir path: './output/preUMI/somatic_annotated', mode: 'copy'
 
