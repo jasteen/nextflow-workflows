@@ -465,7 +465,7 @@ process collectHSMetrics {
     label 'medium_6h'
 
     input:
-        set sample, file(bam) from ch_forHSMetrics
+        set sample, file(bam), file(bai) from ch_forHSMetrics
     output:
         set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
     
@@ -491,7 +491,7 @@ process collectMultipleMetrics {
     label 'medium_6h'
 
     input:
-        set sample, file(bam) from ch_forMultipleMetrics
+        set sample, file(bam), file(bai) from ch_forMultipleMetrics
     output:
         set sample, file("*multiple_metrics*") into ch_metrics2
     
