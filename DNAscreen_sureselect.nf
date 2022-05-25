@@ -452,7 +452,7 @@ process catStats {
 }
 
 
-ch_forMetrics1.concat(ch_forMetrics2).into{ch_forMultipleMetrics;ch_forHSMetrics}
+ch_forMetrics1.into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
