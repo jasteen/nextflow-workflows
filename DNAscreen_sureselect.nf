@@ -26,6 +26,7 @@ if(params.reference == "hg19"){
     ref            = file("${refBase}.fna")
     refDict        = file("${refBase}.dict")
     refFai         = file("${refBase}.fasta.fai")
+    genome_file    = file("$refFolder/hg38.chrom.sizes")
 
 }else{
     
@@ -128,7 +129,7 @@ process run_vardict {
     script:
     """
     export PATH=/home/jste0021/scripts/git_controlled/vardict_testing/VarDictJava/build/install/VarDict/bin/:$PATH
-    VarDict -G ${ref} -f 0.1 -N "${baseName}" --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 ${params.intervalFile} > "${baseName}.tsv"
+    VarDict -G ${ref} -f 0.1 -N "${baseName}" --nosv -b ${bam} -c 1 -S 2 -E 3 -g 4 $panel_bed > "${baseName}.tsv"
     """
 }
 
@@ -300,7 +301,7 @@ process AmpliconMetircs {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    bedtools coverage -f 5E-1 -a $params.restrictedBed -b $bam | sed "s/\$/\t$sample/" > ${sample}.amplicon.out 
+    bedtools coverage -f 5E-1 -a $panel_bed -b $bam | sed "s/\$/\t$sample/" > ${sample}.amplicon.out 
     """
 }
 
@@ -336,7 +337,7 @@ process InstersectBed {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    intersectBed -abam ${bam} -b ${params.restrictedBed} > ${sample}.intersectbed.bam
+    intersectBed -abam ${bam} -b $panel_bed > ${sample}.intersectbed.bam
     """
 }
 
@@ -352,7 +353,7 @@ process CoverageBed {
     script:
     """
     module load bedtools/2.27.1-gcc5
-    coverageBed -b ${bam} -a ${params.restrictedBed} \
+    coverageBed -b ${bam} -a $panel_bed \
         -sorted -hist -g ${genome_file} | \
         grep all > "${sample}.bedtools_hist_all.txt"
     """
