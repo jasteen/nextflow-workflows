@@ -62,9 +62,9 @@ process surecallTrimmer {
     output:
         set baseName, file("${baseName}_R{1,2}_001.fastq.gz*") into ch_processedInputFiles,ch_forFastqc
 
-        """
-    java -Xmx4g -jar ${surecalltrimmerJar} \
-       -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -out_loc .  
+    module 'java/openjdk-1.14.02' 
+    """
+    bash agent.sh trim -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -out_loc .  
     """
        
 }
