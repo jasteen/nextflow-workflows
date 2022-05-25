@@ -255,7 +255,7 @@ process apply_vep {
     label 'vep'
 
     input:
-        file(vcf) from ch_vtDecomposeVCF
+        file(vcf) from ch_mergedfinalVCF
     output:
         file("merged_vardict_norm_vep.vcf") into ch_vepVCF
 
