@@ -21,9 +21,9 @@ if(params.reference == "hg19"){
     refFai         = file("${refBase}.fasta.fai")
 
 }else if(params.reference == "hg38"){
-    refFolder      = file("/projects/vh83/reference/genomes/hg38/heng_li_recomended")
-    refBase        = "$refFolder/GCA_000001405.15_GRCh38_no_alt_analysis_set"
-    ref            = file("${refBase}.fna")
+    refFolder      = file("/projects/vh83/reference/genomes/hg38/hg38_broad_resource_bundle/v0")
+    refBase        = "$refFolder/Homo_sapiens_assembly38"
+    ref            = file("${refBase}.fasta")
     refDict        = file("${refBase}.dict")
     refFai         = file("${refBase}.fasta.fai")
     genome_file    = file("$refFolder/hg38.chrom.sizes")
