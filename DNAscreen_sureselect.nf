@@ -106,7 +106,7 @@ process align_bwa {
     """
 }
 
-ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6:ch_forMetrics1}
+ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6;ch_forMetrics1}
 
 
 process run_vardict {
