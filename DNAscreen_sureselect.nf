@@ -27,7 +27,7 @@ if(params.reference == "hg19"){
     refDict        = file("${refBase}.dict")
     refFai         = file("${refBase}.fasta.fai")
     genome_file    = file("$refFolder/hg38.chrom.sizes")
-    header         = file("refFolder/hg38_vcf_header.txt")
+    header         = file("$refFolder/hg38_vcf_header.txt")
 
 
 }else{
