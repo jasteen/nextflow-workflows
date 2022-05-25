@@ -1,42 +1,49 @@
 #!/usr/bin/env nextflow
 
 // Required Inputs
-refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-inputDirectory = file('/scratch/vh83/projects/medha_exomes/fastqs/')
-outputDir      = "/scratch/vh83/projects/medha_exomes/out"
-panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions.bed')
-padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded.bed')
+inputDirectory = file('./fastqs/')
+params.reference = ""
 
-// Getting Reference Files
-refBase          = "$refFolder/human_g1k_v37_decoy"
-ref              = file("${refBase}.fasta")
-refDict          = file("${refBase}.dict")
-refFai           = file("${refBase}.fasta.fai")
-millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
-dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
+panel_bed      = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered.bed')
+padded_bed     = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered_Padded.bed')
+panel_int      = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered.interval_list')
+padded_int     = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered_Padded.interval_list')
+
+
+//set up for multiple regerence possibilities.
+
+if(params.reference == "hg19"){
+    //HG19 reference for aspree stuff
+    refFolder      = file("/projects/vh83/reference/genomes/hg19")
+    refBase        = "$refFolder/ucsc.hg19"
+    ref            = file("${refBase}.fasta")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
+
+}else if(params.reference == "hg38"){
+    refFolder      = file("/projects/vh83/reference/genomes/hg38/heng_li_recomended")
+    refBase        = "$refFolder/GCA_000001405.15_GRCh38_no_alt_analysis_set"
+    ref            = file("${refBase}.fna")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
+
+}else{
+    
+    refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
+    refBase          = "$refFolder/human_g1k_v37_decoy"
+    ref              = file("${refBase}.fasta")
+    refDict          = file("${refBase}.dict")
+    refFai           = file("${refBase}.fasta.fai")
+}
+
 
 
 // Tools
 picardJar      = '/usr/local/picard/2.9.2/bin/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
-gatkModule     = 'gatk/4.0.11.0' 
 surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1.jar'
-locatitJar     = '/projects/vh83/local_software/agent/LocatIt_v4.0.1.jar'
 
-// Global Resource Configuration Options
-globalExecutor    = 'slurm'
-globalStageInMode = 'symlink'
-globalCores       = 1
-bwaCores	  = 12
-globalMemoryS     = '6 GB'
-globalMemoryM     = '8 GB'
-globalMemoryL     = '16 GB'
-globalTimeS       = '8m'
-globalTimeM       = '1h'
-globalTimeL       = '24h'
-globalQueueS      = 'short'
-globalQueueL      = 'comp'
 
 // Creating channel from input directory
 inputFiles = Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz")
