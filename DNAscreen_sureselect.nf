@@ -250,7 +250,7 @@ process mergeVCFS {
     for i in temp_shorter_*; do bcftools merge -m all -l \$i -O z -o \$i.merged.vcf.gz; bcftools index -t \$i.merged.vcf.gz; done
     ls *merged.vcf.gz > list3.txt
     bcftools merge -m all -O z -o "merged_vardict.vcf.gz" -l list3.txt
-    bcftools norm -f $ref -m -both -o "merged_vardict_norm.vcf.gz" -O z "merged_vardict_vcf.gz"
+    bcftools norm -f $ref -m -both -o "merged_vardict_norm.vcf.gz" -O z "merged_vardict.vcf.gz"
     bcftools index --tbi "merged_vardict_norm.vcf.gz"
     """
 }
