@@ -510,7 +510,7 @@ process multiQC {
     input:
         file('coverage/*') from ch_metrics2.collect()
         file('multiple/*') from ch_metrics.collect()
-        file('fastqc/*') from ch_ch_fastQCOutput.collect()
+        file('fastqc/*') from ch_fastQCOutput.collect()
         
     output:
         set file("*multiqc_report.html"), file("*multiqc_data") into ch_multiQCOut
