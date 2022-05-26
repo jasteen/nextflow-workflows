@@ -42,7 +42,7 @@ process apply_vep {
     label 'vep_sing'
 
     input:
-        set basename, file(vcf) from ch_mergedfinalVCF
+        set basename, file(vcf) from ch_VCF
     output:
         file("${basename}_vep.vcf") into ch_vepVCF
 
