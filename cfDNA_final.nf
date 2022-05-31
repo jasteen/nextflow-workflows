@@ -38,7 +38,7 @@ condaModule        = 'miniconda3/4.1.11-python3.5'
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fastq.gz", size: 2, flat: true).into{ch_inputFiles;ch_forFastqc}
 
 process runFASTQC {
-    label 'small_2'
+    label 'genomics_3'
 
     input:
         set baseName, file(R1), file(R2) from ch_forFastqc
@@ -59,16 +59,18 @@ process runFASTQC {
 
 process surecallTrimmer {
     
-    label 'genomics_1'
+    label 'genomics_3'
 
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
+        set baseName, file("${baseName}.unmapped.umi.query_sort.bam") into ch_unmappedUMIbams
 
     module 'java/openjdk-1.14.02' 
+    module 'samtools'
     """
-    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -bam -out ./${baseName}.unmapped.umi  
+    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -bam -out ./${baseName}.unmapped.umi
+    samtools sort -n -O BAM -o ./${baseName}.unmapped.umi.query_sort.bam ./${baseName}.unmapped.umi.bam  
     """
        
 }
@@ -76,7 +78,7 @@ process surecallTrimmer {
 
 process alignBwa {
     
-    label 'bwa'
+    label 'genomics_2'
     
     input:
         set baseName, file(bam) from ch_unmappedUMIbams
@@ -86,7 +88,7 @@ process alignBwa {
     publishDir path: './output/bams', mode: 'copy'
 
     module      bwaModule
-    module	    'samtools'
+    module	    samtoolsModule
     module      'picard'
     
     script:
@@ -107,7 +109,7 @@ process alignBwa {
 
 process groupreadsByUmi {
     
-    label 'medium_6h'
+    label 'genomics_3'
 
     input:
         set baseName, file(bam) from ch_pipedBams
@@ -126,7 +128,7 @@ process groupreadsByUmi {
 
 process generateConsensusReads {
     
-    label 'medium_6h'
+    label 'genomics_3'
 
     input:
         set baseName, file(hist), file(bam) from ch_umiGroupedBams
