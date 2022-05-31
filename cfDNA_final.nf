@@ -79,7 +79,7 @@ process alignBwa {
     label 'bwa'
     
     input:
-        set baseName, file(bam), file(metrics) from ch_markedUMIbams
+        set baseName, file(bam) from ch_unmappedUMIbams
     output:
         set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_forMetrics1
 
