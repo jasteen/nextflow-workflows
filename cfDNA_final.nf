@@ -62,7 +62,7 @@ process surecallTrimmer {
     label 'genomics_1'
 
     input:
-        set baseName, file(R1) file(R2) from ch_inputFiles
+        set baseName, file(R1), file(R2) from ch_inputFiles
     output:
         set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
 
