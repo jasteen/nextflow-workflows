@@ -62,13 +62,13 @@ process surecallTrimmer {
     label 'genomics_1'
 
     input:
-        set baseName, file(fastqs) from ch_inputFiles
+        set baseName, file(R1) file(R2) from ch_inputFiles
     output:
         set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
 
     module 'java/openjdk-1.14.02' 
     """
-    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${fastqs[0]} -fq2 ${fastqs[1]} -v2 -bam -out ./${baseName}.unmapped.umi  
+    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -bam -out ./${baseName}.unmapped.umi  
     """
        
 }
