@@ -339,7 +339,7 @@ process collectHSMetrics {
     input:
         set sample, file(bam) from ch_forHSMetrics
     output:
-        set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
+        set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics2
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
     
