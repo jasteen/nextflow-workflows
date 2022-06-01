@@ -31,7 +31,7 @@ bwaModule          = 'bwa/0.7.17-gcc5'
 samtoolsModule     = 'samtools/1.9'
 gatkModule         = 'gatk/4.0.11.0' 
 rModule            = 'R/3.5.1'          
-fgbioJar           = '/usr/local/fgbio/0.9.0/target/fgbio-0.9.0-17cb5fb-SNAPSHOT.jar'
+fgbioJar           = '/fs02/vh83/local_software/fgbio/fgbio-2.0.2.jar'
 condaModule        = 'miniconda3/4.1.11-python3.5' 
 
 // Creating channel from input directory
@@ -70,8 +70,8 @@ process surecallTrimmer {
     module 'samtools'
     """
     bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -out ./${baseName}.unmapped
-    zcat ${baseName}.unmapped_R1.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c > ${baseName}.unmapped.umi_R1.fastq.gz
-    zcat ${baseName}.unmapped_R2.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c > ${baseName}.unmapped.umi_R2.fastq.gz
+    zcat ${baseName}.unmapped_R1.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c - > ${baseName}.unmapped.umi_R1.fastq.gz
+    zcat ${baseName}.unmapped_R2.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c - > ${baseName}.unmapped.umi_R2.fastq.gz
     """
     
 }
@@ -95,7 +95,7 @@ process createUnmappedUMIBam {
     script:
     """
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
-        -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.umi.bam" --extract-umis-from-read-names \
+        -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.umi.bam" --extract-umis-from-read-names true \
         --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
     """
 }
