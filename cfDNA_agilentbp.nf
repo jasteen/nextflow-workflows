@@ -82,7 +82,7 @@ process alignBwa {
     input:
         set baseName, file(R1), file(R2) from ch_surecall
     output:
-        set baseName, file("${baseName}.aligned.bam") into ch_pipedBams
+        set baseName, file("${baseName}.aligned.bam") into ch_pipedBams, ch_forMetrics1
 
     publishDir path: './output/bams', mode: 'copy'
 
@@ -357,6 +357,7 @@ process collectHSMetrics {
         --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
+
 
 process multiQC {
 
