@@ -188,7 +188,7 @@ process mapConsensusReads {
         -I "$bam" \
         -FASTQ /dev/stdout \
         -INTERLEAVE true -TMP_DIR $tmp_dir | \
-    bwa mem -M -t ${task.cpus} -p $ref "${baseName}.consensus.aligned.bam" 
+    bwa mem -M -t ${task.cpus} -p $ref /dev/stdin > ${baseName}.consensus.aligned.bam
     """
 }
 
