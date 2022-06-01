@@ -64,7 +64,7 @@ process surecallTrimmer {
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.unmapped.umi_R1.fastq.gz"), file("${baseName}.unmapped.umi_R2.fastq.gz") into ch_surecall
+        set baseName, file("${baseName}.unmapped_R1.fastq.gz"), file("${baseName}.unmapped_R2.fastq.gz") into ch_surecall
 
     module 'java/openjdk-1.14.02' 
     module 'samtools'
