@@ -188,12 +188,7 @@ process mapConsensusReads {
         -I "$bam" \
         -FASTQ /dev/stdout \
         -INTERLEAVE true -TMP_DIR $tmp_dir | \
-    bwa mem -M -t ${task.cpus} -p $ref /dev/stdin | \
-    java -Dpicard.useLegacyParser=false -Xmx${ (task.memory.toGiga() / 6).toInteger() }g -jar $picardJar MergeBamAlignment \
-        -ALIGNED_BAM /dev/stdin -UNMAPPED_BAM "$bam" \
-        -OUTPUT "${baseName}.consensus.aligned.bam" -R $ref -ADD_MATE_CIGAR true \
-         -ALIGNED_READS_ONLY TRUE -CLIP_ADAPTERS false -MAX_INSERTIONS_OR_DELETIONS '-1' \
-        -PRIMARY_ALIGNMENT_STRATEGY MostDistant -ATTRIBUTES_TO_RETAIN XS -TMP_DIR "$tmp_dir"
+    bwa mem -M -t ${task.cpus} -p $ref "${baseName}.consensus.aligned.bam" 
     """
 }
 
