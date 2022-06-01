@@ -70,9 +70,9 @@ process surecallTrimmer {
     module 'samtools'
     """
     bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -bam -out ./${baseName}.unmapped.umi
-    samtools sort -n -O BAM -o ./${baseName}.unmapped.umi.query_sort.bam ./${baseName}.unmapped.umi.bam  
+    samtools view ./${baseName}.unmapped.umi.bam | cut -f1-11,16 | samtools view -b -o ${baseName}.unmapped.umi.query_sort.bam   
     """
-       
+    
 }
 
 
