@@ -104,7 +104,7 @@ process agentCREAK {
 
     input:
 
-        set baseName, file("${baseName}.aligned.bam") from ch_pipedBams
+        set baseName, file(aligned_bam) from ch_pipedBams
 
     output:
         set baseName, file("${baseName}.dedupe.bam") into ch_mappedConsensusBams
@@ -115,8 +115,7 @@ process agentCREAK {
     """
     bash /projects/vh83/local_software/agent3.0/agent.sh creak \
               --consensus-mode HYBRID -r -d 0 -b $panel_bed -f -MS 3 \
-              --output-bam-file "${baseName}.dedupe.bam" ${baseName}.aligned.bam
-    
+              --output-bam-file "${baseName}.dedupe.bam" $aligned_bam
     """
 
 }
