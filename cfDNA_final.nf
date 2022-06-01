@@ -64,18 +64,42 @@ process surecallTrimmer {
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
     output:
-        set baseName, file("${baseName}.unmapped.umi.query_sort.bam") into ch_unmappedUMIbams
+        set baseName, file("${baseName}.unmapped.umi_R1.fastq.gz"), file("${baseName}.unmapped.umi_R2.fastq.gz") into ch_surecall
 
     module 'java/openjdk-1.14.02' 
     module 'samtools'
     """
-    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -bam -out ./${baseName}.unmapped.umi
-    samtools view ./${baseName}.unmapped.umi.bam | cut -f1-11,16 | samtools view -b -o ${baseName}.unmapped.umi.cut.bam   
-    samtools sort -n -o ${baseName}.unmapped.umi.query_sort.bam ${baseName}.unmapped.umi.cut.bam
-
+    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -out ./${baseName}.unmapped
+    zcat ${baseName}.unmapped_R1.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c > ${baseName}.unmapped.umi_R1.fastq.gz
+    zcat ${baseName}.unmapped_R2.fastq.gz | awk 'BEGIN{FS=OFS="\t"}{gsub(/RX:Z:/, "", \$5);if(\$0 ~ /^@/){print \$1":"\$5}else{print \$0}}' - | gzip -c > ${baseName}.unmapped.umi_R2.fastq.gz
     """
     
 }
+
+process createUnmappedUMIBam {
+    
+    label 'medium_6h'
+
+    publishDir path: './output/intermediate', mode: 'copy'
+    
+    input:
+        set baseName, file(R1), file(R2) from ch_surecall
+    output:
+        set baseName, file("${baseName}.unmapped.umi.bam") into ch_unmappedUMIbams
+
+    //publishDir path: './output/intermediate', mode: 'copy'
+    
+    module      'fgbio'
+    module      'java'
+    
+    script:
+    """
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
+        -jar $fgbioJar FastqToBam --input $R1 $R2 --output "${baseName}.unmapped.umi.bam" --extract-umis-from-read-names \
+        --sample "${baseName}" --read-group-id "${baseName}" --library A --platform illumina --sort true
+    """
+}
+
 
 
 process alignBwa {
