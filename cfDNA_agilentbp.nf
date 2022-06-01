@@ -114,7 +114,7 @@ process agentCREAK {
     script:
     """
     bash /projects/vh83/local_software/agent3.0/agent.sh creak \
-              --consensus-mode HYBRID -r -d 0 -b $panel_bed -f -MS 3 \
+              -c HYBRID -r -d 0 -b $panel_bed -f -MS 3 \
               --output-bam-file "${baseName}.dedupe.bam" $aligned_bam
     """
 
