@@ -17,7 +17,7 @@ refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
-af_thr           = 0.1
+af_thr           = 0.00001
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 //VEP
@@ -33,6 +33,9 @@ gatkModule         = 'gatk/4.0.11.0'
 rModule            = 'R/3.5.1'          
 fgbioJar           = '/fs02/vh83/local_software/fgbio/fgbio-2.0.2.jar'
 condaModule        = 'miniconda3/4.1.11-python3.5' 
+trimmerJar         = '/fs02/vh83/local_software/agent3.0/lib/trimmer-3.0.3.jar'
+creakJar           = '/fs02/vh83/local_software/agent3.0/lib/creak-1.0.5.jar'
+
 
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fastq.gz", size: 2, flat: true).into{ch_inputFiles;ch_forFastqc}
@@ -59,7 +62,7 @@ process runFASTQC {
 
 process surecallTrimmer {
     
-    label 'medium_6h'
+    label 'medium_long'
 
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
@@ -67,12 +70,12 @@ process surecallTrimmer {
         set baseName, file("${baseName}.unmapped_R1.fastq.gz"), file("${baseName}.unmapped_R2.fastq.gz") into ch_surecall
 
     module 'java/openjdk-1.14.02' 
-    module 'samtools'
+    
     """
-    bash /projects/vh83/local_software/agent3.0/agent.sh trim -fq1 ${R1} -fq2 ${R2} -v2 -out ./${baseName}.unmapped
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
+        -jar $trimmerJar -fq1 ${R1} -fq2 ${R2} -v2 -out ./${baseName}.unmapped
     """
 }
-
 
 
 process alignBwa {
@@ -100,7 +103,7 @@ process alignBwa {
 
 process agentCREAK {
 
-    label 'medium_6h'
+    label 'big_6h'
 
     input:
 
@@ -113,8 +116,8 @@ process agentCREAK {
     
     script:
     """
-    bash /projects/vh83/local_software/agent3.0/agent.sh creak \
-              -c HYBRID -r -d 0 -b $panel_bed -f -F -MS 3 \
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir \
+        -jar $creakJar -c HYBRID -r -d 0 -b $panel_bed -f -F -MS 3 \
               --output-bam-file "${baseName}.dedupe.bam" $aligned_bam
     """
 
