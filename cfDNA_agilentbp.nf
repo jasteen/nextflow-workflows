@@ -138,7 +138,7 @@ process indexBam {
  
     script:
     """
-    samtools index $bam ${baseName}.consensus.aligned.bam.bai
+    samtools index $bam ${baseName}.dedupe.bam.bai
     """
 
 }
