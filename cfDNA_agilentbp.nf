@@ -131,7 +131,7 @@ process indexBam {
     input:
         set baseName, file(bam) from ch_mappedConsensusBams
     output:
-        set baseName, file(bam), file("${baseName}.consensus.aligned.bam.bai") into ch_indexedConsensusBams
+        set baseName, file(bam), file("${baseName}.dedupe.bam.bai") into ch_indexedConsensusBams
     publishDir path: './output/bams', mode: 'copy'
  
     module      'samtools'
