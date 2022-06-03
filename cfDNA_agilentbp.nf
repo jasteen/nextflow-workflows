@@ -3,10 +3,10 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./test')
-panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.interval_list')
-padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.interval_list')
-panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.bed')
-padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.bed')
+panel_int      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.interval_list')
+padded_int     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.interval_list')
+panel_bed      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.bed')
+padded_bed     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Getting Reference Files
