@@ -1,33 +1,43 @@
-input_path =file("./bams")
-//panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Covered_UCSChg19.interval_list ')
-//padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_UCSChg19.interval_list')
+inputDirectory = file('./bams/')
+params.reference = ""
+
+params.panel_bed       = ""
+params.padded_bed      = ""
+params.panel_int       = ""
+params.padded_int      = ""
+
+//set up for multiple regerence possibilities.
+
+if(params.reference == "hg19"){
+    //HG19 reference for aspree stuff
+    refFolder      = file("/projects/vh83/reference/genomes/hg19")
+    refBase        = "$refFolder/ucsc.hg19"
+    ref            = file("${refBase}.fasta")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
+
+}else if(params.reference == "hg38"){
+    refFolder      = file("/projects/vh83/reference/genomes/hg38/hg38_broad_resource_bundle/v0")
+    refBase        = "$refFolder/Homo_sapiens_assembly38"
+    ref            = file("${refBase}.fasta")
+    refDict        = file("${refBase}.dict")
+    refFai         = file("${refBase}.fasta.fai")
+    genome_file    = file("$refFolder/hg38.chrom.sizes")
+    header         = file("$refFolder/hg38_vcf_header.txt")
+    vep_cache      = file("/projects/vh83/reference/VEP_CACHE"
 
 
-panel_int      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
-padded_int     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.interval_list')
-panel_bed      = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.bed')
-padded_bed     = file('/projects/vh83/reference/genomes/b37/accessory_files/intervals_Broad.human.exome.b37.padded.bed')
-//Variables
-
-refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
-refBase          = "$refFolder/human_g1k_v37_decoy"
-ref              = file("${refBase}.fasta")
-refDict          = file("${refBase}.dict")
-refFai           = file("${refBase}.fasta.fai")
+}else{
+    
+    refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
+    refBase          = "$refFolder/human_g1k_v37_decoy"
+    ref              = file("${refBase}.fasta")
+    refDict          = file("${refBase}.dict")
+    refFai           = file("${refBase}.fasta.fai")
+}
 
 
-
-
-
-//refFolder      = file("/projects/vh83/reference/genomes/hg19/")
-//refBase          = "$refFolder/ucsc.hg19"
-//ref              = file("${refBase}.fasta")
-//refDict          = file("${refBase}.dict")
-//refFai           = file("${refBase}.fasta.fai")
-
-
-
-picardJar          = '~/picard.jar'
+picardJar      = '/usr/local/picard/2.19.0/bin/picard.jar'
 
 
 Channel
@@ -36,27 +46,30 @@ Channel
     .set { ch_1 }
 
 process collectHSMetrics {
-    label 'medium_6h'
+
+    label 'genomics_1'
+
     input:
-        set sample, file(bam) from ch_1
+        set sample, file(bam), file(bai) from ch_1
     output:
-        set sample, file("*.HSmetrics.txt"), file("*.perbase.txt"), file("*.pertarget.txt") into ch_metrics_unused2
+        set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
     
     publishDir path: './output/metrics/coverage', mode: 'copy'
-
+    
     script:
 
     """
     module purge
     module load R/3.5.1
-    java -Dpicard.useLegacyParser=false -Xmx6G -jar ${picardJar} CollectHsMetrics \
+    module picard/2.19.0
+
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectHsMetrics \
         -I ${bam} \
-        -O "${sample}.HSmetrics.txt" \
+        -O "${bam.baseName}.HSmetrics.txt" \
         -R ${ref} \
         -BI $panel_int \
         -TI $padded_int \
-        --PER_BASE_COVERAGE "${sample}.perbase.txt" \
-        --PER_TARGET_COVERAGE "${sample}.pertarget.txt"
+        --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
 
