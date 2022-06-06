@@ -67,8 +67,8 @@ process collectHSMetrics {
         -I ${bam} \
         -O "${bam.baseName}.HSmetrics.txt" \
         -R ${ref} \
-        -BI $panel_int \
-        -TI $padded_int \
+        -BI ${params.panel_int} \
+        -TI ${params.padded_int} \
         --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
