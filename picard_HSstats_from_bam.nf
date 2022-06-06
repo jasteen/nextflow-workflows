@@ -41,7 +41,7 @@ picardJar      = '/usr/local/picard/2.19.0/bin/picard.jar'
 
 
 Channel
-    .fromPath("${input_path}/*.bam")
+    .fromPath("${inputDirectory}/*.bam")
     .map{ file -> tuple(file.name.take(file.name.lastIndexOf('.')), file) }
     .set { ch_1 }
 
