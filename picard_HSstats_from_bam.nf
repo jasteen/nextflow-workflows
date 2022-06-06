@@ -50,7 +50,7 @@ process collectHSMetrics {
     label 'genomics_1'
 
     input:
-        set sample, file(bam), file(bai) from ch_1
+        set sample, file(bam) from ch_1
     output:
         set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
     
