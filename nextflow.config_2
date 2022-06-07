@@ -6,7 +6,7 @@ genomics_option = '--partition=genomics --qos=genomics --account=' + slurm_accou
 
 def time_mod(time, attempt) {(attempt == 1) ? time : (time + (attempt * (time / 2)))}
 def memory_mod(memory, attempt) {(attempt == 1) ? memory : (memory + (attempt * (memory / 2)))}
-def partition_choice(time) {(time < 4h) ? genomics_option : normal_option}
+def partition_choice(time) {(time < 4.hour) ? genomics_option : normal_option}
 
 
 
