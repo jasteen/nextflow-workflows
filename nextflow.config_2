@@ -1,0 +1,148 @@
+slurm_account = 'vh83'
+normal_option = '--parition=comp -qos=normal --account=' + slurm_account
+shortq_option = '--partition=short --qos=shortq --account=' + slurm_account
+genomics_option = '--partition=genomics --qos=genomics --account=' + slurm_account
+
+
+def time_mod(time, attempt) {(attempt == 1) ? time : (time + (attempt * (time / 2)))}
+def memory_mod(memory, attempt) {(attempt == 1) ? memory : (memory + (attempt * (memory / 2)))}
+def partition_choice(time) {(time < 4h) ? genomics_option : normal_option}
+
+
+
+profiles {
+    slurm {
+        executor {
+           name = 'slurm'
+           queueSize = 200
+           pollInterval = '30 sec'
+        }
+
+        singularity {
+            enabled = true
+            runOptions = "-B /projects/vh83/ -B /scratch/vh83/ -B /fs02/vh83/"
+            cacheDir = "/projects/vh83/jason"
+            autoMounts = 'true'
+        }
+        process {
+    
+            executor = 'slurm'
+            stageInMode = 'symlink'
+            errorStrategy = 'retry'
+            maxRetries = 5
+            cache = 'lenient'
+            module = 'singularity/3.5.3'
+
+            withLabel: small_short {
+                cpus = 1
+                memory = { memory_mod(1.GB, task.attempt) } 
+                time = { time_mod(5.minute, task.attempt) }
+                clusterOptions = shortq_option
+            }
+            
+            withLabel: start_1_8_15m {
+                cpus = 1
+                memory = { memory_mod(8.GB, task.attempt) } 
+                time = { time_mod(15.minute, task.attempt) }
+                clusterOptions = partition_choice(task.time)
+            }
+
+            withLabel: start_1_8_2h {
+                cpus = 1
+                memory = { memory_mod(8.GB, task.attempt) } 
+                time = { time_mod(2.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)
+            }
+
+            withLabel: start_4_64_2h {
+                cpus = 4
+                memory = { memory_mod(64.GB, task.attempt) } 
+                time = { time_mod(2.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)
+            }
+
+            withLabel: start_1_16_6h {
+                cpus = 1
+                memory = { memory_mod(16.GB, task.attempt) } 
+                time = { time_mod(6.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)   
+            }
+            
+            withLabel: start_1_16_12h {
+                cpus = 1
+                memory = { memory_mod(16.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time) 
+            }    
+
+            withLabel: bwa {
+                cpus = 12
+                memory = { memory_mod(32.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)    
+            }
+
+            withLabel: vardict {
+                cpus = 6
+                memory = { memory_mod(32.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time) 
+            }
+
+            withLabel: vep_sing {
+                cpus = 12
+                memory = { memory_mod(64.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)
+                container = 'file:///projects/vh83/jason/ensembl-vep102samtools_latest.sif'
+                
+            }
+
+            withLabel: vep {
+                cpus = 12
+                memory = { memory_mod(64.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time)
+              
+            }
+
+            withLabel: gatk_unknown {
+                cpus = 8
+                memory = { memory_mod(32.GB, task.attempt) } 
+                time = { time_mod(12.hour, task.attempt) }
+                clusterOptions = partition_choice(task.time) 
+            }
+            
+        }
+    }
+    local {
+        executor {
+        name = 'local'
+        queueSize = 32
+        pollInterval = '30 sec'
+        }
+        process {
+            executor = 'local'
+            stageInMode = 'symlink'
+            errorStrategy = 'retry' 
+            maxRetries = 5
+            cache = 'lenient'
+
+            withLabel: small_1 {
+                cpus = 1
+            }
+
+            withLabel: small_2 {
+                cpus = 2
+            }
+
+            withLabel: vardict {
+                cpus = 2
+            }
+        }
+    }
+}
+
+
+
+

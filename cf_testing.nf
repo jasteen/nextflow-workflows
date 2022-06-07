@@ -3,10 +3,10 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./test')
-panel_int      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.interval_list')
-padded_int     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.interval_list')
-panel_bed      = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Regions_b37.bed')
-padded_bed     = file('/projects/vh83/reference/sureselect/medha_exome_panel/S30409818_Padded_b37.bed')
+panel_int      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.interval_list')
+padded_int     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.interval_list')
+panel_bed      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.bed')
+padded_bed     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.bed')
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Getting Reference Files
@@ -17,7 +17,7 @@ refFai           = file("${refBase}.fasta.fai")
 millsIndels      = file("${refFolder}/accessory_files/Mills_and_1000G_gold_standard.indels.b37.vcf")
 dbSNP            = file("${refFolder}/accessory_files/dbsnp_138.b37.vcf")
 header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
-af_thr           = 0.1
+af_thr           = 0.00001
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 //VEP
@@ -249,7 +249,7 @@ process runVardict {
     script:
     """
     export PATH=/home/jste0021/scripts/VarDict-1.7.0/bin/:$PATH
-    VarDict -G ${ref} -f 0.01 -N "${tbam}|${nbam}" \
+    VarDict -G ${ref} -f $af_thr -N "${tbam}|${nbam}" \
         -b "${tbam}|${nbam}" -th ${task.cpus} --nosv -c 1 -S 2 -E 3 -g 4 ${segment} \
         > "${sample}.${ttype}_v_${ntype}.${segment}.somatic.vardict.tsv"
     """ 
