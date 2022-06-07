@@ -160,7 +160,7 @@ process generateUMIstats {
     label 'genomics_3'
 
     input:
-        set baseName, file(bam from ch_duplexStats
+        set baseName, file(bam) from ch_duplexStats
     output:
         set baseName, file("*") into ch_stats_out
     
