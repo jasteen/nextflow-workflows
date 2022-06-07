@@ -1,5 +1,5 @@
 slurm_account = 'vh83'
-normal_option = '--partition=comp -qos=normal --account=' + slurm_account
+normal_option = '--partition=comp --qos=normal --account=' + slurm_account
 shortq_option = '--partition=short --qos=shortq --account=' + slurm_account
 genomics_option = '--partition=genomics --qos=genomics --account=' + slurm_account
 
