@@ -97,12 +97,29 @@ process alignBwa {
     """
 }
 
+
+process setMateInfo {
+    label 'genomics_3'
+
+    input:
+        set baseName, file(bam) from ch_pipedBams
+    output:
+        set baseName, file("${baseName}.aligned.matefixed.bam") into ch_mateFixed
+
+    script:
+    """
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar SetMateInformation \
+          -i $bam -r $ref -o ${baseName}.aligned.matefixed.bam")
+    """
+}
+
+
 process groupreadsByUmi {
     
     label 'genomics_3'
 
     input:
-        set baseName, file(bam) from ch_pipedBams
+        set baseName, file(bam) from ch_mateFixed
     output:
         set baseName, file("${baseName}.piped.grouped.histogram.tsv"), file("${baseName}.piped.grouped.bam") into ch_umiGroupedBams
     
