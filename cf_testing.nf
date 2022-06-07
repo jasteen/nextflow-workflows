@@ -166,6 +166,7 @@ process generateUMIstats {
     
     publishDir path: './output/metrics/UMI', mode: 'copy'
 
+    module       rModule
     script:
     """
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar CollectDuplexSeqMetrics \
