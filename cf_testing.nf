@@ -109,7 +109,7 @@ process setMateInfo {
     script:
     """
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar SetMateInformation \
-          -i $bam -r $ref -o ${baseName}.aligned.matefixed.bam")
+          -i $bam -r $ref -o ${baseName}.aligned.matefixed.bam
     """
 }
 
