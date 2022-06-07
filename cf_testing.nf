@@ -108,8 +108,10 @@ process setMateInfo {
 
     script:
     """
+    java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar SortBam \
+           -i $bam -o ${baseName}.aligned.sorted.bam -s Queryname
     java -Xmx${task.memory.toGiga() - 2}g -Djava.io.tmpdir=$tmp_dir -jar $fgbioJar SetMateInformation \
-          -i $bam -r $ref -o ${baseName}.aligned.matefixed.bam
+          -i ${baseName}.aligned.sorted.bam -r $ref -o ${baseName}.aligned.matefixed.bam
     """
 }
 
