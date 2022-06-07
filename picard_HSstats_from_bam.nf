@@ -1,4 +1,4 @@
-inputDirectory = file('./bams/')
+inputDirectory = file('./bams')
 params.reference = ""
 
 params.panel_bed       = ""
