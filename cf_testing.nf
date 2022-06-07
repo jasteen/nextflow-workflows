@@ -38,7 +38,7 @@ condaModule        = 'miniconda3/4.1.11-python3.5'
 Channel.fromFilePairs("$inputDirectory/*_{R1,R2}.fastq.gz", size: 2, flat: true).into{ch_inputFiles;ch_forFastqc}
 
 process runFASTQC {
-    label 'genomics_3'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(R1), file(R2) from ch_forFastqc
@@ -59,7 +59,7 @@ process runFASTQC {
 
 process surecallTrimmer {
     
-    label 'genomics_3'
+    label 'gstart_1_16_6h'
 
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
@@ -99,7 +99,7 @@ process alignBwa {
 
 
 process setMateInfo {
-    label 'genomics_3'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(bam) from ch_pipedBams
@@ -118,7 +118,7 @@ process setMateInfo {
 
 process groupreadsByUmi {
     
-    label 'genomics_3'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(bam) from ch_mateFixed
@@ -137,7 +137,7 @@ process groupreadsByUmi {
 
 process generateConsensusReads {
     
-    label 'genomics_3'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(hist), file(bam) from ch_umiGroupedBams
@@ -157,7 +157,7 @@ process generateConsensusReads {
 
 process generateUMIstats {
     
-    label 'genomics_3'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(bam) from ch_duplexStats
@@ -200,7 +200,7 @@ process mapConsensusReads {
 
 process indexBam {
     
-    label 'small_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(bam) from ch_mappedConsensusBams
@@ -260,7 +260,7 @@ ch_collatedSegments = ch_rawVardictSegments.map{ sample, tbam, nbam, segment -> 
 
 process catSegments {
     
-    label 'small_1'
+    label 'start_1_8_15m'
     echo true
 
     input: 
@@ -278,7 +278,7 @@ process catSegments {
 
 process makeVCF {
     
-    label 'medium_6h'
+    label 'start_1_8_2h'
 
     input:
         set sample, tbam, nbam, file(tsv) from ch_rawVardict
@@ -299,7 +299,7 @@ process makeVCF {
 
 process reheaderUMIVCF {
     
-    label 'small_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(vcf) from ch_outputVCF
@@ -320,7 +320,7 @@ process reheaderUMIVCF {
 
 process sortVCFS {
 
-    label 'medium_6h'
+    label 'start_1_16_6h'
     
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -339,7 +339,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'small_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -359,7 +359,7 @@ process indexVCFS {
 
 process vt_decompose_normalise {
         
-    label 'medium_6h'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(vcf), file(tbi) from ch_indexedVCF
@@ -411,7 +411,7 @@ ch_forMetrics1.into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
-    label 'medium_6h'
+    label 'start_1_8_2h'
 
     input:
         set sample, file(bam) from ch_forHSMetrics
@@ -438,7 +438,7 @@ process collectHSMetrics {
 
 process multiQC {
 
-    label 'medium_6h'
+    label 'start_1_8_2h'
 
     input:
         file('coverage/*') from ch_metrics2.collect()
