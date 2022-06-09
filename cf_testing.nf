@@ -59,7 +59,7 @@ process runFASTQC {
 
 process surecallTrimmer {
     
-    label 'gstart_1_16_6h'
+    label 'start_1_16_6h'
 
     input:
         set baseName, file(R1), file(R2) from ch_inputFiles
@@ -92,14 +92,14 @@ process alignBwa {
     
     script:
     """
-    bwa mem -C -t ${task.cpus} $ref $R1 $R2 | samtools view -b - > ${baseName}.aligned.bam
+    bwa mem -C -t ${task.cpus} -R "@RG\\tID:A\\tSM:${baseName}\\tPU:lib1\\tPL:Illumina" $ref $R1 $R2 | samtools view -b - > ${baseName}.aligned.bam
 
     """
 }
 
 
 process setMateInfo {
-    label 'start_1_8_2h'
+    label 'start_1_16_12h'
 
     input:
         set baseName, file(bam) from ch_pipedBams
@@ -118,7 +118,7 @@ process setMateInfo {
 
 process groupreadsByUmi {
     
-    label 'start_1_8_2h'
+    label 'start_1_16_12h'
 
     input:
         set baseName, file(bam) from ch_mateFixed
@@ -137,7 +137,7 @@ process groupreadsByUmi {
 
 process generateConsensusReads {
     
-    label 'start_1_8_2h'
+    label 'start_1_16_12h'
 
     input:
         set baseName, file(hist), file(bam) from ch_umiGroupedBams
@@ -152,8 +152,6 @@ process generateConsensusReads {
         --error-rate-post-umi 30 --min-reads 3
     """
 }
-
-
 
 process generateUMIstats {
     
