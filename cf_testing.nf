@@ -3,10 +3,13 @@
 // Required Inputs
 refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index/")
 inputDirectory = file('./test')
-panel_int      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.interval_list')
-padded_int     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.interval_list')
-panel_bed      = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_b37.bed')
-padded_bed     = file('/fs02/vh83/reference/cellfree/gen2_hg19/3166521_Covered_slop100_b37.bed')
+
+
+params.panel_bed       = ""
+params.padded_bed      = ""
+params.panel_int       = ""
+params.padded_int      = ""
+
 tmp_dir        = file('/scratch/vh83/tmp/')
 
 // Getting Reference Files
@@ -427,8 +430,8 @@ process collectHSMetrics {
         -I ${bam} \
         -O "${bam.baseName}.HSmetrics.txt" \
         -R ${ref} \
-        -BI $panel_int \
-        -TI $padded_int \
+        -BI ${params.panel_int} \
+        -TI ${params.padded_int} \
         --PER_TARGET_COVERAGE "${bam.baseName}.pertarget.txt"
     """
 }
