@@ -188,7 +188,7 @@ process mapConsensusReads {
 
     module 	    bwaModule
     module      samtoolsModule
-    
+
     script:
     """
     java -Dpicard.useLegacyParser=false -Xmx${ (task.memory.toGiga() / 6).toInteger() }g -jar $picardJar SamToFastq \
@@ -235,7 +235,7 @@ ch_tumorSplit = ch_tumor.map{ baseName, bam, bai -> [ baseName.split('_')[0], ba
 ch_tumorNormalPairs = ch_tumorSplit.join(ch_normalSplit)
 
 //create bedfile segments
-ch_bedSegments = Channel.fromPath("$padded_bed").splitText( by: 50000, file: "seg")
+ch_bedSegments = Channel.fromPath("${params.padded_bed}").splitText( by: 50000, file: "seg")
 //create cartesian product of the input channel and the segments files
 ch_vardictInput = ch_tumorNormalPairs.combine(ch_bedSegments)
 
