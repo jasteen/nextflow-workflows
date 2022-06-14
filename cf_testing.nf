@@ -187,6 +187,7 @@ process mapConsensusReads {
     publishDir path: './output/bams', mode: 'copy'
 
     module 	    bwaModule
+    module      samtoolsModule
     
     script:
     """
