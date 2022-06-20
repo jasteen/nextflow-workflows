@@ -57,7 +57,7 @@ Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz") into {ch_processe
 
 process fastQC {
     
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     publishDir path: './fastqc_results', mode: 'copy'
     
@@ -76,7 +76,7 @@ process fastQC {
 
 process align_bwa {
 
-    label 'bwa_small'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(fastqs) from ch_processedInputFiles
@@ -101,7 +101,7 @@ ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_ma
 
 process run_vardict {
 
-    label 'vardict_small'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(bam), file(bai) from ch_mappedBam1               
@@ -119,7 +119,7 @@ process run_vardict {
 
 process makeVCF {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(tsv) from ch_vardict_TSV
@@ -140,7 +140,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -161,7 +161,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -181,7 +181,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -213,7 +213,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     echo true
 
@@ -275,7 +275,7 @@ ch_forMetrics1.into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set sample, file(bam), file(bai) from ch_forHSMetrics
@@ -303,7 +303,7 @@ process collectHSMetrics {
 
 process multiQC {
 
-    label 'medium_6h'
+    label 'start_1_8_2h'
 
     input:
         file('coverage/*') from ch_metrics.collect()
