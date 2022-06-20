@@ -52,7 +52,7 @@ af_thr           = 0.1
 rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 // Creating channel from input directory
-Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz") into ch_processedInputFiles,ch_forFastqc
+Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz") into {ch_processedInputFiles;ch_forFastqc}
 
 
 process fastQC {
