@@ -76,7 +76,7 @@ process fastQC {
 
 process align_bwa {
 
-    label 'start_1_8_2h'
+    label 'bwa'
 
     input:
         set baseName, file(fastqs) from ch_processedInputFiles
