@@ -47,7 +47,7 @@ Channel
 
 process collectHSMetrics {
 
-    label 'genomics_1'
+    label 'start_1_8_2h'
 
     input:
         set sample, file(bam) from ch_1
