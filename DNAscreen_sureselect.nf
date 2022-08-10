@@ -28,7 +28,7 @@ if(params.reference == "hg19"){
     refFai         = file("${refBase}.fasta.fai")
     genome_file    = file("$refFolder/hg38.chrom.sizes")
     header         = file("$refFolder/hg38_vcf_header.txt")
-    vep_cache      = file("/projects/vh83/reference/VEP_CACHE"
+    vep_cache      = file("/projects/vh83/reference/VEP_CACHE")
 
 
 }else{
