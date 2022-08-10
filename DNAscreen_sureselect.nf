@@ -457,7 +457,6 @@ process multiQC {
     label 'medium_6h'
 
     input:
-        file('coverage/*') from ch_metrics2.collect()
         file('multiple/*') from ch_metrics.collect()
         file('fastqc/*') from ch_fastQCOutput.collect()
         
