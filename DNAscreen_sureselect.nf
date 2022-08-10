@@ -451,29 +451,6 @@ process collectHSMetrics {
     """
 }
 
-process collectMultipleMetrics {
-
-    label 'medium_6h'
-
-    input:
-        set sample, file(bam), file(bai) from ch_forMultipleMetrics
-    output:
-        set sample, file("*multiple_metrics*") into ch_metrics2
-    
-    publishDir path: './output/metrics/multiple', mode: 'copy'
-    
-    script:
-
-    """
-    module purge
-    module load R/3.5.1
-    module picard/2.19.0
-    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar ${picardJar} CollectMultipleMetrics \
-        -I $bam \
-        -O ${bam.baseName}.multiple_metrics \
-        -R $ref
-    """
-}
 
 process multiQC {
 
