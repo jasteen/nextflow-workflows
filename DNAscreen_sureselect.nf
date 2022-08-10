@@ -4,10 +4,10 @@
 inputDirectory = file('./fastqs/')
 params.reference = ""
 
-panel_bed      = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered.bed')
-padded_bed     = file('/fs02/vh83/taylor/HsMetrics/DNAScreen/9genes_25bp.fix.sorted.bed')
-panel_int      = file('/projects/vh83/reference/sureselect/DNAscreen/3394381_Covered.interval_list')
-padded_int     = file('/fs02/vh83/taylor/HsMetrics/DNAScreen/list.interval_list')
+panel_bed      = file('/projects/vh83/reference/sureselect/DNAscreen/3409581_Covered.bed')
+padded_bed     = file('/projects/vh83/reference/sureselect/DNAscreen/9genes_25bp.fix.sorted.bed')
+panel_int      = file('/projects/vh83/reference/sureselect/DNAscreen/3409581_Covered.interval_list')
+padded_int     = file('/projects/vh83/reference/sureselect/DNAscreen/9genes_25bp.fix.sorted.interval_list')
 
 
 //set up for multiple reference possibilities.
