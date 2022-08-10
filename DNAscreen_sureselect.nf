@@ -74,7 +74,7 @@ process surecallTrimmer {
 
 process fastQC {
     
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     publishDir path: './fastqc_results', mode: 'copy'
     
@@ -93,7 +93,7 @@ process fastQC {
 
 process align_bwa {
 
-    label 'bwa_small'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(fastqs) from ch_processedInputFiles
@@ -118,7 +118,7 @@ ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_ma
 
 process run_vardict {
 
-    label 'vardict_small'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(bam), file(bai) from ch_mappedBam1               
@@ -136,7 +136,7 @@ process run_vardict {
 
 process makeVCF {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(tsv) from ch_vardict_TSV
@@ -157,7 +157,7 @@ process makeVCF {
 
 process reheaderVCF {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(vcf) from ch_vardictVCFs
@@ -178,7 +178,7 @@ process reheaderVCF {
 
 process sortVCFS {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(vcf) from ch_reheaderVCF
@@ -198,7 +198,7 @@ process sortVCFS {
 
 process indexVCFS {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set baseName, file(vcf) from ch_sortedVCF
@@ -230,7 +230,7 @@ ch_files
 
 process mergeVCFS {
 
-    label 'medium_6h'
+    label 'start_1_8_15m'
 
     echo true
 
@@ -290,7 +290,7 @@ Stats Generation Section
 
 process InstersectBed {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam2
@@ -306,7 +306,7 @@ process InstersectBed {
 
 process CoverageBed {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam3
@@ -324,7 +324,7 @@ process CoverageBed {
 
 process ReadsMapped {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam4
@@ -341,7 +341,7 @@ process ReadsMapped {
 
 process ReadsTotal {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam), file(bai) from ch_mappedBam5
@@ -358,7 +358,7 @@ process ReadsTotal {
     
 process TargetMapped {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam) from ch_intersectBam
@@ -379,7 +379,7 @@ ch_final3 = ch_final2.join(ch_onTotal)
 
 process collateData {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
@@ -404,7 +404,7 @@ ch_out.map{a,b -> b}.collect().set{ch_out2}
 
 process catStats {
 
-    label 'genomics_1'
+    label 'start_1_8_15m'
 
     input:
         file(stats) from ch_out2
@@ -425,7 +425,7 @@ ch_forMetrics1.into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
 
-    label 'medium_6h'
+    label 'start_1_8_15m'
 
     input:
         set sample, file(bam), file(bai) from ch_forHSMetrics
@@ -454,7 +454,7 @@ process collectHSMetrics {
 
 process multiQC {
 
-    label 'medium_6h'
+    label 'start_1_8_15m'
 
     input:
         file('multiple/*') from ch_metrics.collect()
