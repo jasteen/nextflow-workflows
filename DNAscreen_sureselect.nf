@@ -122,7 +122,7 @@ process markDuplicatesPicard {
         set baseName, bam, bai from ch_mappedBams
     output:
         set baseName, file("${baseName}.hq.sorted.marked.bam"), file("${baseName}.hq.sorted.marked.bam.bai") into ch_markedBamFiles
-        set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics
+        set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics_unused
 
     publishDir path: './output/metrics/markduplicates', mode: 'copy', pattern: '*.metrics'
     publishDir path: './output/bams/markdup', mode: 'copy', pattern: '*.{bam,bai}'
