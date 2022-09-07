@@ -76,7 +76,7 @@ process fastQC {
     
     label 'start_1_8_15m'
 
-    publishDir path: './fastqc_results', mode: 'copy'
+    publishDir path: './output/metrics/fastqc_results', mode: 'copy'
     
     input:
         set baseName, file(fastq) from ch_forFastqc
@@ -100,7 +100,7 @@ process align_bwa {
     output:
         set baseName, file("${baseName}.hq.sorted.bam"), file("${baseName}.hq.sorted.bam.bai") into ch_mappedBams
 
-    publishDir path: './bam_out', mode: 'copy'
+    publishDir path: './output/bams/raw', mode: 'copy'
 
     module      bwaModule
     module      samtoolsModule
@@ -121,10 +121,12 @@ process markDuplicatesPicard {
     input:
         set baseName, bam, bai from ch_mappedBams
     output:
-        set baseName, file("${baseName}.hq.sorted.marked.bam"),  into ch_markedBamFiles
+        set baseName, file("${baseName}.hq.sorted.marked.bam"), file("${baseName}.hq.sorted.marked.bam.bai") into ch_markedBamFiles
         set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics
 
-    publishDir path: './output/metrics/markduplicates', mode: 'copy'
+    publishDir path: './output/metrics/markduplicates', mode: 'copy', pattern: '*.metrics'
+    publishDir path: './output/bams/markdup', mode: 'copy', pattern: '*.{bam,bai}'
+
 
     module      samtoolsModule
     script:
@@ -154,7 +156,7 @@ process run_vardict {
     output: 
         set baseName, file("${baseName}.tsv") into ch_vardict_TSV           
     
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    publishDir path: './output/variants/raw', mode: 'copy'                                    
     
     script:
     """
@@ -172,7 +174,7 @@ process makeVCF {
     output:
         set baseName, file("${baseName}.vardict.vcf") into ch_vardictVCFs
     
-    publishDir path: './variants_raw_out', mode: 'copy'
+    publishDir path: './output/variants/raw', mode: 'copy'
     
     script:
     """
@@ -194,7 +196,7 @@ process reheaderVCF {
     output:
         set baseName, file("${baseName}.reheader.vcf.gz") into ch_reheaderVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    publishDir path: './output/variants/raw', mode: 'copy'                                    
     
     module     'bcftools/1.8'
 
@@ -214,7 +216,7 @@ process sortVCFS {
     output:
         set baseName, file("${baseName}.sorted.vcf.gz") into ch_sortedVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    publishDir path: './output/variants/raw', mode: 'copy'                                    
     
     module     'bcftools/1.8'
 
@@ -234,7 +236,7 @@ process indexVCFS {
     output:
         set baseName, file(vcf), file("${baseName}.sorted.vcf.gz.tbi") into ch_indexedVCF
 
-    publishDir path: './variants_raw_out', mode: 'copy'                                    
+    publishDir path: './output/variants/raw', mode: 'copy'                                    
     
     module     'bcftools/1.8'
 
@@ -263,7 +265,7 @@ process mergeVCFS {
 
     echo true
 
-    publishDir './variants_merged/', mode: 'copy'
+    publishDir './output/variants/merged/', mode: 'copy'
 
     input:
     file list from ch_list_f
@@ -294,7 +296,7 @@ process apply_vep {
     output:
         file("merged_vardict_norm_vep.vcf") into ch_vepVCF
 
-    publishDir path: './variants_merged', mode: 'copy'
+    publishDir path: './output/variants/merged', mode: 'copy'
 
     module 'singularity'
 
@@ -313,143 +315,6 @@ process apply_vep {
 }
     
 
-/*
-Stats Generation Section
-*/
-
-process InstersectBed {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bam), file(bai) from ch_mappedBam2
-    output:
-        set sample, file("${sample}.intersectbed.bam") into ch_intersectBam
-    
-    script:
-    """
-    module load bedtools/2.27.1-gcc5
-    intersectBed -abam ${bam} -b $panel_bed > ${sample}.intersectbed.bam
-    """
-}
-
-process CoverageBed {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bam), file(bai) from ch_mappedBam3
-    output:
-        set sample, file("${sample}.bedtools_hist_all.txt") into ch_bedtools
-    
-    script:
-    """
-    module load bedtools/2.27.1-gcc5
-    coverageBed -b ${bam} -a $panel_bed \
-        -sorted -hist -g ${genome_file} | \
-        grep all > "${sample}.bedtools_hist_all.txt"
-    """
-}
-
-process ReadsMapped {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bam), file(bai) from ch_mappedBam4
-    output:
-        set sample, file("${sample}.mapped_to_genome.txt") into ch_onGenome
-
-    module      'samtools/1.9'
-    
-    script:
-    """
-    samtools view -c -F4 ${bam} > "${sample}.mapped_to_genome.txt"
-    """
-}
-
-process ReadsTotal {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bam), file(bai) from ch_mappedBam5
-    output:
-        set sample, file("${sample}.total_raw_reads.txt") into ch_onTotal
-
-    module      'samtools/1.9'
-
-    script:
-    """
-    samtools view -c ${bam} > "${sample}.total_raw_reads.txt"
-    """
-}
-    
-process TargetMapped {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bam) from ch_intersectBam
-    output:
-        set sample, file("${sample}.mapped_to_target.txt") into ch_onTarget
-
-    module      'samtools/1.9'
-   
-    script:
-    """
-    samtools view -c -F4 ${bam} > ${sample}.mapped_to_target.txt
-    """
-}
-
-ch_final = ch_bedtools.join(ch_onGenome)
-ch_final2 = ch_final.join(ch_onTarget)
-ch_final3 = ch_final2.join(ch_onTotal)
-
-process collateData {
-
-    label 'start_1_8_15m'
-
-    input:
-        set sample, file(bedtools), file(onGenome), file(onTarget), file(onTotal) from ch_final3
-    output:
-        set sample, file("${sample}_summary_coverage.txt") into ch_out
-
-    script:
-    """
-    module purge
-    module load R/3.5.1
-    Rscript --vanilla /projects/vh83/pipelines/code/modified_summary_stat.R \
-            ${bedtools} \
-            ${onGenome} \
-            ${onTarget} \
-            ${onTotal} \
-            ${sample} \
-            "${sample}_summary_coverage.txt"
-    """
-}
-
-ch_out.map{a,b -> b}.collect().set{ch_out2}
-
-process catStats {
-
-    label 'start_1_8_15m'
-
-    input:
-        file(stats) from ch_out2
-    output:
-        file("project_summary.txt") into ch_out3
-    
-    publishDir path: './metrics/', mode: 'copy'
-
-    script:
-    """
-    cat ${rheader} ${stats} > "project_summary.txt"
-    """
-
-}
-
-
 ch_forMetrics1.into{ch_forMultipleMetrics;ch_forHSMetrics}
 
 process collectHSMetrics {
@@ -461,8 +326,10 @@ process collectHSMetrics {
     output:
         set sample, file("*.HSmetrics.txt"), file("*.pertarget.txt") into ch_metrics
     
-    publishDir path: './output/metrics/coverage', mode: 'copy'
-    
+    publishDir path: './output/metrics/HSMetrics/coverage', mode: 'copy', pattern: '*.HSmetrics.txt'
+    publishDir path: './output/metrics/HSMetrics/per_target', mode: 'copy', pattern: '*.pertarget.txt'
+
+
     script:
 
     """
@@ -492,7 +359,7 @@ process multiQC {
     output:
         set file("*multiqc_report.html"), file("*multiqc_data") into ch_multiQCOut
 
-    publishDir path: './output/metrics/report', mode: 'copy'
+    publishDir path: './output/metrics/multiQC', mode: 'copy'
 
     module      condaModule
     conda       '/home/jste0021/.conda/envs/py3.5/'
