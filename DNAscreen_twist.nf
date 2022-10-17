@@ -32,11 +32,17 @@ if(params.reference == "hg19"){
 
 }else{
     
-    refFolder      = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
+    refFolder        = file("/projects/vh83/reference/genomes/b37/bwa_0.7.12_index")
     refBase          = "$refFolder/human_g1k_v37_decoy"
     ref              = file("${refBase}.fasta")
     refDict          = file("${refBase}.dict")
     refFai           = file("${refBase}.fasta.fai")
+    genome_file      = ''
+    header           = file("/home/jste0021/vh83/reference/genomes/b37/vcf_contig_header_lines.txt")
+    vep_cache        = file("/projects/vh83/reference/VEP_CACHE")
+    vep_string       = 'GRCh37'
+
+
 }
 
 
@@ -45,11 +51,9 @@ if(params.reference == "hg19"){
 picardJar      = '/usr/local/picard/2.19.0/bin/picard.jar'
 bwaModule      = 'bwa/0.7.17-gcc5'
 samtoolsModule = 'samtools/1.9'
-surecalltrimmerJar = '/projects/vh83/local_software/agent/SurecallTrimmer_v4.0.1.jar'
 condaModule        = 'miniconda3/4.1.11-python3.5'
 rModule            = 'R/3.5.1'
 af_thr           = 0.1
-rheader          = file("/projects/vh83/pipelines/code/Rheader.txt")
 
 // Creating channel from input directory
 Channel.fromFilePairs("$inputDirectory/*_R{1,2}_001.fastq.gz") into {ch_processedInputFiles;ch_forFastqc}
@@ -284,7 +288,7 @@ process apply_vep {
     script:
     """
     vep --cache --dir_cache $vep_cache \
-                      --assembly GRCh38 --refseq --offline \
+                      --assembly GRCh37 --refseq --offline \
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
