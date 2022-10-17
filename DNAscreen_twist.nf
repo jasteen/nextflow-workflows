@@ -13,7 +13,7 @@ params.padded_int      = ""
 
 if(params.reference == "hg19"){
     //HG19 reference for aspree stuff
-    refFolder      = file("/projects/vh83/reference/genomes/hg19")
+    refFolder      = file("/projects/vh83/reference/genomes/hg19/bwa_0.7.12_index")
     refBase        = "$refFolder/ucsc.hg19"
     ref            = file("${refBase}.fasta")
     refDict        = file("${refBase}.dict")
@@ -96,7 +96,36 @@ process align_bwa {
     """
 }
 
-ch_mappedBams.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6;ch_forMetrics1}
+process markDuplicatesPicard {
+    
+    label 'start_1_8_15m'
+
+    input:
+        set baseName, bam, bai from ch_mappedBams
+    output:
+        set baseName, file("${baseName}.hq.sorted.marked.bam"), file("${baseName}.hq.sorted.marked.bam.bai") into ch_markedBamFiles
+        set baseName, file("${baseName}.markduplicates.metrics") into ch_metrics_unused
+
+    publishDir path: './output/metrics/markduplicates', mode: 'copy', pattern: '*.metrics'
+    publishDir path: './output/bams/markdup', mode: 'copy', pattern: '*.{bam,bai}'
+
+
+    module      samtoolsModule
+    script:
+    """
+    java -Dpicard.useLegacyParser=false -Xmx${task.memory.toGiga() - 2}g -jar $picardJar MarkDuplicates \
+        -INPUT $bam \
+        -OUTPUT ${baseName}.hq.sorted.marked.bam \
+        -METRICS_FILE ${baseName}.markduplicates.metrics \
+        -VALIDATION_STRINGENCY SILENT \
+        -OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \
+        -ASSUME_SORT_ORDER queryname
+    samtools index "${baseName}.hq.sorted.marked.bam" "${baseName}.hq.sorted.marked.bam.bai"
+
+    """
+}
+
+ch_markedBamFiles.into{ch_mappedBam1;ch_mappedBam2;ch_mappedBam3;ch_mappedBam4;ch_mappedBam5;ch_mappedBam6;ch_forMetrics1}
 
 
 process run_vardict {
