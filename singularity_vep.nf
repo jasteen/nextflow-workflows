@@ -24,7 +24,7 @@ if(params.reference == "hg19"){
     genome_file    = file("$refFolder/hg38.chrom.sizes")
     header         = file("$refFolder/hg38_vcf_header.txt")
     vep_cache      = file("/projects/vh83/reference/VEP_CACHE")
-
+    assembly       = "GRCh38"
 
 }else{
     
@@ -33,6 +33,10 @@ if(params.reference == "hg19"){
     ref              = file("${refBase}.fasta")
     refDict          = file("${refBase}.dict")
     refFai           = file("${refBase}.fasta.fai")
+    genome_file    = file("$refFolder/hg38.chrom.sizes")  
+    header         = file("$refFolder/hg38_vcf_header.txt")
+    vep_cache      = file("/projects/vh83/reference/VEP_CACHE")
+    assembly       = "GRCh37"
 }
 
 
@@ -53,7 +57,7 @@ process apply_vep {
     script:
     """
     vep --cache --dir_cache $vep_cache \
-                      --assembly GRCh38 --refseq --offline \
+                      --assembly $assembly --refseq --offline \
                       --fasta $ref \
                       --sift b --polyphen b --symbol --numbers --biotype \
                       --total_length --hgvs --format vcf \
